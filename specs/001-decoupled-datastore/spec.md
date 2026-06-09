@@ -10,6 +10,8 @@
 ### Session 2026-06-09
 
 - Q: Should decoupled datastore be only operational, or should datastore resources have their own stable identity and lifecycle? → A: Datastore resources get their own stable identity and can outlive metadata revisions.
+- Q: Should canonical datastore lookup require distribution IDs? → A: Use a datastore-owned resource identifier as canonical; distribution ID is optional reference metadata.
+- Q: Should datastore handle distribution-ID-only requests during migration? → A: No. Datastore has no knowledge of distribution IDs; metastore performs all dataset/distribution-to-resource mapping.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -62,6 +64,8 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - How does the system handle a datastore resource whose metadata reference no longer exists?
 - What happens when an operator attempts to refresh a datastore resource whose source definition changed since the last import?
 - How are partially available or stale datastore resources reported to operators?
+- How does the system respond when a client sends only a distribution ID and no datastore resource identifier?
+- What happens when a client calls datastore directly with a dataset ID or distribution ID instead of a resource ID?
 
 ## Requirements *(mandatory)*
 
@@ -75,11 +79,18 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **FR-006**: The system MUST report when a datastore resource is stale, missing, or replaced so operators can identify the current valid resource.
 - **FR-007**: The system MUST avoid requiring a metadata rewrite as part of the normal datastore query path.
 - **FR-008**: The system MUST support an explicit operator action to refresh datastore state when the underlying source or metadata definition changes.
+- **FR-009**: The system MUST treat the datastore-owned resource identifier as the canonical lookup key for datastore import, query, refresh, and removal operations.
+- **FR-010**: The system MUST NOT require a distribution ID as input to execute datastore operations against an existing datastore resource.
+- **FR-011**: The metastore MUST be responsible for resolving dataset IDs and distribution IDs to canonical datastore resource identifiers.
+- **FR-012**: Datastore operations MUST accept only canonical datastore resource identifiers as operational keys.
+- **FR-013**: Datastore components and APIs MUST NOT parse, persist, or depend on dataset IDs or distribution IDs for execution logic.
+- **FR-014**: When datastore receives a non-resource identifier, it MUST reject the request with an actionable response directing clients to resolve identifiers through metastore first.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Datastore Resource**: A queryable data asset managed by the datastore with its own lifecycle, identity, and availability status.
 - **Metadata Record**: The catalog entry describing a dataset or distribution, which may reference one or more datastore resources.
+- **Distribution Reference**: Optional metadata linkage from a dataset distribution to a datastore resource; not required as an operational key.
 - **Resource Status**: The current state of a datastore resource, such as available, stale, missing, or replaced.
 
 ## Success Criteria *(mandatory)*
@@ -90,11 +101,15 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **SC-002**: Operators can identify the current datastore resource for a changed dataset without consulting implementation details in under 2 minutes.
 - **SC-003**: At least 90% of maintainer-reviewed datastore tasks are correctly classified as datastore-managed or metadata-managed in the published documentation.
 - **SC-004**: Support requests caused by confusion between datastore and metadata responsibilities are reduced by 50% after rollout.
+- **SC-005**: 100% of datastore operations in scope are executable using only canonical datastore resource identifiers.
+- **SC-006**: 100% of dataset/distribution-to-resource identifier resolution in scope is performed by metastore rather than datastore.
 
 ## Assumptions
 
 - The feature is focused on reducing coupling between datastore lifecycle management and metadata management, not on replacing the metadata layer.
 - Datastore resources are independently addressable operational assets, while metadata remains the discovery and catalog layer.
+- Distribution IDs remain useful for metadata discovery and traceability, but are not required for datastore operations.
+- Clients resolve dataset/distribution identifiers through metastore before invoking datastore operations.
 - Existing datasets and datastore resources remain valid unless explicitly refreshed, replaced, or removed.
 - Operators need clear guidance and status reporting more than they need a new user-facing workflow.
 - The platform continues to support both datastore and metadata capabilities, but each must have clearer boundaries.
