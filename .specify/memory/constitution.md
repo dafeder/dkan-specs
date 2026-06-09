@@ -1,50 +1,43 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+# DKAN Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Metadata-First Design
+Every data resource in DKAN is defined through structured, standardized metadata stored as JSON in Drupal entities. Metadata structure is governed by customizable JSON schemas; deployments may use DCAT-US (Data Catalog Vocabulary for US Federal Data) or other domain-specific vocabularies. New features that expose, transform, or validate data MUST address their metadata implications first and be compatible with the configured schema.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Modular Component Architecture
+DKAN's three core components—metastore, datastore, and harvest—MUST remain architecturally independent with clearly defined interfaces. Components communicate via stable APIs and contracts. New features that span components require explicit interface documentation. No component may directly access another component's internal data structures; public communication flows through documented APIs and internal orchestration flows through documented Drupal services.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. API-Driven Integration
+All external data access, transformation, and ingestion MUST flow through well-documented APIs (REST, JSON). The datastore API, metastore API, and harvest integrations MUST support both human-readable and machine-parseable output formats (JSON preferred for machine consumption). CLI tools and UI features are consumers of these APIs, not alternative data paths; internal component coordination may use documented Drupal services when it does not bypass the public API contract.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Standards Compliance & Data Quality
+Metadata must validate against the configured metastore schema; tabular data imported into the datastore undergoes schema validation and type checking; harvest integrations validate remote metadata before import. Data quality issues MUST be surfaced to operators with actionable remediation guidance. Breaking compliance with the active schema or quality gates requires explicit governance review.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Extensibility Through Drupal
+DKAN leverages Drupal's module system for extensibility. Custom vocabularies, field definitions, and harvest source types extend DKAN's behavior through standard Drupal patterns. Extensions MUST be independently installable/removable and documented. Core DKAN functionality remains independent of non-essential extensions.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### VI. Test Coverage & Documentation Excellence
+Test coverage and documentation are non-negotiable. All code additions MUST include unit tests for business logic and integration tests for component interactions. Diff coverage on pull requests MUST exceed 50%; overall project coverage target is 90%. API endpoints, configuration schemas, and extension points MUST be documented with examples and use cases. Breaking changes MUST include migration guides. Undocumented or untested features are considered incomplete.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+## Technology & Architecture Standards
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+DKAN is a Drupal-based system with three integrated components:
+- **Metastore**: Drupal entities storing JSON metadata conforming to customizable schemas (commonly DCAT-US, but schema-agnostic)
+- **Datastore**: Tabular data import, storage, and REST API
+- **Harvest**: Metadata ingestion from external sources
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+All public data access uses documented REST/JSON APIs. Drupal provides the entity system, permissions, service container, and extension framework. Internal inter-component orchestration may use Drupal services, but it MUST preserve the public API contract. Code written in PHP (Drupal modules) and other languages (datastore API, harvest collectors) MUST conform to their respective ecosystem standards.
+
+## Development Workflow & Quality Gates
+
+1. **Code Review**: All changes reviewed against Constitution principles; compliance is a merge prerequisite.
+2. **Testing**: Unit tests for business logic; integration tests for component interactions; API contract tests for datastore/harvest/metastore.
+3. **Documentation**: API changes require updated API documentation; schema changes require migration guides; new extensions require README and usage examples.
+4. **Backwards Compatibility**: DCAT-US metadata structure is a public contract; breaking changes require major version bump and migration period.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This Constitution is the authoritative source for DKAN architecture and development practices. All pull requests, feature proposals, and architectural changes MUST verify compliance with these core principles before approval. When conflicts arise between principles, decisions are escalated to the maintainer team with documented rationale.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Version**: 1.2.0 | **Ratified**: 2026-05-26 | **Last Amended**: 2026-05-26
