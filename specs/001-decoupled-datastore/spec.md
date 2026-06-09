@@ -14,6 +14,11 @@
 - Q: Should datastore handle distribution-ID-only requests during migration? → A: No. Datastore has no knowledge of distribution IDs; metastore performs all dataset/distribution-to-resource mapping.
 - Q: What URI normalization is in scope now? → A: Keep all query parameters and fragments as part of URI identity; defer other normalization policies for now.
 - Q: What refresh policy should be used for URI-backed resources? → A: Policy-driven refresh using ETag first, Last-Modified fallback, and explicit re-import when neither signal is usable.
+- Q: What should be the canonical identity model for stored resources? → A: Datastore issues opaque canonical IDs on URI registration and reuses them for the same URI (idempotent create).
+- Q: Should ETL and workflow states be explicitly captured and reported? → A: Yes. ETL run states, workflow transitions, and operator-facing reporting are required parts of this feature.
+- Q: How should the ETL pipeline execute by default? → A: Queue-driven default `localize -> import -> post-import`, with immediate execution allowed via admin/API/CLI overrides.
+- Q: Should ETL state transitions and report fields be specified now? → A: Yes. Define required transitions and minimum report fields now; defer storage/entity implementation details to planning.
+- Q: Are datastore API breaks acceptable, and what compatibility should be preserved? → A: Some breaking changes are acceptable (especially internal/PHP API), but when practical we preserve existing class names, method signatures, and operational call patterns.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -69,6 +74,12 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - How does the system respond when a client sends only a distribution ID and no datastore resource identifier?
 - What happens when a client calls datastore directly with a dataset ID or distribution ID instead of a resource ID?
 - What happens when a source URI does not support HEAD or does not return ETag/Last-Modified metadata?
+- What happens when an ETL run fails after resource identity is resolved but before a new version is finalized?
+- What happens when an ETL run is retried while a prior run for the same resource is still in progress?
+- What happens when `localize` succeeds but `import` fails, or `import` succeeds but `post-import` fails?
+- What happens when immediate execution is requested while queue jobs already exist for the same resource?
+- What happens when an invalid ETL state transition is attempted (for example, failed -> running without retry)?
+- What happens when preserving a legacy class or method signature conflicts with required decoupling behavior?
 
 ## Requirements *(mandatory)*
 
@@ -84,19 +95,41 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **FR-008**: The system MUST support an explicit operator action to refresh datastore state when the underlying source or metadata definition changes.
 - **FR-009**: The system MUST treat the datastore-owned resource identifier as the canonical lookup key for datastore import, query, refresh, and removal operations.
 - **FR-010**: The system MUST NOT require a distribution ID as input to execute datastore operations against an existing datastore resource.
-- **FR-011**: The metastore MUST be responsible for resolving dataset IDs and distribution IDs to canonical datastore resource identifiers.
-- **FR-012**: Datastore operations MUST accept only canonical datastore resource identifiers as operational keys.
-- **FR-013**: Datastore components and APIs MUST NOT parse, persist, or depend on dataset IDs or distribution IDs for execution logic.
-- **FR-014**: When datastore receives a non-resource identifier, it MUST reject the request with an actionable response directing clients to resolve identifiers through metastore first.
+- **FR-011**: Datastore registration by URI MUST be idempotent: if a URI identity already exists, the system MUST return the existing canonical datastore resource identifier.
+- **FR-012**: Datastore MUST issue opaque canonical resource identifiers for newly registered URI identities.
+- **FR-013**: Datastore operations MUST accept canonical datastore resource identifiers as operational keys and MUST NOT require distribution IDs.
+- **FR-014**: Datastore components and APIs MUST NOT parse, persist, or depend on dataset IDs or distribution IDs for execution logic.
 - **FR-015**: URI-based resource identity MUST preserve all query parameters and URI fragments exactly as provided.
 - **FR-016**: Additional URI normalization policies (such as redirect canonicalization, host/path case rules, and default-port handling) MUST be explicitly deferred and treated as out of scope for this phase.
 - **FR-017**: Refresh behavior MUST be policy-driven and MUST check ETag first when available.
 - **FR-018**: If ETag is unavailable, refresh logic MUST use Last-Modified as the fallback signal for change detection.
 - **FR-019**: If neither ETag nor Last-Modified is usable, the system MUST NOT auto-reimport and MUST require an explicit import request to create a new version.
+- **FR-020**: The system MUST capture ETL run state transitions for each import attempt, including at minimum queued, running, succeeded, and failed states.
+- **FR-021**: The system MUST record workflow state ownership boundaries so it is clear which states apply to canonical resources, resource versions, and ETL runs.
+- **FR-022**: The system MUST expose operator-readable reporting for ETL runs, including current state, last successful run, last failure reason, and run timestamps.
+- **FR-023**: Failed ETL runs MUST NOT mark a new resource version as successful, and failure outcomes MUST remain queryable for diagnostics.
+- **FR-024**: Retried ETL runs MUST produce auditable run history linked to the same canonical resource identifier.
+- **FR-025**: The ETL pipeline MUST define three ordered stages: `localize` (extract/local caching), `import` (load parsed data), and `post-import` (optional schema/data-dictionary adjustments).
+- **FR-026**: In normal non-admin workflows, stage execution MUST be queue-driven, where successful completion of each stage enqueues or triggers the next stage in order.
+- **FR-027**: The system MUST allow immediate execution of the same stages through admin/API/CLI-triggered operations without requiring queue-only orchestration.
+- **FR-028**: Stage-level state and outcomes MUST be captured and reportable independently so operators can identify the exact stage of failure or completion.
+- **FR-029**: When both queued and immediate execution requests target the same resource workflow, the system MUST enforce deterministic handling to avoid duplicate stage execution.
+- **FR-030**: ETL run state transitions MUST follow a defined transition contract, including valid transitions from queued to running, and from running to terminal states succeeded or failed.
+- **FR-031**: Retries MUST be represented as new ETL runs linked to the same canonical resource, rather than mutating a terminal run back to running.
+- **FR-032**: Operator reporting MUST expose, at minimum, canonical resource identifier, run identifier, stage name, current state, terminal outcome, start timestamp, end timestamp (if terminal), and failure reason (when failed).
+- **FR-033**: Reporting endpoints and operational views MUST support listing run history for a canonical resource in chronological order.
+- **FR-034**: The feature MAY introduce breaking changes to datastore APIs when required to satisfy decoupling and workflow requirements, including internal/PHP APIs.
+- **FR-035**: When practical, existing class names, method signatures, and operational invocation patterns MUST be preserved to reduce migration impact.
+- **FR-036**: If a breaking change is introduced where practical preservation is not feasible, the system MUST provide explicit migration guidance and deprecation notes for affected consumers.
 
 ### Key Entities *(include if feature involves data)*
 
-- **Datastore Resource**: A queryable data asset managed by the datastore with its own lifecycle, identity, and availability status.
+- **Datastore Resource**: A queryable data asset managed by the datastore with an opaque canonical identifier and lifecycle state.
+- **URI Identity**: The URI-derived identity used for idempotent resource registration and canonical ID reuse.
+- **ETL Run**: A single execution attempt to import or refresh a resource, with lifecycle states and timestamps.
+- **Pipeline Stage**: A named ETL stage (`localize`, `import`, or `post-import`) with ordered execution semantics and stage-level status.
+- **Workflow State**: A state record associated with a canonical resource, resource version, or ETL run that indicates processing outcome and progression.
+- **State Transition Contract**: The allowed ETL run state changes and retry semantics used to ensure consistent workflow behavior and reporting.
 - **Metadata Record**: The catalog entry describing a dataset or distribution, which may reference one or more datastore resources.
 - **Distribution Reference**: Optional metadata linkage from a dataset distribution to a datastore resource; not required as an operational key.
 - **Resource Status**: The current state of a datastore resource, such as available, stale, missing, or replaced.
@@ -109,20 +142,31 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **SC-002**: Operators can identify the current datastore resource for a changed dataset without consulting implementation details in under 2 minutes.
 - **SC-003**: At least 90% of maintainer-reviewed datastore tasks are correctly classified as datastore-managed or metadata-managed in the published documentation.
 - **SC-004**: Support requests caused by confusion between datastore and metadata responsibilities are reduced by 50% after rollout.
-- **SC-005**: 100% of datastore operations in scope are executable using only canonical datastore resource identifiers.
+- **SC-005**: 100% of repeated URI registration requests in scope return the same canonical datastore resource identifier.
 - **SC-006**: 100% of dataset/distribution-to-resource identifier resolution in scope is performed by metastore rather than datastore.
 - **SC-007**: For refresh checks where metadata headers are available, at least 99% of change decisions are made using ETag or Last-Modified without full re-import.
 - **SC-008**: For refresh checks where both ETag and Last-Modified are unavailable, 100% of new versions are created only via explicit import requests.
+- **SC-009**: 100% of ETL runs in scope emit a terminal state (succeeded or failed) with timestamps and are retrievable in operator reporting.
+- **SC-010**: At least 95% of failed ETL runs in scope include a machine-readable failure reason that supports operator troubleshooting without direct code inspection.
+- **SC-011**: 100% of in-scope ETL executions expose stage-level outcome visibility for `localize`, `import`, and `post-import`.
+- **SC-012**: At least 99% of queue-driven workflows execute stages in declared order without duplicate stage completion records.
+- **SC-013**: 100% of ETL runs in scope follow the defined state transition contract with invalid transitions rejected and logged.
+- **SC-014**: At least 99% of ETL run records in scope include the minimum required reporting fields for operator diagnostics.
+- **SC-015**: For affected datastore internal/PHP surfaces in scope, at least 80% remain source-compatible when practical, with documented migration guidance for exceptions.
 
 ## Assumptions
 
 - The feature is focused on reducing coupling between datastore lifecycle management and metadata management, not on replacing the metadata layer.
 - Datastore resources are independently addressable operational assets, while metadata remains the discovery and catalog layer.
 - Distribution IDs remain useful for metadata discovery and traceability, but are not required for datastore operations.
-- Clients resolve dataset/distribution identifiers through metastore before invoking datastore operations.
+- Clients may store canonical datastore resource IDs for direct operations, or re-register by URI and reuse the returned canonical ID.
 - URI identity preserves all query parameters and fragments for this phase.
 - Broader URI normalization policy decisions are deferred to a later phase.
 - Refresh checks prefer ETag and use Last-Modified fallback; absent both, explicit import is required for version creation.
+- ETL and workflow states are first-class operational outputs and must be reportable without querying internal implementation details.
+- Queue-driven stage orchestration is the default execution model, while immediate execution remains available for operational and administrative workflows.
+- Storage-level entity modeling for ETL and workflow state records is intentionally deferred to planning.
+- API compatibility is a pragmatic goal rather than an absolute constraint: preserving existing surfaces is preferred when practical, but decoupling correctness takes priority.
 - Existing datasets and datastore resources remain valid unless explicitly refreshed, replaced, or removed.
 - Operators need clear guidance and status reporting more than they need a new user-facing workflow.
 - The platform continues to support both datastore and metadata capabilities, but each must have clearer boundaries.
