@@ -19,6 +19,8 @@
 - Q: How should the ETL pipeline execute by default? → A: Queue-driven default `localize -> import -> post-import`, with immediate execution allowed via admin/API/CLI overrides.
 - Q: Should ETL state transitions and report fields be specified now? → A: Yes. Define required transitions and minimum report fields now; defer storage/entity implementation details to planning.
 - Q: Are datastore API breaks acceptable, and what compatibility should be preserved? → A: Some breaking changes are acceptable (especially internal/PHP API), but when practical we preserve existing class names, method signatures, and operational call patterns.
+- Q: How should import customization be modularized? → A: Use an importer plugin architecture with stage-level extension points (`localize`, `import`, `post-import`) and clear default fallback behavior.
+- Q: How should importer selection work in this phase? → A: Use a single globally configured active importer for now to reduce scope; defer priority-based deterministic multi-plugin selection to a future phase.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -80,6 +82,9 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - What happens when immediate execution is requested while queue jobs already exist for the same resource?
 - What happens when an invalid ETL state transition is attempted (for example, failed -> running without retry)?
 - What happens when preserving a legacy class or method signature conflicts with required decoupling behavior?
+- What happens when no custom importer plugin is available for a resource and stage?
+- What happens when a custom importer plugin overrides one stage but relies on default behavior for the others?
+- What happens when multiple importer plugins are installed but only one is configured as active?
 
 ## Requirements *(mandatory)*
 
@@ -121,6 +126,12 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **FR-034**: The feature MAY introduce breaking changes to datastore APIs when required to satisfy decoupling and workflow requirements, including internal/PHP APIs.
 - **FR-035**: When practical, existing class names, method signatures, and operational invocation patterns MUST be preserved to reduce migration impact.
 - **FR-036**: If a breaking change is introduced where practical preservation is not feasible, the system MUST provide explicit migration guidance and deprecation notes for affected consumers.
+- **FR-037**: The system MUST provide an importer plugin architecture that allows extension modules to customize import behavior without replacing the entire default workflow.
+- **FR-038**: Import customization MUST support stage-level extension points for `localize`, `import`, and `post-import`.
+- **FR-039**: If a custom plugin does not implement a stage override, the system MUST fall back to default stage behavior.
+- **FR-040**: The system MUST support selecting exactly one globally configured active importer for runtime execution in this phase.
+- **FR-041**: If multiple importer plugins are installed, only the configured active importer MUST execute, while others remain available but inactive.
+- **FR-042**: Priority-based deterministic multi-plugin selection is explicitly out of scope for this phase and deferred to a future enhancement.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -130,6 +141,8 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **Pipeline Stage**: A named ETL stage (`localize`, `import`, or `post-import`) with ordered execution semantics and stage-level status.
 - **Workflow State**: A state record associated with a canonical resource, resource version, or ETL run that indicates processing outcome and progression.
 - **State Transition Contract**: The allowed ETL run state changes and retry semantics used to ensure consistent workflow behavior and reporting.
+- **Importer Plugin**: A modular extension unit that can override one or more import pipeline stages while interoperating with default datastore behavior.
+- **Stage Override**: A plugin-provided implementation for a specific pipeline stage that supersedes the default stage logic for selected workflows.
 - **Metadata Record**: The catalog entry describing a dataset or distribution, which may reference one or more datastore resources.
 - **Distribution Reference**: Optional metadata linkage from a dataset distribution to a datastore resource; not required as an operational key.
 - **Resource Status**: The current state of a datastore resource, such as available, stale, missing, or replaced.
@@ -153,6 +166,9 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **SC-013**: 100% of ETL runs in scope follow the defined state transition contract with invalid transitions rejected and logged.
 - **SC-014**: At least 99% of ETL run records in scope include the minimum required reporting fields for operator diagnostics.
 - **SC-015**: For affected datastore internal/PHP surfaces in scope, at least 80% remain source-compatible when practical, with documented migration guidance for exceptions.
+- **SC-016**: At least two distinct importer implementations in scope (for example, default parser and MySQL-native importer) can run through the same workflow contract without custom queue-worker replacement.
+- **SC-017**: 100% of workflows in scope with partial stage overrides correctly execute overridden stages and default fallback stages in declared order.
+- **SC-018**: 100% of in-scope runtime executions use the configured active importer and do not invoke inactive importer plugins.
 
 ## Assumptions
 
@@ -167,6 +183,8 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - Queue-driven stage orchestration is the default execution model, while immediate execution remains available for operational and administrative workflows.
 - Storage-level entity modeling for ETL and workflow state records is intentionally deferred to planning.
 - API compatibility is a pragmatic goal rather than an absolute constraint: preserving existing surfaces is preferred when practical, but decoupling correctness takes priority.
+- Import extension behavior should prefer stage-level overrides over full workflow replacement to reduce maintenance cost for extension modules.
+- Importer selection is intentionally single-active-plugin for this phase; priority-based multi-plugin selection is deferred to future scope.
 - Existing datasets and datastore resources remain valid unless explicitly refreshed, replaced, or removed.
 - Operators need clear guidance and status reporting more than they need a new user-facing workflow.
 - The platform continues to support both datastore and metadata capabilities, but each must have clearer boundaries.
