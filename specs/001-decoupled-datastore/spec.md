@@ -13,6 +13,7 @@
 - Q: Should canonical datastore lookup require distribution IDs? → A: Use a datastore-owned resource identifier as canonical; distribution ID is optional reference metadata.
 - Q: Should datastore handle distribution-ID-only requests during migration? → A: No. Datastore has no knowledge of distribution IDs; metastore performs all dataset/distribution-to-resource mapping.
 - Q: What URI normalization is in scope now? → A: Keep all query parameters and fragments as part of URI identity; defer other normalization policies for now.
+- Q: What refresh policy should be used for URI-backed resources? → A: Policy-driven refresh using ETag first, Last-Modified fallback, and explicit re-import when neither signal is usable.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -67,6 +68,7 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - How are partially available or stale datastore resources reported to operators?
 - How does the system respond when a client sends only a distribution ID and no datastore resource identifier?
 - What happens when a client calls datastore directly with a dataset ID or distribution ID instead of a resource ID?
+- What happens when a source URI does not support HEAD or does not return ETag/Last-Modified metadata?
 
 ## Requirements *(mandatory)*
 
@@ -88,6 +90,9 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **FR-014**: When datastore receives a non-resource identifier, it MUST reject the request with an actionable response directing clients to resolve identifiers through metastore first.
 - **FR-015**: URI-based resource identity MUST preserve all query parameters and URI fragments exactly as provided.
 - **FR-016**: Additional URI normalization policies (such as redirect canonicalization, host/path case rules, and default-port handling) MUST be explicitly deferred and treated as out of scope for this phase.
+- **FR-017**: Refresh behavior MUST be policy-driven and MUST check ETag first when available.
+- **FR-018**: If ETag is unavailable, refresh logic MUST use Last-Modified as the fallback signal for change detection.
+- **FR-019**: If neither ETag nor Last-Modified is usable, the system MUST NOT auto-reimport and MUST require an explicit import request to create a new version.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -106,6 +111,8 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **SC-004**: Support requests caused by confusion between datastore and metadata responsibilities are reduced by 50% after rollout.
 - **SC-005**: 100% of datastore operations in scope are executable using only canonical datastore resource identifiers.
 - **SC-006**: 100% of dataset/distribution-to-resource identifier resolution in scope is performed by metastore rather than datastore.
+- **SC-007**: For refresh checks where metadata headers are available, at least 99% of change decisions are made using ETag or Last-Modified without full re-import.
+- **SC-008**: For refresh checks where both ETag and Last-Modified are unavailable, 100% of new versions are created only via explicit import requests.
 
 ## Assumptions
 
@@ -115,6 +122,7 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - Clients resolve dataset/distribution identifiers through metastore before invoking datastore operations.
 - URI identity preserves all query parameters and fragments for this phase.
 - Broader URI normalization policy decisions are deferred to a later phase.
+- Refresh checks prefer ETag and use Last-Modified fallback; absent both, explicit import is required for version creation.
 - Existing datasets and datastore resources remain valid unless explicitly refreshed, replaced, or removed.
 - Operators need clear guidance and status reporting more than they need a new user-facing workflow.
 - The platform continues to support both datastore and metadata capabilities, but each must have clearer boundaries.
