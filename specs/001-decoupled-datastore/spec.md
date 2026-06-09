@@ -12,6 +12,7 @@
 - Q: Should decoupled datastore be only operational, or should datastore resources have their own stable identity and lifecycle? → A: Datastore resources get their own stable identity and can outlive metadata revisions.
 - Q: Should canonical datastore lookup require distribution IDs? → A: Use a datastore-owned resource identifier as canonical; distribution ID is optional reference metadata.
 - Q: Should datastore handle distribution-ID-only requests during migration? → A: No. Datastore has no knowledge of distribution IDs; metastore performs all dataset/distribution-to-resource mapping.
+- Q: What URI normalization is in scope now? → A: Keep all query parameters and fragments as part of URI identity; defer other normalization policies for now.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -85,6 +86,8 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **FR-012**: Datastore operations MUST accept only canonical datastore resource identifiers as operational keys.
 - **FR-013**: Datastore components and APIs MUST NOT parse, persist, or depend on dataset IDs or distribution IDs for execution logic.
 - **FR-014**: When datastore receives a non-resource identifier, it MUST reject the request with an actionable response directing clients to resolve identifiers through metastore first.
+- **FR-015**: URI-based resource identity MUST preserve all query parameters and URI fragments exactly as provided.
+- **FR-016**: Additional URI normalization policies (such as redirect canonicalization, host/path case rules, and default-port handling) MUST be explicitly deferred and treated as out of scope for this phase.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -110,6 +113,8 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - Datastore resources are independently addressable operational assets, while metadata remains the discovery and catalog layer.
 - Distribution IDs remain useful for metadata discovery and traceability, but are not required for datastore operations.
 - Clients resolve dataset/distribution identifiers through metastore before invoking datastore operations.
+- URI identity preserves all query parameters and fragments for this phase.
+- Broader URI normalization policy decisions are deferred to a later phase.
 - Existing datasets and datastore resources remain valid unless explicitly refreshed, replaced, or removed.
 - Operators need clear guidance and status reporting more than they need a new user-facing workflow.
 - The platform continues to support both datastore and metadata capabilities, but each must have clearer boundaries.
