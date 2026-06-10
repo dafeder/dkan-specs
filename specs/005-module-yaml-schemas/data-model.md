@@ -28,8 +28,8 @@ Attributes:
 
 - Machine name: stable schema ID used by metastore lookup, derived from the key under `schemas`, such as `dataset`, `distribution`, or `data-dictionary`.
 - Provider module: module machine name that owns the declaration.
-- Validation schema source: path to JSON schema content or inline schema content.
-- UI schema source: optional path or inline schema content for forms.
+- Validation schema source: required object with exactly one of `path` or `inline`.
+- UI schema source: optional object with exactly one of `path` or `inline`.
 - Weight: optional numeric weight for duplicate resolution.
 - References: optional list/map of Reference Definitions.
 - Triggers: optional list/map of Trigger Definitions.
@@ -39,9 +39,10 @@ Attributes:
 Validation rules:
 
 - Machine name is required as the schema map key; it is not repeated inside the schema definition body.
-- Validation schema source is required and must resolve to parseable JSON-compatible schema content.
-- UI schema source is optional, but if present must resolve to parseable JSON-compatible content.
-- A declaration cannot define mutually exclusive schema sources in an ambiguous way; inline content and file path rules must be documented and validated.
+- `validation_schema` is required and must be an object containing exactly one of `path` or `inline`.
+- `ui_schema` is optional, but if present must be an object containing exactly one of `path` or `inline`.
+- `path` values are module-relative file paths.
+- `inline` values must be parseable JSON-compatible schema content.
 - Invalid declarations are excluded individually.
 
 Relationships:
@@ -49,6 +50,22 @@ Relationships:
 - Has zero or more Reference Definitions.
 - Has zero or more Trigger Definitions.
 - Participates in one Schema Selection for its machine name unless legacy override mode is active.
+
+## Schema Content Source
+
+Shared source object used by `validation_schema` and `ui_schema`.
+
+Attributes:
+
+- `path`: module-relative path to a JSON schema document.
+- `inline`: inline JSON-compatible schema content.
+
+Validation rules:
+
+- Exactly one of `path` or `inline` must be provided.
+- `path` and `inline` must not both be present.
+- If `path` is present, the file must exist and parse as JSON-compatible content.
+- If `inline` is present, the value must parse as JSON-compatible content.
 
 ## Schema Registry
 

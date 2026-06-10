@@ -1,0 +1,182 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/dkan/module-schemas.schema.json",
+  "title": "DKAN Module Schema Declarations",
+  "description": "JSON Schema for parsed MODULE.schemas.yml declaration files.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemas"
+  ],
+  "properties": {
+    "schemas": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "$ref": "#/$defs/schemaDefinition"
+      }
+    }
+  },
+  "$defs": {
+    "schemaContentSource": {
+      "description": "Schema source object containing exactly one of path or inline.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "inline": {}
+      },
+      "oneOf": [
+        {
+          "required": [
+            "path"
+          ]
+        },
+        {
+          "required": [
+            "inline"
+          ]
+        }
+      ]
+    },
+    "schemaDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "validation_schema"
+      ],
+      "properties": {
+        "weight": {
+          "type": "number"
+        },
+        "validation_schema": {
+          "$ref": "#/$defs/schemaContentSource"
+        },
+        "ui_schema": {
+          "$ref": "#/$defs/schemaContentSource"
+        },
+        "references": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/referenceDefinition"
+          }
+        },
+        "triggers": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/triggerDefinition"
+          }
+        }
+      }
+    },
+    "referenceDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "object_ref",
+            "item_url",
+            "resource_url"
+          ],
+          "default": "object_ref"
+        },
+        "target_schema": {
+          "type": "string",
+          "minLength": 1
+        },
+        "behavior": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "anyOf": [
+              {
+                "not": {
+                  "required": [
+                    "type"
+                  ]
+                }
+              },
+              {
+                "required": [
+                  "type"
+                ],
+                "properties": {
+                  "type": {
+                    "const": "object_ref"
+                  }
+                }
+              }
+            ]
+          },
+          "then": {
+            "required": [
+              "target_schema"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "item_url"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "target_schema"
+            ]
+          }
+        },
+        {
+          "if": {
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "const": "resource_url"
+              }
+            }
+          },
+          "then": {
+            "not": {
+              "required": [
+                "target_schema"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "triggerDefinition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "behavior"
+      ],
+      "properties": {
+        "behavior": {
+          "type": "string",
+          "minLength": 1
+        },
+        "event": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    }
+  }
+}

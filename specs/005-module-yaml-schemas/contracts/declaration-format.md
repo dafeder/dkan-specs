@@ -22,7 +22,7 @@ schemas:
       path: schema/collections/dataset.ui.json
     references:
       distribution:
-        type: schema
+        type: object_ref
         target_schema: distribution
     triggers:
       distribution:
@@ -32,7 +32,7 @@ schemas:
       path: schema/collections/distribution.json
     references:
       downloadURL:
-        type: resource
+        type: resource_url
         behavior: resource_mapper_registration
   data-dictionary:
     validation_schema:
@@ -49,6 +49,23 @@ schemas:
 - `weight` is optional and numeric.
 - Missing, unreadable, or malformed schema content invalidates only the affected declaration.
 - Invalid declarations are excluded from active selection and included in operator warnings.
+
+## JSON Schema Contract
+
+Machine-validated declaration format is defined in:
+
+```text
+contracts/module-schemas.schema.json
+```
+
+This JSON Schema validates the parsed YAML structure and enforces:
+
+- required `schemas` map
+- required `validation_schema` with exactly one of `path` or `inline`
+- optional `ui_schema` with exactly one of `path` or `inline`
+- reference `type` values (`object_ref`, `item_url`, `resource_url`)
+- `target_schema` required for `object_ref` and `item_url`
+- `target_schema` forbidden for `resource_url`
 
 ## Duplicate Selection
 
@@ -74,12 +91,20 @@ Reference entries map schema properties to supported reference behaviors.
 
 Required fields:
 
-- `type`: `schema`, `identifier`, or `resource` for the initial implementation.
-- `target_schema`: required for schema or identifier references when a target schema is needed.
+- `type`: `object_ref`, `item_url`, or `resource_url` for the initial implementation.
+- `target_schema`: required for `object_ref` and `item_url`.
 
 Optional fields:
 
 - `behavior`: named behavior for special handling, such as resource mapper registration.
+
+Default behavior:
+
+- If `type` is omitted, treat it as `object_ref`.
+
+Disallowed combinations:
+
+- `target_schema` must not be present when `type` is `resource_url`.
 
 Invalid reference definitions exclude the affected declaration and produce an operator warning.
 

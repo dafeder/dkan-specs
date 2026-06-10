@@ -28,7 +28,7 @@ schemas:
       path: schema/collections/dataset.ui.json
     references:
       distribution:
-        type: schema
+        type: object_ref
         target_schema: distribution
     triggers:
       distribution:
@@ -38,7 +38,7 @@ schemas:
       path: schema/collections/distribution.json
     references:
       downloadURL:
-        type: resource
+        type: resource_url
         behavior: resource_mapper_registration
 ```
 
