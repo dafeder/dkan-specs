@@ -75,6 +75,10 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - How are partially available or stale datastore resources reported to operators?
 - How does the system respond when a client sends only a distribution ID and no datastore resource identifier?
 - What happens when a client calls datastore directly with a dataset ID or distribution ID instead of a resource ID?
+- What happens when cache dependency or invalidation code still relies on resource-to-distribution-to-dataset lookup?
+- What happens when Drush reverse lookup commands infer dataset identity through distribution IDs?
+- What happens when post-import status, dashboard, or reporting code still expects distribution-shaped payloads?
+- What happens when cleanup or orphan-processing workflows depend on distribution reference entities that may not exist?
 - What happens when a source URI does not support HEAD or does not return ETag/Last-Modified metadata?
 - What happens when an ETL run fails after resource identity is resolved but before a new version is finalized?
 - What happens when an ETL run is retried while a prior run for the same resource is still in progress?
@@ -103,7 +107,7 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **FR-011**: Datastore registration by URI MUST be idempotent: if a URI identity already exists, the system MUST return the existing canonical datastore resource identifier.
 - **FR-012**: Datastore MUST issue opaque canonical resource identifiers for newly registered URI identities.
 - **FR-013**: Datastore operations MUST accept canonical datastore resource identifiers as operational keys and MUST NOT require distribution IDs.
-- **FR-014**: Datastore components and APIs MUST NOT parse, persist, or depend on dataset IDs or distribution IDs for execution logic.
+- **FR-014**: Datastore components and APIs MUST NOT parse, persist, or depend on dataset IDs or distribution IDs for execution logic; metadata-initiated datastore workflows MUST resolve dataset/distribution context to canonical datastore resource identifiers before datastore execution begins.
 - **FR-015**: URI-based resource identity MUST preserve all query parameters and URI fragments exactly as provided.
 - **FR-016**: Additional URI normalization policies (such as redirect canonicalization, host/path case rules, and default-port handling) MUST be explicitly deferred and treated as out of scope for this phase.
 - **FR-017**: Refresh behavior MUST be policy-driven and MUST check ETag first when available.
@@ -132,6 +136,13 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **FR-040**: The system MUST support selecting exactly one globally configured active importer for runtime execution in this phase.
 - **FR-041**: If multiple importer plugins are installed, only the configured active importer MUST execute, while others remain available but inactive.
 - **FR-042**: Priority-based deterministic multi-plugin selection is explicitly out of scope for this phase and deferred to a future enhancement.
+- **FR-043**: Cache dependency and cache invalidation behavior for datastore summary, query, import status, and reporting responses MUST NOT require runtime resource-to-distribution-to-dataset lookup by datastore components.
+- **FR-044**: When metadata references are present, metastore MAY provide cache dependencies that relate datastore resources back to datasets or distributions, but datastore execution MUST remain valid when that metadata linkage is absent.
+- **FR-045**: Drush reverse lookup and other operational lookup commands that currently derive dataset identity through distribution IDs MUST be redesigned around canonical datastore resource identifiers or clearly documented as metadata-side compatibility tools.
+- **FR-046**: Post-import status/result creation MUST use canonical datastore resource identifiers, ETL run records, or datastore resource metadata, and MUST NOT require distribution-shaped payloads.
+- **FR-047**: Dashboard and admin reporting code MUST display datastore status from canonical datastore resources and ETL run reporting, with optional dataset/distribution context added only when metastore can resolve it.
+- **FR-048**: Resource cleanup, purge, and orphan behavior MUST remove obsolete datastore resources, versions, mappings, and artifacts from datastore resource lifecycle context without depending on orphaned distribution reference entities as the only cleanup trigger.
+- **FR-049**: Migration guidance MUST identify existing code paths that currently depend on distribution IDs, including datastore lookup helpers, Drush reverse lookup, cache invalidation, post-import/dashboard reporting, and cleanup/orphan processors.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -145,6 +156,10 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **Stage Override**: A plugin-provided implementation for a specific pipeline stage that supersedes the default stage logic for selected workflows.
 - **Metadata Record**: The catalog entry describing a dataset or distribution, which may reference one or more datastore resources.
 - **Distribution Reference**: Optional metadata linkage from a dataset distribution to a datastore resource; not required as an operational key.
+- **Metadata-Initiated Import**: A metastore-owned initiation path that resolves dataset distribution `downloadURL` values to canonical datastore resources before datastore execution begins.
+- **Cache Dependency Context**: Optional metadata-provided context used to invalidate or cache datastore-facing responses without making dataset/distribution IDs datastore execution keys.
+- **Operational Lookup Command**: A CLI or API helper, such as reverse dataset lookup, that resolves relationships for operators while preserving canonical datastore resource identifiers as operational keys.
+- **Cleanup/Orphan Workflow**: Lifecycle processing that removes obsolete datastore resources or artifacts independently of whether a distribution reference entity exists.
 - **Resource Status**: The current state of a datastore resource, such as available, stale, missing, or replaced.
 
 ## Success Criteria *(mandatory)*
@@ -169,12 +184,18 @@ As a maintainer, I want the datastore boundary to be clearly documented so that 
 - **SC-016**: At least two distinct importer implementations in scope (for example, default parser and MySQL-native importer) can run through the same workflow contract without custom queue-worker replacement.
 - **SC-017**: 100% of workflows in scope with partial stage overrides correctly execute overridden stages and default fallback stages in declared order.
 - **SC-018**: 100% of in-scope runtime executions use the configured active importer and do not invoke inactive importer plugins.
+- **SC-019**: 100% of datastore summary, query, import-status, and reporting responses in scope can compute cache dependencies or safe fallback dependencies without datastore-side distribution-ID lookup.
+- **SC-020**: 100% of operational lookup commands in scope either accept canonical datastore resource identifiers or are documented as metadata-side compatibility commands.
+- **SC-021**: 100% of post-import status and dashboard/reporting views in scope can render datastore status without requiring distribution-shaped payloads.
+- **SC-022**: 100% of cleanup/orphan workflows in scope can remove obsolete datastore artifacts when distribution reference entities are absent.
 
 ## Assumptions
 
 - The feature is focused on reducing coupling between datastore lifecycle management and metadata management, not on replacing the metadata layer.
 - Datastore resources are independently addressable operational assets, while metadata remains the discovery and catalog layer.
 - Distribution IDs remain useful for metadata discovery and traceability, but are not required for datastore operations.
+- Metadata may continue to support referenced distributions, but datastore initiation receives canonical datastore resource identifiers after metastore resolves dataset distribution `downloadURL` values.
+- Cache dependencies, reverse lookup helpers, dashboard/reporting code, and cleanup/orphan processors are part of the decoupling surface because current implementations may still infer dataset context through distribution IDs.
 - Clients may store canonical datastore resource IDs for direct operations, or re-register by URI and reuse the returned canonical ID.
 - URI identity preserves all query parameters and fragments for this phase.
 - Broader URI normalization policy decisions are deferred to a later phase.
