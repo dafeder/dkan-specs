@@ -93,15 +93,22 @@ Declarative rule for metastore reference handling.
 Attributes:
 
 - Property: source property in the owning schema, derived from the key under `references`.
-- Type: schema reference, identifier reference, resource reference, or supported future reference type.
+- Type: `object_ref`, `item_url`, `resource_url`, or supported future reference type. Default is `object_ref` when omitted.
 - Target schema: schema machine name when relevant.
 - Behavior: named behavior such as distribution reference or resource download URL registration.
+
+Reference type semantics:
+
+- `object_ref`: Treat the property value as a metastore object reference whose target type is defined by `target_schema`; used for relationships such as dataset-to-distribution where dependency traversal and dereferencing should resolve the referenced record. This is the default reference type when `type` is not declared.
+- `item_url`: Treat the property value as an identifier key that resolves to a URL reference for the related item, not a fully dereferenced object payload; used for data-dictionary or identifier-driven linking where lookup is by declared identifier semantics.
+- `resource_url`: Treat the property value as an external or file resource locator (for example `downloadURL`) that resolves to a URL reference and should register or update resource linkage behavior instead of a direct object relationship.
 
 Validation rules:
 
 - Property is required as the reference map key; it is not repeated inside the reference definition body.
-- Type must be supported.
-- Target schema must be known when required by the reference type.
+- Type must be supported; if omitted, `object_ref` is assumed.
+- `target_schema` is required for `object_ref` and `item_url` references, and not allowed for `resource_url` references.
+- Behavior must be valid for the selected reference type.
 
 Relationships:
 
