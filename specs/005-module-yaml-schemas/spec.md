@@ -14,6 +14,9 @@
 - Q: What schema declaration filename and location should modules use? -> A: Enabled modules declare schemas in a module-root `MODULE.schemas.yml` file.
 - Q: How should invalid schema declarations affect discovery? -> A: Ignore only the invalid declaration, warn operators, and continue discovering valid declarations.
 - Q: Should business behavior use explicit schema roles or fixed core schema names in this phase? -> A: Use fixed core schema machine names for business behavior in this phase and defer role/alias support.
+- Q: What validation schema source formats are allowed in declarations? -> A: File path only; inline schema content is not supported.
+- Q: What path format should schema declarations use for schema files? -> A: Module-relative file paths only (relative to module root).
+- Q: Should this phase keep a separate SchemaSource abstraction? -> A: No; store normalized validation/UI schema paths directly on schema declarations.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -84,7 +87,6 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - Multiple enabled modules declare the same schema machine name.
 - Multiple enabled modules declare the same schema machine name with missing or equal declaration weights.
 - A declaration references a schema file or UI schema file that does not exist.
-- A declaration uses both inline schema content and a schema path for the same schema.
 - A declaration defines a reference to an unknown schema.
 - A declaration defines an unsupported reference type or trigger name.
 - An invalid declaration is skipped with warnings while other valid declarations continue to be discovered.
@@ -93,7 +95,6 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - If `docroot/schema/collections` exists, legacy filesystem schema discovery wins and module YAML declarations are ignored.
 - A declaration omits optional UI schema information.
 - A schema declaration changes while existing metadata records already use earlier behavior.
-- Literal string schemas are declared without explicit class metadata.
 
 ## Requirements *(mandatory)*
 
@@ -102,9 +103,10 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-001**: When `docroot/schema/collections` is absent, the system MUST discover metastore schemas from explicit module-root `MODULE.schemas.yml` declaration files provided by enabled modules.
 - **FR-002**: The system MUST NOT infer schema availability solely from the presence of JSON files in filesystem directories.
 - **FR-003**: Each schema declaration MUST have a stable schema machine name used for lookup and metastore operations.
-- **FR-004**: A schema declaration MUST support a validation schema defined either by a path to a schema document or by inline schema content.
+- **FR-004**: A schema declaration MUST support a validation schema defined by a path to a schema document.
 - **FR-005**: A schema declaration MUST support an optional UI schema defined separately from the validation schema.
-- **FR-006**: The system MUST report a validation error when a declaration references a missing schema document, missing UI schema document, or malformed inline schema, exclude the invalid declaration from active discovery, and continue discovering other valid declarations.
+- **FR-005a**: Validation schema and UI schema file paths in declarations MUST be module-relative to the declaring module root.
+- **FR-006**: The system MUST report a validation error when a declaration references a missing schema document or missing UI schema document, exclude the invalid declaration from active discovery, and continue discovering other valid declarations.
 - **FR-007**: When more than one enabled declaration provides the same schema machine name, the system MUST select a winning declaration deterministically instead of failing discovery.
 - **FR-008**: Schema declarations MUST support reference definitions that identify the source property and reference behavior for schema references, identifier references, and resource references.
 - **FR-009**: Reference processing MUST use declaration-defined reference rules instead of property-name-only conditionals.
@@ -112,7 +114,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-011**: Datastore import trigger behavior MUST be driven by schema declaration trigger definitions rather than datastore trigger fields stored only in administrative configuration.
 - **FR-012**: DKAN business behavior in this phase MUST use fixed core schema machine names, including at minimum `dataset`, `distribution`, and `data-dictionary`, rather than a separate role or alias system.
 - **FR-013**: The initial feature MUST support the default `dataset` and `distribution` schema names and MUST NOT require arbitrary multiple schemas for the same core behavior in this phase.
-- **FR-014**: Literal string schemas MUST be supported without requiring a standalone JSON schema file.
+- **FR-014**: Literal-string schema handling is out of scope for this phase.
 - **FR-015**: The system MUST keep validation schema behavior separate from UI schema behavior.
 - **FR-016**: Existing schema lookup consumers MUST be able to retrieve validation schemas by declared machine name.
 - **FR-017**: Existing form-building consumers MUST be able to retrieve UI schemas when declared.
@@ -129,13 +131,14 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-028**: If duplicate schema declarations have equal or missing `weight` values, the system MUST fall back to standard Drupal module weight/order practices to select the active schema.
 - **FR-029**: The system MUST provide an operator-visible view or report showing all available declarations for each schema machine name, the selected active declaration, and the reason it won.
 - **FR-030**: Operator-visible declaration validation messages MUST identify the invalid declaration, the reason it was excluded, and any remaining active schema selected for the affected machine name.
+- **FR-031**: This phase MUST model validation and UI schema locations as normalized module-relative paths directly on schema declarations and MUST NOT require a separate source-type abstraction.
 
 ### Key Entities *(include if feature involves data)*
 
 - **Schema Declaration File**: A module-root `MODULE.schemas.yml` file that registers one or more schemas and their metadata.
-- **Schema Definition**: A declared schema entry with machine name, validation schema source, optional UI schema source, optional weight, references, triggers, and endpoint metadata where applicable.
-- **Validation Schema**: The JSON-compatible schema used to validate metastore metadata and API behavior.
-- **UI Schema**: Optional form-specific schema data used for metadata form rendering and editing experience.
+- **Schema Definition**: A declared schema entry with machine name, validation schema file path, optional UI schema file path, optional weight, references, triggers, and endpoint metadata where applicable.
+- **Validation Schema**: The JSON-compatible schema document loaded from a module-relative declaration path and used to validate metastore metadata and API behavior.
+- **UI Schema**: Optional form-specific schema data loaded from a module-relative declaration path and used for metadata form rendering and editing experience.
 - **Reference Definition**: Declarative rule that maps a property to schema, identifier, resource, or future reference behavior.
 - **Trigger Definition**: Declarative rule that maps a property change to named system behavior such as datastore import.
 - **Default Schema Module**: Module-provided package of DKAN's default DCAT-US-style schemas and declarations.
@@ -172,6 +175,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - The initial phase supports one active schema for each core role such as dataset and distribution.
 - The initial phase uses fixed core schema machine names for business behavior; role aliases and multiple schemas for the same core behavior are deferred.
 - Duplicate schema machine names are expected during customization and are resolved deterministically rather than treated as fatal conflicts.
-- Literal schemas can be recognized from simple string schema declarations without requiring a separate class flag.
+- Validation schemas are declared as file paths; inline schema content is out of scope for this phase.
+- A separate SchemaSource-style source-type abstraction is out of scope; declarations carry normalized module-relative file paths directly.
 - Additional schema role aliasing and multiple dataset/distribution schema variants may be explored later.
 - Existing public API behavior should remain stable where practical while schema discovery internals change.
