@@ -4,7 +4,7 @@
 
 Module-root YAML file named `MODULE.schemas.yml`, where `MODULE` matches the provider module machine name.
 
-Fields:
+Attributes:
 
 - `schemas`: map of schema machine names to schema definitions.
 - File provider: inferred from the enabled Drupal module containing the file.
@@ -24,21 +24,21 @@ Relationships:
 
 Declared schema entry selected by schema machine name.
 
-Fields:
+Attributes:
 
-- `machine_name`: stable schema ID used by metastore lookup, such as `dataset`, `distribution`, or `data-dictionary`.
-- `provider_module`: module machine name that owns the declaration.
-- `validation_schema`: path to JSON schema content or inline schema content.
-- `ui_schema`: optional path or inline schema content for forms.
-- `weight`: optional numeric weight for duplicate resolution.
-- `references`: optional list/map of Reference Definitions.
-- `triggers`: optional list/map of Trigger Definitions.
-- `status`: valid, invalid, active, inactive, or ignored-by-legacy-override.
-- `validation_messages`: warnings or errors discovered during declaration validation.
+- Machine name: stable schema ID used by metastore lookup, derived from the key under `schemas`, such as `dataset`, `distribution`, or `data-dictionary`.
+- Provider module: module machine name that owns the declaration.
+- Validation schema source: path to JSON schema content or inline schema content.
+- UI schema source: optional path or inline schema content for forms.
+- Weight: optional numeric weight for duplicate resolution.
+- References: optional list/map of Reference Definitions.
+- Triggers: optional list/map of Trigger Definitions.
+- Status: valid, invalid, active, inactive, or ignored-by-legacy-override.
+- Validation messages: warnings or errors discovered during declaration validation.
 
 Validation rules:
 
-- Machine name is required.
+- Machine name is required as the schema map key; it is not repeated inside the schema definition body.
 - Validation schema source is required and must resolve to parseable JSON-compatible schema content.
 - UI schema source is optional, but if present must resolve to parseable JSON-compatible content.
 - A declaration cannot define mutually exclusive schema sources in an ambiguous way; inline content and file path rules must be documented and validated.
@@ -54,14 +54,14 @@ Relationships:
 
 Runtime discovery result for all available schema sources.
 
-Fields:
+Attributes:
 
-- `source_mode`: `legacy_filesystem` or `module_declarations`.
-- `legacy_directory`: `docroot/schema/collections` when present.
-- `declarations`: all parsed module declarations when module mode is active.
-- `active_schemas`: selected Schema Definitions by machine name when module mode is active, or filesystem schema IDs when legacy mode is active.
-- `invalid_declarations`: declarations excluded with validation messages.
-- `selection_report`: operator-visible report data.
+- Source mode: `legacy_filesystem` or `module_declarations`.
+- Legacy directory: `docroot/schema/collections` when present.
+- Declarations: all parsed module declarations when module mode is active.
+- Active schemas: selected Schema Definitions by machine name when module mode is active, or filesystem schema IDs when legacy mode is active.
+- Invalid declarations: declarations excluded with validation messages.
+- Selection report: operator-visible report data.
 
 Validation rules:
 
@@ -72,13 +72,13 @@ Validation rules:
 
 Decision record for one schema machine name.
 
-Fields:
+Attributes:
 
-- `machine_name`: schema ID being selected.
-- `candidates`: valid declarations with that machine name.
-- `winner`: selected active Schema Definition.
-- `selection_reason`: highest weight, Drupal module order fallback, or single candidate.
-- `candidate_order`: ordered candidate list with weights and provider order.
+- Machine name: schema ID being selected.
+- Candidates: valid declarations with that machine name.
+- Winner: selected active Schema Definition.
+- Selection reason: highest weight, Drupal module order fallback, or single candidate.
+- Candidate order: ordered candidate list with weights and provider order.
 
 Validation rules:
 
@@ -90,16 +90,16 @@ Validation rules:
 
 Declarative rule for metastore reference handling.
 
-Fields:
+Attributes:
 
-- `property`: source property in the owning schema.
-- `type`: schema reference, identifier reference, resource reference, or supported future reference type.
-- `target_schema`: schema machine name when relevant.
-- `behavior`: named behavior such as distribution reference or resource download URL registration.
+- Property: source property in the owning schema, derived from the key under `references`.
+- Type: schema reference, identifier reference, resource reference, or supported future reference type.
+- Target schema: schema machine name when relevant.
+- Behavior: named behavior such as distribution reference or resource download URL registration.
 
 Validation rules:
 
-- Property is required.
+- Property is required as the reference map key; it is not repeated inside the reference definition body.
 - Type must be supported.
 - Target schema must be known when required by the reference type.
 
@@ -112,15 +112,15 @@ Relationships:
 
 Declarative rule for system behavior driven by metadata changes.
 
-Fields:
+Attributes:
 
-- `property`: source property that triggers behavior.
-- `event`: lifecycle point, initially dataset update/pre-reference behavior.
-- `behavior`: named behavior such as datastore import trigger.
+- Property: source property that triggers behavior, derived from the key under `triggers`.
+- Event: lifecycle point, initially dataset update/pre-reference behavior.
+- Behavior: named behavior such as datastore import trigger.
 
 Validation rules:
 
-- Property is required.
+- Property is required as the trigger map key; it is not repeated inside the trigger definition body.
 - Behavior must be supported.
 - Initial implementation supports datastore import trigger behavior and fixed core schema names.
 
@@ -133,15 +133,15 @@ Relationships:
 
 Readable report for maintainers and site operators.
 
-Fields:
+Attributes:
 
-- `source_mode`: active discovery mode.
-- `legacy_override_present`: whether `docroot/schema/collections` exists.
-- `active_schemas`: selected schemas and sources.
-- `ignored_declarations`: declarations ignored because legacy override is active.
-- `duplicate_groups`: machine names with more than one valid declaration.
-- `invalid_declarations`: skipped declarations and reasons.
-- `selection_reasons`: weight/order explanation for each active schema.
+- Source mode: active discovery mode.
+- Legacy override present: whether `docroot/schema/collections` exists.
+- Active schemas: selected schemas and sources.
+- Ignored declarations: declarations ignored because legacy override is active.
+- Duplicate groups: machine names with more than one valid declaration.
+- Invalid declarations: skipped declarations and reasons.
+- Selection reasons: weight/order explanation for each active schema.
 
 Validation rules:
 
