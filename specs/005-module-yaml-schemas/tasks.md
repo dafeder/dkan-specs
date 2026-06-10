@@ -180,8 +180,8 @@
 - **Phase 1 Setup**: No dependencies; can start immediately.
 - **Phase 2 Foundational**: Depends on Phase 1; blocks all user stories.
 - **Phase 3 US1**: Depends on Phase 2 and is the MVP.
-- **Phase 4 US2**: Depends on Phase 2 and integrates most cleanly after US1 registry services exist.
-- **Phase 5 US3**: Depends on Phase 2 and uses US1 registry services for lookup.
+- **Phase 4 US2**: Depends on Phase 2 and integrates most cleanly after US1 registry result APIs exist.
+- **Phase 5 US3**: Depends on Phase 2 and uses US1 registry result APIs for lookup.
 - **Phase 6 US4**: Depends on US1 for discovery/override behavior and benefits from US2/US3 for complete default declarations.
 - **Phase 7 Polish**: Depends on the desired story set being complete.
 
@@ -195,7 +195,7 @@
 ### Within Each User Story
 
 - Tests are listed first and should be written to fail before implementation.
-- Value objects and registry services precede consumers.
+- Value objects and registry result APIs precede consumers.
 - Metastore service updates precede datastore integration.
 - Documentation follows validated behavior.
 - Each checkpoint should be validated before moving to the next priority story.

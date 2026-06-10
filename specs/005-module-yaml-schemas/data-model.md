@@ -71,6 +71,8 @@ Validation rules:
 
 Runtime discovery result for all available schema sources.
 
+`SchemaRegistry` is a runtime data object (result snapshot), not a standalone service entry point. It is built by schema resolution/retrieval logic and consumed by other objects.
+
 Attributes:
 
 - Source mode: `legacy_filesystem` or `module_declarations`.
@@ -79,11 +81,13 @@ Attributes:
 - Active schemas: selected Schema Definitions by machine name when module mode is active, or filesystem schema IDs when legacy mode is active.
 - Invalid declarations: declarations excluded with validation messages.
 - Selection report: operator-visible report data.
+- Cacheability: registry snapshot is cacheable to avoid repeated module discovery at request time.
 
 Validation rules:
 
 - If `docroot/schema/collections` exists, `source_mode` is `legacy_filesystem` and module declarations do not participate in active selection.
 - If the legacy directory is absent, enabled module declarations are discovered and active schemas are selected from them.
+- The cached unit is the `SchemaRegistry` snapshot metadata (source mode, selections, warnings, and declaration-derived mappings), not the raw schema JSON document payloads.
 
 ## Schema Selection
 
