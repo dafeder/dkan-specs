@@ -20,9 +20,9 @@ Alternatives considered: URL deduplication was rejected because it would introdu
 
 ## Decision: Use best-effort per-URL dispatch with structured logs and status summary
 
-Rationale: Dataset distribution arrays may contain mixed-quality entries. Best-effort dispatch keeps valid resources moving even when individual entries are invalid or fail processing. Structured logs and a machine-readable summary provide operator visibility and testable outcomes.
+Rationale: Dataset distribution arrays may contain mixed-quality entries. Best-effort dispatch keeps valid resources moving even when individual entries are invalid or fail processing. Structured logs and a machine-readable summary provide administrator visibility and testable outcomes.
 
-Alternatives considered: Fail-fast dispatch was rejected because it would make one bad URL block unrelated valid entries. Summary-only reporting was rejected because operators also need traceable per-entry diagnostics.
+Alternatives considered: Fail-fast dispatch was rejected because it would make one bad URL block unrelated valid entries. Summary-only reporting was rejected because administrators also need traceable per-entry diagnostics.
 
 ## Decision: Accept distribution references as compatibility metadata but never require them for initiation
 

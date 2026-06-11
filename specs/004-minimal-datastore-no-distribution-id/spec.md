@@ -25,7 +25,7 @@
 
 ### User Story 1 - Dataset-Save Discovery and Dispatch Without Distribution IDs (Priority: P1)
 
-As a DKAN operator, I want dataset save side effects to discover distribution downloadURL values and trigger datastore processing without requiring distribution-ID lookup so ingestion starts reliably from dataset context.
+As a DKAN administrator, I want dataset save side effects to discover distribution downloadURL values and trigger datastore processing without requiring distribution-ID lookup so ingestion starts reliably from dataset context.
 
 **Why this priority**: Dataset-save discovery and dispatch is the most affected behavior and the primary risk area for this scoped change.
 
@@ -96,10 +96,10 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-013**: The workflow MUST trigger datastore processing for all valid `downloadURL` values discovered during traversal.
 - **FR-014**: The workflow MUST preserve existing dispatch behavior by processing discovered `downloadURL` values as encountered, without introducing new deduplication requirements in this scoped feature.
 - **FR-015**: During traversal, entries with invalid or missing `downloadURL` values MUST be skipped without blocking dispatch for valid entries.
-- **FR-016**: The workflow MUST emit logging or operator-visible reporting for skipped invalid/missing `downloadURL` entries.
+- **FR-016**: The workflow MUST emit logging or administrator-visible reporting for skipped invalid/missing `downloadURL` entries.
 - **FR-017**: Distribution referencing and legacy distribution ID inputs MAY be accepted for backward compatibility, but MUST NOT be required or control workflow initiation when dataset distribution `downloadURL` values are available.
 - **FR-018**: During multi-`downloadURL` processing, failure of an individual URL MUST NOT prevent dispatch attempts for remaining valid discovered URLs.
-- **FR-019**: The workflow MUST emit logging or operator-visible reporting for each per-URL processing failure during best-effort dispatch.
+- **FR-019**: The workflow MUST emit logging or administrator-visible reporting for each per-URL processing failure during best-effort dispatch.
 - **FR-020**: Legacy distribution-ID-based hook payload fields MUST be removed in this feature scope; no compatibility alias fields are required.
 - **FR-021**: The workflow MUST emit structured logs for skipped invalid/missing `downloadURL` entries and per-URL processing failures.
 - **FR-022**: The workflow MUST produce a machine-readable status summary per dataset-save dispatch run with counts for processed, skipped, and failed URLs.
