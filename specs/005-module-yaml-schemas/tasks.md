@@ -66,7 +66,7 @@
 - [ ] T028 [US1] Update validation schema retrieval to read active declaration schema content in `../dkan/modules/dkan_metastore/src/SchemaRetriever.php`
 - [ ] T029 [US1] Update metastore schema listing to use registry-backed IDs in `../dkan/modules/dkan_metastore/src/MetastoreService.php`
 - [ ] T030 [US1] Update schema API docs generation for declaration-backed schema IDs in `../dkan/modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`
-- [ ] T031 [US1] Add operator source and selection report service in `../dkan/modules/dkan_metastore/src/Schema/SchemaSelectionReporter.php`
+- [ ] T031 [US1] Add administrator source and selection report service in `../dkan/modules/dkan_metastore/src/Schema/SchemaSelectionReporter.php`
 - [ ] T032 [US1] Add admin or route wiring for schema selection reporting in `../dkan/modules/dkan_metastore/dkan_metastore.routing.yml`
 
 **Checkpoint**: User Story 1 is independently functional: module declarations discover active schemas, duplicates are deterministic, invalid declarations warn without blocking valid ones, schema APIs work, and legacy filesystem override wins when present.

@@ -1,3 +1,20 @@
+<!--
+Sync Impact Report
+Version change: 1.2.0 -> 1.2.1
+Modified principles:
+- IV. Standards Compliance & Data Quality: terminology update from "operators" to "administrators"
+Added sections:
+- None
+Removed sections:
+- None
+Templates requiring updates:
+- ✅ .specify/templates/plan-template.md (reviewed, no update required)
+- ✅ .specify/templates/spec-template.md (reviewed, no update required)
+- ✅ .specify/templates/tasks-template.md (reviewed, no update required)
+Follow-up TODOs:
+- None
+-->
+
 # DKAN Constitution
 
 ## Core Principles
@@ -12,7 +29,7 @@ DKAN's three core components—metastore, datastore, and harvest—MUST remain a
 All external data access, transformation, and ingestion MUST flow through well-documented APIs (REST, JSON). The datastore API, metastore API, and harvest integrations MUST support both human-readable and machine-parseable output formats (JSON preferred for machine consumption). CLI tools and UI features are consumers of these APIs, not alternative data paths; internal component coordination may use documented Drupal services when it does not bypass the public API contract.
 
 ### IV. Standards Compliance & Data Quality
-Metadata must validate against the configured metastore schema; tabular data imported into the datastore undergoes schema validation and type checking; harvest integrations validate remote metadata before import. Data quality issues MUST be surfaced to operators with actionable remediation guidance. Breaking compliance with the active schema or quality gates requires explicit governance review.
+Metadata must validate against the configured metastore schema; tabular data imported into the datastore undergoes schema validation and type checking; harvest integrations validate remote metadata before import. Data quality issues MUST be surfaced to administrators with actionable remediation guidance. Breaking compliance with the active schema or quality gates requires explicit governance review.
 
 ### V. Extensibility Through Drupal
 DKAN leverages Drupal's module system for extensibility. Custom vocabularies, field definitions, and harvest source types extend DKAN's behavior through standard Drupal patterns. Extensions MUST be independently installable/removable and documented. Core DKAN functionality remains independent of non-essential extensions.
@@ -40,4 +57,6 @@ All public data access uses documented REST/JSON APIs. Drupal provides the entit
 
 This Constitution is the authoritative source for DKAN architecture and development practices. All pull requests, feature proposals, and architectural changes MUST verify compliance with these core principles before approval. When conflicts arise between principles, decisions are escalated to the maintainer team with documented rationale.
 
-**Version**: 1.2.0 | **Ratified**: 2026-05-26 | **Last Amended**: 2026-05-26
+Terminology note: in constitutional and derivative project artifacts, "administrator" is the preferred term for users previously described as "operator".
+
+**Version**: 1.2.1 | **Ratified**: 2026-05-26 | **Last Amended**: 2026-06-10

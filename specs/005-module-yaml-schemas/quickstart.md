@@ -51,7 +51,7 @@ With `docroot/schema/collections` absent:
 - `GET /api/1/metastore/schemas` includes active declared schemas.
 - `GET /api/1/metastore/schemas/dataset` returns the selected dataset validation schema.
 - UI schema retrieval uses the declared UI schema when present.
-- Invalid declarations are absent from active schemas and visible in the operator report.
+- Invalid declarations are absent from active schemas and visible in the administrator report.
 - Duplicate declarations select the highest `weight`; equal weights fall back to Drupal module order.
 
 ## 3. Verify Legacy Override Mode
@@ -62,7 +62,7 @@ Expected results:
 
 - Active schemas come from `docroot/schema/collections`.
 - Module YAML declarations do not participate in active selection.
-- Operator reporting states that legacy filesystem override mode is active.
+- Administrator reporting states that legacy filesystem override mode is active.
 - Ignored module declarations are visible as ignored or inactive because of the override.
 
 ## 4. Verify Reference Behavior
@@ -105,7 +105,7 @@ Keep implementation pull requests small enough for one developer to finish in a 
 1. Parser and value objects.
 2. Registry and legacy override source selection.
 3. Retriever/API/UI schema compatibility.
-4. Duplicate selection and operator reports.
+4. Duplicate selection and administrator reports.
 5. Default schema module packaging.
 6. Reference declarations.
 7. Datastore trigger declarations and settings UI cleanup.

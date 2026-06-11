@@ -13,7 +13,7 @@ Validation rules:
 
 - File is read only from enabled modules.
 - File name must match the module machine name.
-- Invalid YAML excludes every declaration in that file and records an operator warning.
+- Invalid YAML excludes every declaration in that file and records an administrator warning.
 
 Relationships:
 
@@ -80,7 +80,7 @@ Attributes:
 - Declarations: all parsed module declarations when module mode is active.
 - Active schemas: selected Schema Definitions by machine name when module mode is active, or filesystem schema IDs when legacy mode is active.
 - Invalid declarations: declarations excluded with validation messages.
-- Selection report: operator-visible report data.
+- Selection report: administrator-visible report data.
 - Cacheability: registry snapshot is cacheable to avoid repeated module discovery at request time.
 
 Validation rules:
@@ -157,9 +157,9 @@ Relationships:
 - Belongs to one Schema Definition.
 - Consumed by datastore event subscriber behavior.
 
-## Operator Report
+## Administrator Report
 
-Readable report for maintainers and site operators.
+Readable report for maintainers and site administrators.
 
 Attributes:
 

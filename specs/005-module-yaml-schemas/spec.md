@@ -9,10 +9,10 @@
 
 ### Session 2026-06-10
 
-- Q: How should duplicate schema machine names be resolved? -> A: Schema declarations may include an optional `weight`; highest declaration weight wins, equal weights fall back to standard Drupal module weight/order, a schema is always selected, and operators can view available schemas plus why a winner was chosen.
+- Q: How should duplicate schema machine names be resolved? -> A: Schema declarations may include an optional `weight`; highest declaration weight wins, equal weights fall back to standard Drupal module weight/order, a schema is always selected, and administrators can view available schemas plus why a winner was chosen.
 - Q: How should legacy filesystem schema discovery behave during migration? -> A: If `docroot/schema/collections` exists, use legacy filesystem discovery as the authoritative source and ignore module YAML declarations.
 - Q: What schema declaration filename and location should modules use? -> A: Enabled modules declare schemas in a module-root `MODULE.schemas.yml` file.
-- Q: How should invalid schema declarations affect discovery? -> A: Ignore only the invalid declaration, warn operators, and continue discovering valid declarations.
+- Q: How should invalid schema declarations affect discovery? -> A: Ignore only the invalid declaration, warn administrators, and continue discovering valid declarations.
 - Q: Should business behavior use explicit schema roles or fixed core schema names in this phase? -> A: Use fixed core schema machine names for business behavior in this phase and defer role/alias support.
 - Q: What validation schema source formats are allowed in declarations? -> A: File path only; inline schema content is not supported.
 - Q: What path format should schema declarations use for schema files? -> A: Module-relative file paths only (relative to module root).
@@ -80,7 +80,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 
 1. **Given** a site uses DKAN's default schema set, **When** the upgrade path runs, **Then** the default schema module is enabled or otherwise made available as required for continued operation.
 2. **Given** a site uses custom schemas, **When** maintainers follow migration guidance, **Then** custom schemas can be moved into a custom module declaration without being masked by default schemas.
-3. **Given** a schema declaration is invalid or references a missing schema file, **When** schema discovery runs, **Then** operators receive actionable validation errors.
+3. **Given** a schema declaration is invalid or references a missing schema file, **When** schema discovery runs, **Then** administrators receive actionable validation errors.
 
 ### Edge Cases
 
@@ -122,15 +122,15 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-019**: The default DCAT-US-style schema collection MUST be packaged so it can be enabled as a module-provided schema set.
 - **FR-020**: Sites using custom schemas MUST have a documented path to provide those schemas through a custom module declaration.
 - **FR-021**: When `docroot/schema/collections` exists, the system MUST use legacy filesystem schema discovery as the authoritative schema source and ignore module YAML declarations.
-- **FR-022**: The system MUST expose operator-visible reporting that identifies whether active schemas are sourced from `docroot/schema/collections` or module YAML declarations.
+- **FR-022**: The system MUST expose administrator-visible reporting that identifies whether active schemas are sourced from `docroot/schema/collections` or module YAML declarations.
 - **FR-023**: The current admin pages for reference and trigger field selection MUST be removed, disabled, or clearly superseded once declaration-based references and triggers are authoritative.
-- **FR-024**: Operators MUST receive actionable messages when schema declarations are invalid, incomplete, or conflict with one another.
+- **FR-024**: Administrators MUST receive actionable messages when schema declarations are invalid, incomplete, or conflict with one another.
 - **FR-025**: Documentation MUST include the declaration format, supported fields, default schema module behavior, custom schema migration steps, and examples for references and triggers.
 - **FR-026**: Schema declarations MAY include an optional numeric `weight` property used to resolve duplicate schema machine names.
 - **FR-027**: For duplicate schema machine names, the declaration with the highest explicit `weight` MUST be selected as the active schema.
 - **FR-028**: If duplicate schema declarations have equal or missing `weight` values, the system MUST fall back to standard Drupal module weight/order practices to select the active schema.
-- **FR-029**: The system MUST provide an operator-visible view or report showing all available declarations for each schema machine name, the selected active declaration, and the reason it won.
-- **FR-030**: Operator-visible declaration validation messages MUST identify the invalid declaration, the reason it was excluded, and any remaining active schema selected for the affected machine name.
+- **FR-029**: The system MUST provide an administrator-visible view or report showing all available declarations for each schema machine name, the selected active declaration, and the reason it won.
+- **FR-030**: Administrator-visible declaration validation messages MUST identify the invalid declaration, the reason it was excluded, and any remaining active schema selected for the affected machine name.
 - **FR-031**: This phase MUST model validation and UI schema locations as normalized module-relative paths directly on schema declarations and MUST NOT require a separate source-type abstraction.
 
 ### Key Entities *(include if feature involves data)*
@@ -143,7 +143,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **Trigger Definition**: Declarative rule that maps a property change to named system behavior such as datastore import.
 - **Default Schema Module**: Module-provided package of DKAN's default DCAT-US-style schemas and declarations.
 - **Custom Schema Module**: Site-owned module that declares custom schemas and can replace or extend default schema behavior according to documented rules.
-- **Schema Selection Report**: Operator-visible output that lists discovered declarations, active selections, weights, fallback ordering, and conflict-resolution reasons.
+- **Schema Selection Report**: Administrator-visible output that lists discovered declarations, active selections, weights, fallback ordering, and conflict-resolution reasons.
 - **Legacy Schema Override**: Backward-compatible behavior where the presence of `docroot/schema/collections` makes filesystem schemas authoritative and prevents module YAML declarations from participating in active schema selection.
 
 ## Success Criteria *(mandatory)*
@@ -160,9 +160,9 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **SC-008**: UI schema retrieval works for 100% of declarations that include UI schema information and falls back without fatal errors when UI schema information is omitted.
 - **SC-009**: Reference and trigger administration paths no longer allow conflicting runtime configuration once declaration-based behavior is authoritative.
 - **SC-010**: Migration documentation enables maintainers to convert a legacy custom schema directory into a module declaration in under 30 minutes for a simple dataset/distribution schema pair.
-- **SC-011**: For 100% of duplicate schema machine-name scenarios in scope, schema discovery selects one active schema and exposes the selected declaration and selection reason in operator-visible reporting.
-- **SC-012**: For 100% of environments where `docroot/schema/collections` exists, schema discovery uses filesystem schemas instead of module YAML declarations and reports that source selection to operators.
-- **SC-013**: In 100% of invalid-declaration scenarios in scope, valid declarations remain discoverable and the invalid declaration is excluded with an operator-visible warning.
+- **SC-011**: For 100% of duplicate schema machine-name scenarios in scope, schema discovery selects one active schema and exposes the selected declaration and selection reason in administrator-visible reporting.
+- **SC-012**: For 100% of environments where `docroot/schema/collections` exists, schema discovery uses filesystem schemas instead of module YAML declarations and reports that source selection to administrators.
+- **SC-013**: In 100% of invalid-declaration scenarios in scope, valid declarations remain discoverable and the invalid declaration is excluded with an administrator-visible warning.
 
 ## Assumptions
 
