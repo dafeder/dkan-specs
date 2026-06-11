@@ -26,7 +26,7 @@ Declared schema entry selected by schema machine name.
 
 Attributes:
 
-- Machine name: stable schema ID used by metastore lookup, derived from the key under `schemas`, such as `dataset`, `distribution`, or `data-dictionary`.
+- Machine name: stable schema ID used by metastore lookup, derived from the key under `schemas`, such as `dataset`, `distribution`, `data-dictionary`, or `catalog`.
 - Provider module: module machine name that owns the declaration.
 - Validation schema source: required object with exactly one of `path` or `inline`.
 - UI schema source: optional object with exactly one of `path` or `inline`.
@@ -50,6 +50,66 @@ Relationships:
 - Has zero or more Reference Definitions.
 - Has zero or more Trigger Definitions.
 - Participates in one Schema Selection for its machine name unless legacy override mode is active.
+
+## Catalog Endpoint Definition
+
+Special endpoint contract for the fixed `catalog` schema.
+
+Attributes:
+
+- Endpoint path: `/data.json`.
+- Backing schema: `catalog`.
+- Endpoint kind: singleton listing endpoint.
+
+Validation rules:
+
+- The `catalog` schema is served as a singleton endpoint at `/data.json`.
+- `catalog` is not an item entity type and must not expose `/api/1/metastore/schemas/catalog/items`.
+
+Relationships:
+
+- Uses the active `catalog` Schema Definition when module declaration mode is active.
+- Coexists with other item-oriented schemas without being treated as an item collection schema.
+
+## Abstract Catalog Controller
+
+Shared base contract for serving `/data.json`.
+
+Attributes:
+
+- Route responsibility: handles singleton catalog endpoint requests.
+- Shared behaviors: common request validation, cacheability integration, and response scaffolding.
+- Extension hooks: overridable methods for schema-specific catalog document composition.
+
+Validation rules:
+
+- Must define a stable contract that concrete catalog controllers can extend.
+- Must not require metastore item endpoints for `catalog`.
+
+Relationships:
+
+- Implemented by one or more Catalog Controller Implementations.
+- Consumes active schema and selection data from Schema Registry.
+
+## Catalog Controller Implementation
+
+Concrete schema-module-specific controller for catalog output.
+
+Attributes:
+
+- Provider module: module that owns the controller implementation.
+- Controller class: concrete class extending Abstract Catalog Controller.
+- Selection state: active or inactive candidate.
+
+Validation rules:
+
+- Must extend Abstract Catalog Controller.
+- Active implementation selection must be deterministic and compatible with schema selection rules.
+
+Relationships:
+
+- Belongs to one provider module.
+- Produces `/data.json` response when active.
 
 ## Schema Content Source
 

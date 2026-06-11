@@ -82,8 +82,28 @@ The first implementation phase uses fixed schema machine names for core behavior
 - `dataset`
 - `distribution`
 - `data-dictionary`
+- `catalog`
 
 Role aliases and multiple active schemas for the same core behavior are out of scope.
+
+## Catalog Endpoint Semantics
+
+The `catalog` schema is a special singleton endpoint contract:
+
+- It is served at `/data.json`.
+- It is not a metastore item type and does not expose an items collection endpoint.
+- The route `/api/1/metastore/schemas/catalog/items` must not be registered or reachable.
+
+This keeps catalog behavior aligned with DCAT-US expectations for a single catalog listing endpoint.
+
+### Controller Structure
+
+Catalog endpoint behavior is implemented through:
+
+- an abstract catalog controller contract in core, defining shared `/data.json` handling behavior;
+- a concrete catalog controller implementation provided by the active schema module.
+
+If more than one catalog controller candidate exists, selection must be deterministic and aligned with active schema-module resolution.
 
 ## Reference Definitions
 

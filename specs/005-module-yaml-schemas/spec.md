@@ -17,6 +17,8 @@
 - Q: What validation schema source formats are allowed in declarations? -> A: File path only; inline schema content is not supported.
 - Q: What path format should schema declarations use for schema files? -> A: Module-relative file paths only (relative to module root).
 - Q: Should this phase keep a separate SchemaSource abstraction? -> A: No; store normalized validation/UI schema paths directly on schema declarations.
+- Q: How should the catalog schema be exposed? -> A: Catalog is a singleton endpoint at `/data.json`, not a metastore item type, and it must not expose `/api/1/metastore/schemas/catalog/items`.
+- Q: How should catalog endpoint logic be structured for schema-module customization? -> A: Provide an abstract catalog controller contract in core and implement concrete catalog controllers in schema modules.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -91,6 +93,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - A declaration defines an unsupported reference type or trigger name.
 - An invalid declaration is skipped with warnings while other valid declarations continue to be discovered.
 - A custom module intentionally replaces a default dataset or distribution schema.
+- A declaration includes a `catalog` schema and the system incorrectly treats it as an item collection.
 - A site upgrades with legacy schemas in a filesystem schema directory but no module-based declaration.
 - If `docroot/schema/collections` exists, legacy filesystem schema discovery wins and module YAML declarations are ignored.
 - A declaration omits optional UI schema information.
@@ -112,7 +115,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-009**: Reference processing MUST use declaration-defined reference rules instead of property-name-only conditionals.
 - **FR-010**: Schema declarations MUST support trigger definitions that identify the source property and named trigger behavior.
 - **FR-011**: Datastore import trigger behavior MUST be driven by schema declaration trigger definitions rather than datastore trigger fields stored only in administrative configuration.
-- **FR-012**: DKAN business behavior in this phase MUST use fixed core schema machine names, including at minimum `dataset`, `distribution`, and `data-dictionary`, rather than a separate role or alias system.
+- **FR-012**: DKAN business behavior in this phase MUST use fixed core schema machine names, including at minimum `dataset`, `distribution`, `data-dictionary`, and `catalog`, rather than a separate role or alias system.
 - **FR-013**: The initial feature MUST support the default `dataset` and `distribution` schema names and MUST NOT require arbitrary multiple schemas for the same core behavior in this phase.
 - **FR-014**: Literal-string schema handling is out of scope for this phase.
 - **FR-015**: The system MUST keep validation schema behavior separate from UI schema behavior.
@@ -132,6 +135,11 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-029**: The system MUST provide an administrator-visible view or report showing all available declarations for each schema machine name, the selected active declaration, and the reason it won.
 - **FR-030**: Administrator-visible declaration validation messages MUST identify the invalid declaration, the reason it was excluded, and any remaining active schema selected for the affected machine name.
 - **FR-031**: This phase MUST model validation and UI schema locations as normalized module-relative paths directly on schema declarations and MUST NOT require a separate source-type abstraction.
+- **FR-032**: The `catalog` schema MUST be treated as a singleton endpoint definition for `/data.json`, not as a metastore item type.
+- **FR-033**: The system MUST NOT expose a metastore item endpoint for `catalog`, including `/api/1/metastore/schemas/catalog/items`.
+- **FR-034**: The system MUST provide an abstract catalog controller contract that defines shared `/data.json` request handling, response shape expectations, and extension points.
+- **FR-035**: Schema modules MUST be able to provide a concrete catalog controller implementation that extends the abstract catalog controller contract.
+- **FR-036**: Active catalog controller resolution MUST select one concrete implementation in a deterministic way aligned with active schema-module selection rules.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -144,6 +152,9 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **Default Schema Module**: Module-provided package of DKAN's default DCAT-US-style schemas and declarations.
 - **Custom Schema Module**: Site-owned module that declares custom schemas and can replace or extend default schema behavior according to documented rules.
 - **Schema Selection Report**: Administrator-visible output that lists discovered declarations, active selections, weights, fallback ordering, and conflict-resolution reasons.
+- **Catalog Endpoint Definition**: A fixed singleton endpoint contract for `catalog` served at `/data.json`; it is schema-backed but not item-collection-backed.
+- **Abstract Catalog Controller**: Shared controller contract that defines baseline `/data.json` endpoint behavior and reusable response-building hooks.
+- **Catalog Controller Implementation**: Concrete controller supplied by a schema module to produce catalog output for that schema set.
 - **Legacy Schema Override**: Backward-compatible behavior where the presence of `docroot/schema/collections` makes filesystem schemas authoritative and prevents module YAML declarations from participating in active schema selection.
 
 ## Success Criteria *(mandatory)*
@@ -163,6 +174,9 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **SC-011**: For 100% of duplicate schema machine-name scenarios in scope, schema discovery selects one active schema and exposes the selected declaration and selection reason in administrator-visible reporting.
 - **SC-012**: For 100% of environments where `docroot/schema/collections` exists, schema discovery uses filesystem schemas instead of module YAML declarations and reports that source selection to administrators.
 - **SC-013**: In 100% of invalid-declaration scenarios in scope, valid declarations remain discoverable and the invalid declaration is excluded with an administrator-visible warning.
+- **SC-014**: In 100% of scenarios where `catalog` is active, `/data.json` is available and `/api/1/metastore/schemas/catalog/items` is not exposed.
+- **SC-015**: In 100% of scenarios in scope, catalog responses are served through a concrete controller that extends the abstract catalog controller contract.
+- **SC-016**: In 100% of duplicate catalog-controller scenarios in scope, one concrete controller is selected deterministically and the selection reason is administrator-visible.
 
 ## Assumptions
 

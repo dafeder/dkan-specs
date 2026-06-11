@@ -54,6 +54,8 @@
 - [ ] T019 [P] [US1] Add kernel tests for enabled and disabled module declaration discovery in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/SchemaDeclarationDiscoveryKernelTest.php`
 - [ ] T020 [P] [US1] Add functional API tests for `/api/1/metastore/schemas` declaration-backed responses in `../dkan/modules/dkan_metastore/tests/src/Functional/Api1/SchemaDeclarationApiTest.php`
 - [ ] T021 [P] [US1] Add functional tests for legacy `docroot/schema/collections` override behavior in `../dkan/modules/dkan_metastore/tests/src/Functional/Api1/LegacySchemaOverrideTest.php`
+- [ ] T078 [P] [US1] Add functional tests ensuring `catalog` is served at `/data.json` and `/api/1/metastore/schemas/catalog/items` is not exposed in `../dkan/modules/dkan_metastore/tests/src/Functional/Api1/CatalogEndpointBehaviorTest.php`
+- [ ] T080 [P] [US1] Add unit tests for abstract catalog controller contract and concrete controller conformance in `../dkan/modules/dkan_metastore/tests/src/Unit/Controller/AbstractCatalogControllerTest.php`
 
 ### Implementation for User Story 1
 
@@ -66,6 +68,10 @@
 - [ ] T028 [US1] Update validation schema retrieval to read active declaration schema content in `../dkan/modules/dkan_metastore/src/SchemaRetriever.php`
 - [ ] T029 [US1] Update metastore schema listing to use registry-backed IDs in `../dkan/modules/dkan_metastore/src/MetastoreService.php`
 - [ ] T030 [US1] Update schema API docs generation for declaration-backed schema IDs in `../dkan/modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`
+- [ ] T079 [US1] Update schema endpoint/routing behavior so `catalog` maps to `/data.json` singleton semantics and does not register a metastore items endpoint in `../dkan/modules/dkan_metastore/src/MetastoreService.php`
+- [ ] T081 [US1] Add abstract catalog controller base class for shared `/data.json` request/response handling in `../dkan/modules/dkan_metastore/src/Controller/AbstractCatalogController.php`
+- [ ] T082 [US1] Implement default schema-module catalog controller by extending the abstract base in `../dkan/modules/dkan_metastore/src/Controller/CatalogController.php`
+- [ ] T083 [US1] Add deterministic catalog controller selection wiring aligned with active schema-module selection in `../dkan/modules/dkan_metastore/src/Schema/SchemaRegistryFactory.php`
 - [ ] T031 [US1] Add administrator source and selection report service in `../dkan/modules/dkan_metastore/src/Schema/SchemaSelectionReporter.php`
 - [ ] T032 [US1] Add admin or route wiring for schema selection reporting in `../dkan/modules/dkan_metastore/dkan_metastore.routing.yml`
 
@@ -153,6 +159,7 @@
 - [ ] T067 [US4] Add update or install handling for default schema availability in `../dkan/modules/dkan_metastore/dkan_metastore.install`
 - [ ] T068 [US4] Update custom schema guide for module declarations and legacy override behavior in `../dkan/docs/source/user-guide/guide_custom_schemas.rst`
 - [ ] T069 [US4] Add developer guide declaration format documentation in `../dkan/docs/source/developer-guide/schema_declarations.rst`
+- [ ] T084 [US4] Document abstract catalog controller extension and schema-module concrete controller implementation guidance in `../dkan/docs/source/developer-guide/schema_declarations.rst`
 - [ ] T070 [US4] Update metastore component documentation for declaration-backed discovery in `../dkan/docs/source/components/dkan_metastore.rst`
 - [ ] T071 [US4] Update upgrade notes for `docroot/schema/collections` override and migration path in `../dkan/docs/source/upgrade.rst`
 

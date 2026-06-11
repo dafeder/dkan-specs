@@ -50,6 +50,9 @@ With `docroot/schema/collections` absent:
 
 - `GET /api/1/metastore/schemas` includes active declared schemas.
 - `GET /api/1/metastore/schemas/dataset` returns the selected dataset validation schema.
+- `GET /data.json` returns the active catalog listing endpoint response.
+- `GET /api/1/metastore/schemas/catalog/items` is not exposed.
+- Catalog responses are served through a concrete controller that extends the abstract catalog controller contract.
 - UI schema retrieval uses the declared UI schema when present.
 - Invalid declarations are absent from active schemas and visible in the administrator report.
 - Duplicate declarations select the highest `weight`; equal weights fall back to Drupal module order.
