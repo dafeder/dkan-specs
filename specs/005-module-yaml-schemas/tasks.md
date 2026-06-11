@@ -66,7 +66,7 @@
 - [ ] T028 [US1] Update validation schema retrieval to read active declaration schema content in `../dkan/modules/dkan_metastore/src/SchemaRetriever.php`
 - [ ] T029 [US1] Update metastore schema listing to use registry-backed IDs in `../dkan/modules/dkan_metastore/src/MetastoreService.php`
 - [ ] T030 [US1] Update schema API docs generation for declaration-backed schema IDs in `../dkan/modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`
-- [ ] T031 [US1] Add operator source and selection report service in `../dkan/modules/dkan_metastore/src/Schema/SchemaSelectionReporter.php`
+- [ ] T031 [US1] Add administrator source and selection report service in `../dkan/modules/dkan_metastore/src/Schema/SchemaSelectionReporter.php`
 - [ ] T032 [US1] Add admin or route wiring for schema selection reporting in `../dkan/modules/dkan_metastore/dkan_metastore.routing.yml`
 
 **Checkpoint**: User Story 1 is independently functional: module declarations discover active schemas, duplicates are deterministic, invalid declarations warn without blocking valid ones, schema APIs work, and legacy filesystem override wins when present.
@@ -180,8 +180,8 @@
 - **Phase 1 Setup**: No dependencies; can start immediately.
 - **Phase 2 Foundational**: Depends on Phase 1; blocks all user stories.
 - **Phase 3 US1**: Depends on Phase 2 and is the MVP.
-- **Phase 4 US2**: Depends on Phase 2 and integrates most cleanly after US1 registry services exist.
-- **Phase 5 US3**: Depends on Phase 2 and uses US1 registry services for lookup.
+- **Phase 4 US2**: Depends on Phase 2 and integrates most cleanly after US1 registry result APIs exist.
+- **Phase 5 US3**: Depends on Phase 2 and uses US1 registry result APIs for lookup.
 - **Phase 6 US4**: Depends on US1 for discovery/override behavior and benefits from US2/US3 for complete default declarations.
 - **Phase 7 Polish**: Depends on the desired story set being complete.
 
@@ -195,7 +195,7 @@
 ### Within Each User Story
 
 - Tests are listed first and should be written to fail before implementation.
-- Value objects and registry services precede consumers.
+- Value objects and registry result APIs precede consumers.
 - Metastore service updates precede datastore integration.
 - Documentation follows validated behavior.
 - Each checkpoint should be validated before moving to the next priority story.

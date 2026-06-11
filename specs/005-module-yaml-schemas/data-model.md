@@ -13,7 +13,7 @@ Validation rules:
 
 - File is read only from enabled modules.
 - File name must match the module machine name.
-- Invalid YAML excludes every declaration in that file and records an operator warning.
+- Invalid YAML excludes every declaration in that file and records an administrator warning.
 
 Relationships:
 
@@ -28,8 +28,8 @@ Attributes:
 
 - Machine name: stable schema ID used by metastore lookup, derived from the key under `schemas`, such as `dataset`, `distribution`, or `data-dictionary`.
 - Provider module: module machine name that owns the declaration.
-- Validation schema source: path to JSON schema content or inline schema content.
-- UI schema source: optional path or inline schema content for forms.
+- Validation schema source: required object with exactly one of `path` or `inline`.
+- UI schema source: optional object with exactly one of `path` or `inline`.
 - Weight: optional numeric weight for duplicate resolution.
 - References: optional list/map of Reference Definitions.
 - Triggers: optional list/map of Trigger Definitions.
@@ -39,9 +39,10 @@ Attributes:
 Validation rules:
 
 - Machine name is required as the schema map key; it is not repeated inside the schema definition body.
-- Validation schema source is required and must resolve to parseable JSON-compatible schema content.
-- UI schema source is optional, but if present must resolve to parseable JSON-compatible content.
-- A declaration cannot define mutually exclusive schema sources in an ambiguous way; inline content and file path rules must be documented and validated.
+- `validation_schema` is required and must be an object containing exactly one of `path` or `inline`.
+- `ui_schema` is optional, but if present must be an object containing exactly one of `path` or `inline`.
+- `path` values are module-relative file paths.
+- `inline` values must be parseable JSON-compatible schema content.
 - Invalid declarations are excluded individually.
 
 Relationships:
@@ -50,9 +51,27 @@ Relationships:
 - Has zero or more Trigger Definitions.
 - Participates in one Schema Selection for its machine name unless legacy override mode is active.
 
+## Schema Content Source
+
+Shared source object used by `validation_schema` and `ui_schema`.
+
+Attributes:
+
+- `path`: module-relative path to a JSON schema document.
+- `inline`: inline JSON-compatible schema content.
+
+Validation rules:
+
+- Exactly one of `path` or `inline` must be provided.
+- `path` and `inline` must not both be present.
+- If `path` is present, the file must exist and parse as JSON-compatible content.
+- If `inline` is present, the value must parse as JSON-compatible content.
+
 ## Schema Registry
 
 Runtime discovery result for all available schema sources.
+
+`SchemaRegistry` is a runtime data object (result snapshot), not a standalone service entry point. It is built by schema resolution/retrieval logic and consumed by other objects.
 
 Attributes:
 
@@ -61,12 +80,14 @@ Attributes:
 - Declarations: all parsed module declarations when module mode is active.
 - Active schemas: selected Schema Definitions by machine name when module mode is active, or filesystem schema IDs when legacy mode is active.
 - Invalid declarations: declarations excluded with validation messages.
-- Selection report: operator-visible report data.
+- Selection report: administrator-visible report data.
+- Cacheability: registry snapshot is cacheable to avoid repeated module discovery at request time.
 
 Validation rules:
 
 - If `docroot/schema/collections` exists, `source_mode` is `legacy_filesystem` and module declarations do not participate in active selection.
 - If the legacy directory is absent, enabled module declarations are discovered and active schemas are selected from them.
+- The cached unit is the `SchemaRegistry` snapshot metadata (source mode, selections, warnings, and declaration-derived mappings), not the raw schema JSON document payloads.
 
 ## Schema Selection
 
@@ -93,15 +114,22 @@ Declarative rule for metastore reference handling.
 Attributes:
 
 - Property: source property in the owning schema, derived from the key under `references`.
-- Type: schema reference, identifier reference, resource reference, or supported future reference type.
+- Type: `object_ref`, `item_url`, `resource_url`, or supported future reference type. Default is `object_ref` when omitted.
 - Target schema: schema machine name when relevant.
 - Behavior: named behavior such as distribution reference or resource download URL registration.
+
+Reference type semantics:
+
+- `object_ref`: Treat the property value as a metastore object reference whose target type is defined by `target_schema`; used for relationships such as dataset-to-distribution where dependency traversal and dereferencing should resolve the referenced record. This is the default reference type when `type` is not declared.
+- `item_url`: Treat the property value as an identifier key that resolves to a URL reference for the related item, not a fully dereferenced object payload; used for data-dictionary or identifier-driven linking where lookup is by declared identifier semantics.
+- `resource_url`: Treat the property value as an external or file resource locator (for example `downloadURL`) that resolves to a URL reference and should register or update resource linkage behavior instead of a direct object relationship.
 
 Validation rules:
 
 - Property is required as the reference map key; it is not repeated inside the reference definition body.
-- Type must be supported.
-- Target schema must be known when required by the reference type.
+- Type must be supported; if omitted, `object_ref` is assumed.
+- `target_schema` is required for `object_ref` and `item_url` references, and not allowed for `resource_url` references.
+- Behavior must be valid for the selected reference type.
 
 Relationships:
 
@@ -129,9 +157,9 @@ Relationships:
 - Belongs to one Schema Definition.
 - Consumed by datastore event subscriber behavior.
 
-## Operator Report
+## Administrator Report
 
-Readable report for maintainers and site operators.
+Readable report for maintainers and site administrators.
 
 Attributes:
 
