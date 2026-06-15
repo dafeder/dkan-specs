@@ -14,15 +14,15 @@ Relationships:
 - May reference standalone distribution entities, but datastore discovery cannot require those entities.
 
 Validation rules:
-- Dataset save traversal must tolerate missing or malformed distribution entries.
-- Dataset traversal must continue after invalid entries.
+- Dataset save discovery must tolerate missing or malformed distribution entries.
+- Dataset discovery must continue after invalid entries.
 
 ## Distribution Entry
 
 Represents a distribution object inside the dataset structure.
 
 Fields:
-- `downloadURL`: Source URL or resource identifier candidate discovered during traversal.
+- `downloadURL`: Source URL or resource identifier candidate discovered during discovery.
 - `identifier`: Optional distribution UUID when the distribution is referenced.
 - `format`/`mediaType`: Optional metadata used to infer MIME type.
 - `title`: Optional display metadata.
@@ -93,7 +93,7 @@ Relationships:
 - Contains zero or more per-entry outcomes.
 
 Validation rules:
-- Counts must equal the actual traversal outcomes.
+- Counts must equal the actual discovery outcomes.
 - Failures for one entry must not prevent attempts for later valid entries.
 
 ## Pipeline Stage

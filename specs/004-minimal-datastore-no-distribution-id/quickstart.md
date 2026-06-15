@@ -8,31 +8,31 @@ Implement the minimal datastore change so dataset-save discovery triggers datast
 
 Each ticket is intended to be small enough for one developer to complete in a week or less with manual coding and review.
 
-### Ticket 1: Pre-Reference Dataset Traversal in LifeCycle Flow
+### Ticket 1: Pre-Reference Dataset Discovery in LifeCycle Flow
 
 Scope:
-- Implement traversal where dataset saves already trigger datastore-related decisions: `LifeCycle::referenceMetadata()` -> `LifeCycle::EVENT_PRE_REFERENCE` -> `DatastoreSubscriber::onPreReference()`.
-- Add a traversal helper used by the pre-reference handler to recursively inspect dataset `distribution` entries before reference conversion.
-- Support referenced and non-referenced distribution structures with the same traversal logic.
-- Emit a normalized `ResourceLocatorDiscoveryResult` (valid locator values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
-- Use the emitted `ResourceLocatorDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, (b) executing locator/resource registration and import-trigger work, and (c) producing structured summary/log outputs in later tickets.
+- Implement discovery where dataset saves already trigger datastore-related decisions: `LifeCycle::referenceMetadata()` -> `LifeCycle::EVENT_PRE_REFERENCE` -> `DatastoreSubscriber::onPreReference()`.
+- Add a discovery helper used by the pre-reference handler to recursively inspect dataset `distribution` entries before reference conversion.
+- Support referenced and non-referenced distribution structures with the same discovery logic.
+- Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
+- Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, (b) executing resource registration and import-trigger work, and (c) producing structured summary/log outputs in later tickets.
 
 Acceptance:
 - Unit tests cover referenced, embedded, nested, repeated, invalid, and missing `downloadURL` entries.
-- Subscriber/lifecycle tests verify traversal runs from the pre-reference event path during dataset presave.
-- Contract tests verify downstream components consume the `ResourceLocatorDiscoveryResult` object (rather than re-traversing metadata) for trigger decisions and registration/import planning.
+- Subscriber/lifecycle tests verify discovery runs from the pre-reference event path during dataset presave.
+- Contract tests verify downstream components consume the `ResourceDiscoveryResult` object (rather than re-discovering metadata) for trigger decisions and registration/import planning.
 
 ### Ticket 2: ResourceMapper Registration and Import Trigger Integration
 
 Scope:
-- Register or resolve valid locator values as `DataResource`/ResourceMapper records.
+- Register or resolve valid discovered resource values as `DataResource`/ResourceMapper records.
 - Trigger existing datastore processing from resolved resources.
 - Preserve queue-driven default and immediate override behavior.
 - Handle import-trigger failures gracefully (best-effort: one URL failure does not block others).
 - Log failures with standard logger (no new structured logging framework in this ticket).
 
 Acceptance:
-- Kernel/integration tests verify valid discovered locators trigger datastore processing without distribution lookup.
+- Kernel/integration tests verify valid discovered resource values trigger datastore processing without distribution lookup.
 - Tests verify import-trigger failures are logged and do not block subsequent URL processing.
 
 ### Ticket 3: Cache Dependency and Invalidation Updates
@@ -48,7 +48,7 @@ Scope:
 - Document which cache tags/keys are invalidated by dataset changes vs. resource/import state changes.
 
 Acceptance:
-- Tests verify invalidation behavior for both referenced and non-referenced distribution workflows, including dataset-only traversal paths.
+- Tests verify invalidation behavior for both referenced and non-referenced distribution workflows, including dataset-only discovery paths.
 - Tests prove cache freshness remains correct when distribution references are absent.
 
 ### Ticket 4: API, Drush, SQL Endpoint, and Admin Compatibility Review
@@ -76,7 +76,7 @@ Acceptance:
 
 Scope:
 - Create service method to query import status for resources registered by URL or resource identifier (not requiring distribution reference).
-- Enable dashboard and reporting systems to look up status without traversing distribution references.
+- Enable dashboard and reporting systems to look up status without discovering distribution references.
 - Document which status fields are available from URL-only resource lookups vs. distribution-backed resources.
 
 Acceptance:

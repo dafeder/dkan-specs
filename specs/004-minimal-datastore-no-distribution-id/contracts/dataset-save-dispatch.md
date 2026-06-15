@@ -6,7 +6,7 @@ Define the internal service contract for discovering dataset distribution `downl
 
 ## Caller
 
-Metastore dataset save lifecycle side effect.
+Metastore dataset-save lifecycle hooks/events.
 
 ## Inputs
 
@@ -21,11 +21,11 @@ DatasetDispatchInput {
 Rules:
 - `datasetMetadata` may contain referenced or non-referenced distribution structures.
 - Distribution UUIDs may be present but are not required.
-- Traversal uses `distribution` entries and nested `downloadURL` values.
+- Discovery uses `distribution` entries and nested `downloadURL` values.
 
 ## Processing Contract
 
-1. Recursively traverse dataset `distribution` data.
+1. Recursively discover dataset `distribution` data.
 2. For each entry with a valid `downloadURL`, register or resolve a `DataResource` through existing ResourceMapper behavior.
 3. Trigger datastore processing for each valid discovered resource in encounter order.
 4. Do not deduplicate repeated URLs.

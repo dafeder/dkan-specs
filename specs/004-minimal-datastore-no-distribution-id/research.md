@@ -6,11 +6,11 @@ Rationale: Current metastore reference handling registers distribution `download
 
 Alternatives considered: Replacing ResourceMapper with a new canonical datastore resource model was rejected for this scoped feature because it belongs to the broader decoupled datastore architecture. Continuing to use distribution UUIDs as required keys was rejected because it fails non-referenced distribution workflows.
 
-## Decision: Initiate datastore processing from dataset-save traversal
+## Decision: Initiate datastore processing from dataset-save discovery
 
-Rationale: The most affected behavior is resource discovery when datasets are saved. Both referenced and non-referenced distribution structures expose effective `distribution[].downloadURL` values after dataset handling, except non-referenced distributions do not have their own distribution UUIDs. A single recursive traversal avoids separate logic branches and supports both shapes.
+Rationale: The most affected behavior is resource discovery when datasets are saved. Both referenced and non-referenced distribution structures expose effective `distribution[].downloadURL` values after dataset handling, except non-referenced distributions do not have their own distribution UUIDs. A single recursive discovery pass avoids separate logic branches and supports both shapes.
 
-Alternatives considered: Distribution-save side effects were rejected because non-referenced distributions may not produce standalone distribution entities. Separate referenced/non-referenced traversal paths were rejected because the effective dataset structure is equivalent for discovery.
+Alternatives considered: Distribution-save hook behavior was rejected because non-referenced distributions may not produce standalone distribution entities. Separate referenced/non-referenced discovery paths were rejected because the effective dataset structure is equivalent for discovery.
 
 ## Decision: Preserve existing dispatch order and non-deduplication semantics
 
@@ -26,7 +26,7 @@ Alternatives considered: Fail-fast dispatch was rejected because it would make o
 
 ## Decision: Accept distribution references as compatibility metadata but never require them for initiation
 
-Rationale: Existing DKAN installations and referenced distribution flows remain valid. The feature changes the operational requirement, not the metadata capability: distribution UUIDs may exist and may help cache/reporting context, but discovery and datastore initiation are driven by `downloadURL` traversal.
+Rationale: Existing DKAN installations and referenced distribution flows remain valid. The feature changes the operational requirement, not the metadata capability: distribution UUIDs may exist and may help cache/reporting context, but discovery and datastore initiation are driven by `downloadURL` discovery.
 
 Alternatives considered: Removing distribution referencing was rejected as unnecessary and too disruptive. Preferring distribution-ID paths when present was rejected because it keeps the old dependency on the critical path.
 

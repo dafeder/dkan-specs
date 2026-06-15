@@ -1,104 +1,87 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Minimal Datastore Without Distribution ID Requirement
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
+**Branch**: `main` | **Date**: 2026-06-15 | **Spec**: `specs/004-minimal-datastore-no-distribution-id/spec.md`
+**Input**: Feature specification from `/specs/004-minimal-datastore-no-distribution-id/spec.md`
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Remove distribution UUIDs as required runtime keys for datastore initiation and downstream status/query workflows by shifting initiation to dataset-save discovery of distribution downloadURL values, while preserving ResourceMapper/DataResource, ETL stage behavior, queue/immediate execution modes, and single-active-importer modularity. The implementation keeps compatibility inputs where practical, but operational flow becomes dataset plus discovered resource driven.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: PHP 8.x on Drupal 10 module architecture
+**Primary Dependencies**: DKAN modules (`dkan_metastore`, `dkan_datastore`, `dkan_common`), Drupal service container/event system, existing ResourceMapper/DataResource services
+**Storage**: Drupal entities and metastore resource mapping records; datastore table storage remains unchanged
+**Testing**: PHPUnit unit, kernel, and functional suites in DKAN module test directories; PHPCS for coding standards
+**Target Platform**: DKAN Drupal application runtime (web + CLI/Drush)
+**Project Type**: Drupal module feature update across metastore/datastore/common
+**Performance Goals**: Preserve current dispatch characteristics; no new deduplication; best-effort multi-URL continuation
+**Constraints**: Keep class/method surfaces stable where practical; no multi-importer priority selection; no datastore-owned canonical resource model redesign
+**Scale/Scope**: Feature-scoped refactor focused on dataset-save dispatch, compatibility surfaces, cache invalidation, status/reporting, and cleanup behavior
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- Principle I (Metadata-First Design): PASS
+  - Feature is metadata-driven and centered on dataset distribution discovery and schema-compatible metadata handling.
+- Principle II (Modular Component Architecture): PASS
+  - Changes preserve metastore/datastore separation and rely on documented service/event integration, not hidden data coupling.
+- Principle III (API-Driven Integration): PASS WITH CONSTRAINTS
+  - Public API/SQL/Drush compatibility surfaces are explicitly tracked for migration and behavior updates.
+- Principle IV (Standards Compliance & Data Quality): PASS
+  - Invalid/missing downloadURL entries are explicitly skipped/reported; structured observability and machine-readable summaries are required.
+- Principle V (Extensibility Through Drupal): PASS
+  - Importer modularity and stage-level override behavior are retained via existing Drupal extension patterns.
+- Principle VI (Test Coverage & Documentation Excellence): PASS WITH REQUIRED WORK
+  - Tasks include unit/kernel/functional coverage and migration docs; completion requires executing and recording required suite results.
+
+Post-design re-check:
+- Research, data model, contracts, and quickstart artifacts cover discovery, compatibility, cache invalidation, reporting, and cleanup paths.
+- No constitutional violations identified; implementation must complete structured logging and migration documentation tasks to preserve Principle VI compliance.
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/[###-feature]/
-├── plan.md              # This file (/speckit.plan command output)
-├── research.md          # Phase 0 output (/speckit.plan command)
-├── data-model.md        # Phase 1 output (/speckit.plan command)
-├── quickstart.md        # Phase 1 output (/speckit.plan command)
-├── contracts/           # Phase 1 output (/speckit.plan command)
-└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
+specs/004-minimal-datastore-no-distribution-id/
+├── plan.md
+├── research.md
+├── data-model.md
+├── quickstart.md
+├── contracts/
+│   ├── compatibility-surfaces.md
+│   └── dataset-save-dispatch.md
+└── tasks.md
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+../dkan/modules/dkan_metastore/
+├── src/LifeCycle/
+├── src/Plugin/QueueWorker/
+└── tests/src/
 
-tests/
-├── contract/
-├── integration/
-└── unit/
+../dkan/modules/dkan_datastore/
+├── src/EventSubscriber/
+├── src/Controller/
+├── src/Service/
+├── src/SqlEndpoint/
+├── src/Form/
+├── src/Drush/Commands/
+└── tests/src/
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
+../dkan/modules/dkan_common/
 ├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
+└── tests/src/
 
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+../dkan/docs/source/
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Use the existing DKAN multi-module Drupal layout. Implement behavior changes primarily in `dkan_datastore` and `dkan_metastore`, with shared reporting/status data shape adjustments in `dkan_common`, and migration/update documentation in DKAN docs.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+No constitutional violations require exception handling at this stage.

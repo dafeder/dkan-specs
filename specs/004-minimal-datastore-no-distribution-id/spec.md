@@ -11,7 +11,7 @@
 
 - Q: On dataset save, should metastore select one or all valid distribution downloadURL values? -> A: Recurse through the dataset distribution array and process all valid downloadURL values.
 - Q: Should metastore deduplicate discovered downloadURL values before dispatching datastore processing? -> A: No; preserve current behavior and dispatch each discovered downloadURL as encountered.
-- Q: How should workflow handle invalid or missing distribution downloadURL values during dataset-save traversal? -> A: Skip invalid/missing entries, continue processing valid entries, and log/report skipped entries.
+- Q: How should workflow handle invalid or missing distribution downloadURL values during dataset-save discovery? -> A: Skip invalid/missing entries, continue processing valid entries, and log/report skipped entries.
 
 ### Session 2026-06-10
 
@@ -25,16 +25,16 @@
 
 ### User Story 1 - Dataset-Save Discovery and Dispatch Without Distribution IDs (Priority: P1)
 
-As a DKAN administrator, I want dataset save side effects to discover distribution downloadURL values and trigger datastore processing without requiring distribution-ID lookup so ingestion starts reliably from dataset context.
+As a DKAN administrator, I want dataset-save hooks to discover distribution downloadURL values and trigger datastore processing without requiring distribution-ID lookup so ingestion starts reliably from dataset context.
 
 **Why this priority**: Dataset-save discovery and dispatch is the most affected behavior and the primary risk area for this scoped change.
 
-**Independent Test**: Save datasets with referenced and non-referenced distribution entries, then verify metastore-side workflow traversal discovers all valid downloadURL values and triggers datastore processing without requiring distribution-ID lookup.
+**Independent Test**: Save datasets with referenced and non-referenced distribution entries, then verify metastore-side discovery identifies all valid downloadURL values and triggers datastore processing without requiring distribution-ID lookup.
 
 **Acceptance Scenarios**:
 
-1. **Given** a dataset save event containing multiple referenced or non-referenced distribution entries with valid `downloadURL` fields, **When** metastore workflow side effects run, **Then** datastore processing is triggered for each valid `downloadURL` discovered during recursive traversal.
-2. **Given** a dataset save event where some distribution entries are invalid or missing `downloadURL`, **When** traversal runs, **Then** invalid entries are skipped, valid entries are still dispatched, and skipped entries are logged or reported.
+1. **Given** a dataset save event containing multiple referenced or non-referenced distribution entries with valid `downloadURL` fields, **When** metastore workflow hooks run, **Then** datastore processing is triggered for each valid `downloadURL` identified during recursive discovery.
+2. **Given** a dataset save event where some distribution entries are invalid or missing `downloadURL`, **When** discovery runs, **Then** invalid entries are skipped, valid entries are still dispatched, and skipped entries are logged or reported.
 3. **Given** dataset-save initiated datastore dispatch, **When** processing is triggered, **Then** runtime workflow initiation proceeds without distribution-ID entity lookup.
 
 ---
@@ -71,7 +71,7 @@ As a module developer, I want import customization to remain straightforward so 
 
 - Legacy calls that still supply distribution IDs are accepted for compatibility, but IDs are ignored for workflow initiation.
 - When both legacy IDs and dataset distribution `downloadURL` paths are present, `downloadURL` discovery is authoritative for dispatch.
-- Distribution references remain supported; referenced and non-referenced dataset structures are traversed the same way, except non-referenced distributions do not have their own distribution UUIDs.
+- Distribution references remain supported; referenced and non-referenced dataset structures use the same discovery logic, except non-referenced distributions do not have their own distribution UUIDs.
 - Workflows that still attempt runtime distribution dereferencing must report the failure as a migration error and must not block dataset `downloadURL` discovery for other entries.
 - Custom importers that expect old distribution-ID-based hooks fail until updated; migration guidance must include required payload changes.
 - Distribution entries with invalid or missing `downloadURL` values are skipped and reported while valid entries continue through dispatch.
@@ -91,11 +91,11 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-008**: Import customization MUST support stage-level override behavior with default fallback for non-overridden stages.
 - **FR-009**: This feature MUST keep importer selection to one globally configured active importer for runtime execution in this phase.
 - **FR-010**: Priority-based multi-plugin importer selection MUST remain out of scope for this feature version.
-- **FR-011**: Metastore workflow logic for datastore initiation MUST run as a side effect of dataset save operations rather than requiring distribution save side effects.
-- **FR-012**: On dataset save, the workflow MUST recursively traverse the dataset `distribution` array to discover valid `downloadURL` values for both referenced and non-referenced distribution structures.
-- **FR-013**: The workflow MUST trigger datastore processing for all valid `downloadURL` values discovered during traversal.
+- **FR-011**: Metastore workflow logic for datastore initiation MUST run through dataset-save hooks or events rather than requiring distribution-save hooks.
+- **FR-012**: On dataset save, the workflow MUST recursively inspect the dataset `distribution` array to identify valid `downloadURL` values for both referenced and non-referenced distribution structures.
+- **FR-013**: The workflow MUST trigger datastore processing for all valid `downloadURL` values discovered during discovery.
 - **FR-014**: The workflow MUST preserve existing dispatch behavior by processing discovered `downloadURL` values as encountered, without introducing new deduplication requirements in this scoped feature.
-- **FR-015**: During traversal, entries with invalid or missing `downloadURL` values MUST be skipped without blocking dispatch for valid entries.
+- **FR-015**: During discovery, entries with invalid or missing `downloadURL` values MUST be skipped without blocking dispatch for valid entries.
 - **FR-016**: The workflow MUST emit logging or administrator-visible reporting for skipped invalid/missing `downloadURL` entries.
 - **FR-017**: Distribution referencing and legacy distribution ID inputs MAY be accepted for backward compatibility, but MUST NOT be required or control workflow initiation when dataset distribution `downloadURL` values are available.
 - **FR-018**: During multi-`downloadURL` processing, failure of an individual URL MUST NOT prevent dispatch attempts for remaining valid discovered URLs.
@@ -114,8 +114,8 @@ As a module developer, I want import customization to remain straightforward so 
 ### Key Entities *(include if feature involves data)*
 
 - **Datastore Resource**: The datastore-managed resource used for import/query operations without distribution-ID runtime dependency.
-- **Dataset**: The saved metadata object whose `distribution` array is traversed to discover `downloadURL` values for datastore workflow initiation.
-- **Distribution Entry**: A dataset distribution object that may be stored as a referenced distribution entity with its own UUID or embedded directly without a distribution UUID; datastore discovery uses the same `downloadURL` traversal in either case.
+- **Dataset**: The saved metadata object whose `distribution` array is inspected to identify `downloadURL` values for datastore workflow initiation.
+- **Distribution Entry**: A dataset distribution object that may be stored as a referenced distribution entity with its own UUID or embedded directly without a distribution UUID; datastore discovery uses the same `downloadURL` discovery in either case.
 - **Resource Mapping**: The persisted metastore mapping record that links a datastore resource identifier, version, perspective, file path, MIME type, and checksum.
 - **Dataset Dispatch Run**: One dataset-save workflow execution that discovers distribution `downloadURL` values and records processed, skipped, and failed counts.
 - **Pipeline Stage**: One of `localize`, `import`, or `post-import`, each with independent execution outcome.
@@ -142,6 +142,6 @@ As a module developer, I want import customization to remain straightforward so 
 
 - This feature is an intentionally scoped alternative to broader datastore rearchitecture work.
 - Reducing distribution-ID dependence is the primary objective; large-scale resource model redesign is out of scope.
-- Referenced and non-referenced distributions produce the same effective dataset traversal structure for datastore discovery, except non-referenced distributions do not expose separate distribution UUIDs.
+- Referenced and non-referenced distributions produce the same effective dataset discovery structure for datastore discovery, except non-referenced distributions do not expose separate distribution UUIDs.
 - Existing queue and immediate execution modes remain operationally valuable and should be retained.
 - Full multi-importer runtime selection is deferred to future scope.
