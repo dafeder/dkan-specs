@@ -22,6 +22,16 @@
 - Q: How should import customization be modularized? → A: Use an importer plugin architecture with stage-level extension points (`localize`, `import`, `post-import`) and clear default fallback behavior.
 - Q: How should importer selection work in this phase? → A: Use a single globally configured active importer for now to reduce scope; defer priority-based deterministic multi-plugin selection to a future phase.
 
+### Notes from dev convo
+
+We need a clear way to store processing state, to move beyond the problematic jobstore system.
+
+Should be able to create arbitrary table with schema/indexing, and see how far along in the processing we are.
+- Currently, when doing import, localization is never in progress
+- The dashboard page does not have live updates
+- Could be plugable to allow reporting import status?
+- How can we specify a schema
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Independent Data Operations (Priority: P1)
