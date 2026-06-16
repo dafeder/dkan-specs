@@ -37,15 +37,15 @@ Rules:
 ## Output
 
 ```php
-DatasetDispatchResult {
+DatastoreDispatchResult {
   string $datasetIdentifier;
   int $processedCount;
   int $skippedCount;
   int $failedCount;
-  array $entries;
+  array $items;
 }
 
-DatasetDispatchEntryResult {
+DatastoreDispatchItem {
   string|null $downloadUrl;
   string|null $resourceIdentifier;
   string $status; // processed|skipped|failed

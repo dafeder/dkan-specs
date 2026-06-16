@@ -25,8 +25,8 @@
 **CRITICAL**: No user story implementation starts until this phase is complete.
 
 - [ ] T005 Create resource discovery result value object in `../dkan/modules/dkan_datastore/src/Service/ResourceDiscoveryResult.php`
-- [ ] T006 [P] Create dataset dispatch entry result value object in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchEntryResult.php`
-- [ ] T007 [P] Create dataset dispatch result value object in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchResult.php`
+- [ ] T006 [P] Create datastore dispatch item value object in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatchItem.php`
+- [ ] T007 [P] Create datastore dispatch result value object in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatchResult.php`
 - [ ] T008 Create dataset distribution discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_datastore/src/Service/DatasetDistributionDiscovery.php`
 - [ ] T009 Create datastore dataset dispatch coordinator service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchCoordinator.php`
 - [ ] T010 Register discovery and dispatch coordinator services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`

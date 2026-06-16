@@ -112,7 +112,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-019**: The workflow MUST emit logging or administrator-visible reporting for each per-URL processing failure during best-effort import triggering.
 - **FR-020**: Legacy distribution-ID-based hook payload fields MUST be removed in this feature scope; no compatibility alias fields are required.
 - **FR-021**: The workflow MUST emit structured logs for skipped invalid/missing `downloadURL` entries and per-URL processing failures.
-- **FR-022**: The workflow MUST produce a machine-readable status summary per dataset-save import-triggering run with counts for processed, skipped, and failed URLs.
+- **FR-022**: The workflow MUST produce a machine-readable `Datastore Dispatch Result` for each dataset-save workflow execution, with counts for processed, skipped, and failed URLs.
 - **FR-023**: Existing `ResourceMapper`/resource mapping storage MUST remain the canonical registry for datastore resource identifiers, versions, perspectives, file paths, MIME types, and checksums.
 - **FR-024**: Dataset-save discovery MUST register or resolve valid distribution `downloadURL` values as `DataResource`/resource mapping records before triggering datastore imports/ETL processes.
 - **FR-025**: Existing resource registration and localization/import event flow MUST remain supported, including resource registration triggering deferred datastore import where the resource is importable.
@@ -128,7 +128,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **Dataset**: The saved metadata object whose `distribution` array is inspected to identify `downloadURL` values for datastore workflow initiation.
 - **Distribution Entry**: A dataset distribution object that may be stored as a referenced distribution entity with its own UUID or embedded directly without a distribution UUID; datastore discovery uses the same `downloadURL` discovery in either case.
 - **Resource Mapping**: The persisted metastore mapping record that links a datastore resource identifier, version, perspective, file path, MIME type, and checksum.
-- **Dataset Import-Triggering Run**: One dataset-save workflow execution that discovers distribution `downloadURL` values and records processed, skipped, and failed counts.
+- **Datastore Dispatch Result**: The machine-readable result of one dataset-save workflow execution, including discovered distribution `downloadURL` values and processed, skipped, and failed counts.
 - **Pipeline Stage**: One of `localize`, `import`, or `post-import`, each with independent execution outcome.
 - **Active Importer**: The single configured importer implementation used for runtime stage execution in this phase.
 
@@ -144,7 +144,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **SC-006**: For dataset save events containing repeated valid `downloadURL` values, datastore import-triggering behavior remains consistent with existing non-deduplicated processing semantics.
 - **SC-007**: For mixed-validity distribution arrays, 100% of valid `downloadURL` entries trigger datastore imports/ETL processes while invalid/missing entries are skipped and reported.
 - **SC-008**: For dataset save events with multiple valid discovered `downloadURL` values where at least one URL fails processing, 100% of remaining valid URLs are still attempted, and 100% of per-URL failures are reported.
-- **SC-009**: For 100% of dataset-save import-triggering runs, machine-readable status summaries are produced with accurate processed/skipped/failed counts matching import-triggering outcomes.
+- **SC-009**: For 100% of dataset-save workflow executions, a `Datastore Dispatch Result` is produced with accurate processed/skipped/failed counts matching dispatch outcomes.
 - **SC-010**: Existing importable resources registered in `ResourceMapper` continue to trigger deferred datastore import through the retained resource registration/localization/import event flow.
 - **SC-011**: Datastore summary/query/import-status cache dependencies and invalidations can be exercised without runtime distribution-ID lookup.
 - **SC-012**: Resource cleanup tests verify obsolete mappings and datastore artifacts are removed from dataset/downloadURL context when distribution reference entities are absent.

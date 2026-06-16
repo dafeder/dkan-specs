@@ -77,20 +77,20 @@ Validation rules:
 - Duplicate file paths continue to follow existing AlreadyRegistered handling.
 - New versions are created only when existing ResourceMapper rules require them.
 
-## Dataset Dispatch Run
+## Datastore Dispatch Result
 
-Machine-readable summary for one dataset-save datastore-discovery pass.
+Machine-readable result for one dataset-save discovery and dispatch execution.
 
 Fields:
 - `datasetIdentifier`: Dataset being processed.
 - `processedCount`: Count of valid entries where dispatch was attempted successfully or queued.
 - `skippedCount`: Count of entries skipped before dispatch.
 - `failedCount`: Count of valid entries whose dispatch attempt failed.
-- `entries`: Optional per-entry result objects with URL/path, status, reason, and resource identifier when available.
+- `items`: Optional per-item result objects with URL/path, status, reason, and resource identifier when available.
 
 Relationships:
 - Belongs to one dataset save event.
-- Contains zero or more per-entry outcomes.
+- Contains zero or more per-item outcomes.
 
 Validation rules:
 - Counts must equal the actual discovery outcomes.
