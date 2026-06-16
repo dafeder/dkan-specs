@@ -28,8 +28,8 @@
 - [ ] T006 [P] Create datastore dispatch item value object in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatchItem.php`
 - [ ] T007 [P] Create datastore dispatch result value object in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatchResult.php`
 - [ ] T008 Create dataset distribution discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_datastore/src/Service/DatasetDistributionDiscovery.php`
-- [ ] T009 Create datastore dataset dispatch coordinator service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchCoordinator.php`
-- [ ] T010 Register discovery and dispatch coordinator services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
+- [ ] T009 Create datastore dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatcher.php`
+- [ ] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [ ] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_datastore/tests/src/Unit/Service/ResourceDiscoveryResultTest.php`
 - [ ] T012 [P] Add unit tests for dataset discovery recursion and skip reasons in `../dkan/modules/dkan_datastore/tests/src/Unit/Service/DatasetDistributionDiscoveryTest.php`
 
@@ -54,11 +54,11 @@
 ### Implementation for User Story 1
 
 - [ ] T018 [US1] Refactor pre-reference datastore trigger path to use dataset discovery service in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T019 [US1] Wire `LifeCycle::EVENT_PRE_REFERENCE` dataset metadata payload to dispatch coordinator integration in `../dkan/modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
-- [ ] T020 [US1] Implement ResourceMapper registration/resolution from discovered resource values in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchCoordinator.php`
-- [ ] T021 [US1] Implement best-effort per-URL datastore dispatch loop (continue after per-entry failure) in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchCoordinator.php`
-- [ ] T022 [US1] Emit structured logs (stable fields for dataset, URL, status, reason) for skipped entries and per-URL dispatch failures in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchCoordinator.php`
-- [ ] T023 [US1] Return machine-readable processed/skipped/failed dataset dispatch summary from coordinator in `../dkan/modules/dkan_datastore/src/Service/DatasetDispatchCoordinator.php`
+- [ ] T019 [US1] Wire `LifeCycle::EVENT_PRE_REFERENCE` dataset metadata payload to dispatcher integration in `../dkan/modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
+- [ ] T020 [US1] Implement ResourceMapper registration/resolution from discovered resource values in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatcher.php`
+- [ ] T021 [US1] Implement best-effort per-URL datastore dispatch loop (continue after per-entry failure) in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatcher.php`
+- [ ] T022 [US1] Emit structured logs (stable fields for dataset, URL, status, reason) for skipped entries and per-URL dispatch failures in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatcher.php`
+- [ ] T023 [US1] Return machine-readable processed/skipped/failed dataset dispatch summary from dispatcher in `../dkan/modules/dkan_datastore/src/Service/DatastoreDispatcher.php`
 - [ ] T024 [US1] Remove runtime dependence on distribution entity dereference for dispatch initiation in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 
 **Checkpoint**: User Story 1 works independently and provides dataset-save discovery/dispatch without distribution-ID requirement.
