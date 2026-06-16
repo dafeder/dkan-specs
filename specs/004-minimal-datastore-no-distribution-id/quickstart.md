@@ -56,10 +56,12 @@ Acceptance:
 Scope:
 - Audit paths that accept or infer distribution IDs.
 - Move operational flows to resource/dataset identifiers where needed.
+- Explicitly cover dashboard/reporting continuity for URL-only resources where distribution IDs are absent.
 - Document compatibility-only distribution ID behavior.
 
 Acceptance:
 - Updated tests or docs show distribution IDs are not required operational keys.
+- Dashboard/reporting views render rows and status for distribution-backed and URL-only resources without runtime errors.
 
 ### Ticket 5: PostImportResultFactory Refactoring
 
@@ -83,23 +85,23 @@ Acceptance:
 - Service tests verify status retrieval for discovered resources without distribution references.
 - Status data is consistent with distribution-backed resource status models.
 
-### Ticket 7: Dashboard Row Building for Discovered Resources
+### Ticket 7: Importer Modularity Regression Assurance
 
 Scope:
-- Update `DashboardForm::buildResourcesRow()` to handle both distribution-based and discovered-URL rows.
-- Adapt row rendering to gracefully display status for non-distribution resources.
-- Ensure dashboard iterates discovered resources alongside distribution-backed resources.
+- Validate stage-level override and fallback behavior remains unchanged after dataset/downloadURL-driven dispatch refactors.
+- Confirm single active importer selection remains intact for runtime execution.
+- Verify no importer-path logic depends on distribution IDs as operational keys.
 
 Acceptance:
-- Dashboard tests verify rows render correctly for both distribution-backed and URL-only resources.
-- No display errors or missing data when distribution references are absent.
+- Kernel/unit tests demonstrate stage override/fallback behavior is preserved.
+- No regression in importer selection or stage invocation order.
 
 ### Ticket 8: DatasetInfo Integration for Discovered Resources (Optional Scope)
 
 Scope:
 - Decide whether `DatasetInfo::gather()` merges discovered resources into the `distributions[]` array, or provides a separate array for discovered resources.
-- If merged: minimal dashboard changes; discovered resources appear alongside distribution-backed resources.
-- If separate: dashboard iterates both arrays in `buildRevisionRows()`, combining rows for display.
+- If merged: minimal reporting changes; discovered resources appear alongside distribution-backed resources.
+- If separate: dashboard/reporting iterates both arrays, combining rows for display.
 - May be deferred if resource discovery/registration timing is uncertain relative to dashboard load.
 
 Acceptance:

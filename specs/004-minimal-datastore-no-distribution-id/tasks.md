@@ -78,6 +78,8 @@
 - [ ] T027 [P] [US2] Add functional tests for query download caching/invalidation behavior when distributions are non-referenced in `../dkan/modules/dkan_datastore/tests/src/Functional/Controller/QueryDownloadControllerTest.php`
 - [ ] T028 [P] [US2] Add unit tests for SQL endpoint behavior with resource-based execution and compatibility inputs in `../dkan/modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php`
 - [ ] T029 [P] [US2] Add unit tests for drush command compatibility behavior where distribution IDs are optional metadata only in `../dkan/modules/dkan_datastore/tests/src/Functional/Commands/DegradedModeCommandsTest.php`
+- [ ] T040 [P] [US2] Add unit tests for dashboard row rendering of discovered URL-only resources when distribution IDs are absent in `../dkan/modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
+- [ ] T061 [P] [US2] Add functional dashboard continuity test verifying resource rows and status render without distribution IDs in `../dkan/modules/dkan_datastore/tests/src/Functional/Form/DashboardFormNoDistributionIdTest.php`
 
 ### Implementation for User Story 2
 
@@ -89,6 +91,7 @@
 - [ ] T035 [US2] Update datastore drush command parameter handling and help text for compatibility-only distribution IDs in `../dkan/modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
 - [ ] T036 [US2] Update reimport workflow to resolve resources from dataset/downloadURL context when distribution references are absent in `../dkan/modules/dkan_datastore/src/Drush/Commands/ReimportCommands.php`
 - [ ] T037 [US2] Document compatibility behavior and migration notes for changed operational keys in `../dkan/docs/source/upgrade.rst`
+- [ ] T047 [US2] Update dashboard resource row builder to render discovered resources and status values without distribution IDs in `../dkan/modules/dkan_datastore/src/Form/DashboardForm.php`
 
 **Checkpoint**: User Story 2 preserves practical compatibility while removing distribution IDs from normal runtime operation.
 
@@ -96,15 +99,14 @@
 
 ## Phase 5: User Story 3 - Keep Importer Modularity Simple (Priority: P3)
 
-**Goal**: Maintain stage-level importer override model and default fallback behavior while enabling status/reporting flows without distribution references.
+**Goal**: Maintain stage-level importer override model and default fallback behavior.
 
-**Independent Test**: Validate post-import status, dashboard rendering, and cleanup behavior for both distribution-backed and URL-only resources with stage override/fallback behavior unchanged.
+**Independent Test**: Validate post-import status and cleanup behavior while confirming stage override/fallback behavior is unchanged.
 
 ### Tests for User Story 3
 
 - [ ] T038 [P] [US3] Add unit tests for `PostImportResultFactory` initialization from distribution UUID and dataset+resource_url inputs in `../dkan/modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
 - [ ] T039 [P] [US3] Add kernel tests for import status lookup from resource mapping without distribution references in `../dkan/modules/dkan_datastore/tests/src/Kernel/Service/Info/ImportInfoTest.php`
-- [ ] T040 [P] [US3] Add unit tests for dashboard row rendering of discovered URL-only resources in `../dkan/modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
 - [ ] T041 [P] [US3] Add kernel tests for `DatasetInfo` gathering of discovered resources in `../dkan/modules/dkan_common/tests/src/Kernel/DatasetInfoTest.php`
 - [ ] T042 [P] [US3] Add functional cleanup tests for referenced and non-referenced orphan resource paths in `../dkan/modules/dkan_metastore/tests/src/Functional/OrphanCheckerTest.php`
 - [ ] T043 [P] [US3] Add kernel tests proving importer stage override/fallback behavior remains intact after refactor in `../dkan/modules/dkan_datastore/tests/src/Kernel/Service/ImportServiceEventsTest.php`
@@ -114,7 +116,6 @@
 
 - [ ] T045 [US3] Extend post-import result factory initialization to support dataset/resource context in `../dkan/modules/dkan_datastore/src/PostImportResultFactory.php`
 - [ ] T046 [US3] Add resource-mapper-based status lookup helper for URL-only/distribution-backed resources in `../dkan/modules/dkan_datastore/src/Service/Info/ImportInfoList.php`
-- [ ] T047 [US3] Update dashboard resource row builder to render discovered resources without distribution payloads in `../dkan/modules/dkan_datastore/src/Form/DashboardForm.php`
 - [ ] T048 [US3] Integrate discovered-resource collection into dataset info gathering for reporting surfaces in `../dkan/modules/dkan_common/src/DatasetInfo.php`
 - [ ] T049 [US3] Update datastore dataset-info plugin integration for combined distribution/discovered resource display in `../dkan/modules/dkan_datastore/src/Plugin/DatasetInfo/DatastoreInfo.php`
 - [ ] T050 [US3] Update orphan cleanup path to remove obsolete mappings/artifacts without requiring orphaned distribution references in `../dkan/modules/dkan_metastore/src/Plugin/QueueWorker/OrphanResourceRemover.php`
@@ -122,7 +123,7 @@
 - [ ] T052 [US3] Remove legacy distribution-ID hook payload fields from importer event payload shaping in `../dkan/modules/dkan_datastore/src/Service/ImportService.php`
 - [ ] T053 [US3] Update custom importer hook payload contract documentation for dataset/downloadURL/resource context in `../dkan/docs/source/components/dkan_datastore.rst`
 
-**Checkpoint**: User Story 3 keeps importer modularity stable while enabling URL-only reporting/status/cleanup paths.
+**Checkpoint**: User Story 3 keeps importer modularity stable while preserving status and cleanup behavior.
 
 ---
 
@@ -170,7 +171,7 @@
 - Foundational value object and test tasks T006-T007 and T011-T012 can run in parallel.
 - User-story test tasks marked [P] can run in parallel across separate test files.
 - US2 controller refactors can split across query/import/sql/drush files.
-- US3 status, dashboard, dataset-info, and cleanup updates can run in parallel once post-import contract updates are agreed.
+- US3 status, dataset-info, and cleanup updates can run in parallel once post-import contract updates are agreed.
 
 ## Parallel Example: User Story 1
 
@@ -185,14 +186,14 @@ Task: "T015 [US1] Add ResourceMapper kernel tests in ../dkan/modules/dkan_metast
 ```bash
 Task: "T025 [US2] Add query dependency unit tests in ../dkan/modules/dkan_datastore/tests/src/Unit/Controller/AbstractQueryControllerTest.php"
 Task: "T027 [US2] Add query download functional tests in ../dkan/modules/dkan_datastore/tests/src/Functional/Controller/QueryDownloadControllerTest.php"
-Task: "T034 [US2] Update SQL endpoint behavior in ../dkan/modules/dkan_datastore/src/SqlEndpoint/WebServiceApi.php"
+Task: "T040 [US2] Add dashboard row unit tests in ../dkan/modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php"
 ```
 
 ## Parallel Example: User Story 3
 
 ```bash
-Task: "T040 [US3] Add dashboard row unit tests in ../dkan/modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php"
-Task: "T046 [US3] Update dashboard row rendering in ../dkan/modules/dkan_datastore/src/Form/DashboardForm.php"
+Task: "T043 [US3] Add importer override/fallback kernel tests in ../dkan/modules/dkan_datastore/tests/src/Kernel/Service/ImportServiceEventsTest.php"
+Task: "T051 [US3] Preserve single active importer stage overrides in ../dkan/modules/dkan_datastore/src/Service/Factory/ImportServiceFactory.php"
 Task: "T049 [US3] Update orphan cleanup in ../dkan/modules/dkan_metastore/src/Plugin/QueueWorker/OrphanResourceRemover.php"
 ```
 
@@ -216,7 +217,7 @@ Task: "T049 [US3] Update orphan cleanup in ../dkan/modules/dkan_metastore/src/Pl
 
 ### Ticket 4: API, Drush, SQL Endpoint, and Admin Compatibility Review
 
-- T028, T029, T034, T035, T036, T037
+- T028, T029, T034, T035, T036, T037, T040, T047, T061
 
 ### Ticket 5: PostImportResultFactory Refactoring
 
@@ -226,9 +227,9 @@ Task: "T049 [US3] Update orphan cleanup in ../dkan/modules/dkan_metastore/src/Pl
 
 - T039, T046
 
-### Ticket 7: Dashboard Row Building for Discovered Resources
+### Ticket 7: Importer Modularity Regression Assurance
 
-- T040, T047
+- T043, T051
 
 ### Ticket 8: DatasetInfo Integration for Discovered Resources (Optional Scope)
 
@@ -240,7 +241,7 @@ Task: "T049 [US3] Update orphan cleanup in ../dkan/modules/dkan_metastore/src/Pl
 
 ### Ticket 10: Migration Guidance and Custom Importer Hook Updates
 
-- T043, T044, T051, T052, T053, T055, T058, T060
+- T044, T052, T053, T055, T058, T060
 
 ### Release Gate Validation (After Desired Tickets Complete)
 
@@ -258,14 +259,14 @@ Task: "T049 [US3] Update orphan cleanup in ../dkan/modules/dkan_metastore/src/Pl
 
 1. Deliver US1 (MVP dispatch trigger correctness).
 2. Deliver US2 (compatibility + cache and endpoint behavior updates).
-3. Deliver US3 (reporting/status/dashboard/cleanup and importer modularity assurance).
+3. Deliver US3 (regression assurance for importer modularity plus status/cleanup updates).
 4. Complete Polish validation and documentation alignment.
 
 ### Team Parallelization
 
 1. One engineer on metastore lifecycle/discovery contracts.
 2. One engineer on datastore controller/cache/sql/drush compatibility.
-3. One engineer on post-import status/dashboard/cleanup/reporting.
+3. One engineer on post-import status/cleanup/reporting (dashboard continuity stays in US2 compatibility work).
 
 ## Notes
 

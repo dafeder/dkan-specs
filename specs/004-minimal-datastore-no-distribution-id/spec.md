@@ -21,6 +21,10 @@
 - Q: How should custom importer hooks that expect legacy distribution-ID fields be handled? -> A: Remove legacy distribution-ID hook fields immediately; custom importers must update to the new dataset/downloadURL-driven hook payloads.
 - Q: What observability surface is required for skip/failure outcomes during dispatch? -> A: Require both structured logs and a machine-readable workflow status summary with processed/skipped/failed counts.
 
+### Session 2026-06-15
+
+- Q: How explicit should dashboard continuity be when distribution IDs are absent? -> A: Dashboard continuity must be explicit and testable: rows and status must render for both distribution-backed and URL-only resources without requiring distribution IDs.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Dataset-Save Discovery and Dispatch Without Distribution IDs (Priority: P1)
@@ -51,6 +55,7 @@ As a maintainer, I want existing datastore class and method surfaces preserved w
 
 1. **Given** an existing datastore extension that does not rely on distribution IDs, **When** import/query execution runs after dataset-save initiated dispatch in the updated workflow, **Then** it continues to operate with minimal or no code changes where practical.
 2. **Given** an interface that must change to remove distribution-ID dependency, **When** the change is introduced, **Then** migration guidance clearly documents the required update, including immediate custom importer hook payload changes.
+3. **Given** dataset resources that do not have distribution IDs, **When** an administrator opens datastore dashboard/reporting views, **Then** resource rows and status fields render without errors using dataset/resource context.
 
 ---
 
@@ -76,6 +81,7 @@ As a module developer, I want import customization to remain straightforward so 
 - Custom importers that expect old distribution-ID-based hooks fail until updated; migration guidance must include required payload changes.
 - Distribution entries with invalid or missing `downloadURL` values are skipped and reported while valid entries continue through dispatch.
 - During multi-`downloadURL` dispatch, failure for one URL does not block processing of remaining URLs; each failure is logged/reported.
+- Dashboard/reporting views must not require distribution IDs to render resource rows or status values.
 
 ## Requirements *(mandatory)*
 
@@ -110,6 +116,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-027**: Public API, Drush, SQL endpoint, and admin/reporting paths that currently accept or infer distribution IDs MUST be reviewed and either moved to resource/dataset identifiers or explicitly documented as changed behavior.
 - **FR-028**: Resource cleanup and purge behavior MUST remove obsolete resource mappings and datastore artifacts from dataset/downloadURL context without depending on orphaned distribution reference entities as the only cleanup trigger.
 - **FR-029**: Post-import status/result creation MUST use datastore resource mapping or dataset/downloadURL context rather than requiring a distribution payload.
+- **FR-030**: Dashboard and administrator reporting flows MUST render resource rows and status for both distribution-backed and URL-only discovered resources without requiring distribution IDs.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -137,6 +144,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **SC-010**: Existing importable resources registered in `ResourceMapper` continue to trigger deferred datastore import through the retained resource registration/localization/import event flow.
 - **SC-011**: Datastore summary/query/import-status cache dependencies and invalidations can be exercised without runtime distribution-ID lookup.
 - **SC-012**: Resource cleanup tests verify obsolete mappings and datastore artifacts are removed from dataset/downloadURL context when distribution reference entities are absent.
+- **SC-013**: For dataset resources lacking distribution IDs, 100% of in-scope dashboard/reporting views render resource rows and status values without runtime errors.
 
 ## Assumptions
 
