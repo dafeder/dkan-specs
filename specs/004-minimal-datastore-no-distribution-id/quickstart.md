@@ -73,24 +73,15 @@ Scope:
 - Treat DatasetInfo output from Ticket 4 as an input dependency for dashboard/reporting work.
 - Modify `PostImportResultFactory::initializeFromDistribution()` to accept either distribution-based lookups (existing) or dataset+resource_url/resource-identifier (new) because the affected status flows are primarily consumed through admin and Drush interfaces.
 - Enable post-import status retrieval for discovered resources without distribution references as part of the same compatibility pass.
+- Create the ResourceMapper-based status lookup helper needed by dashboard, reporting, and admin/Drush surfaces as part of the same compatibility pass.
+- Document which status fields are available from URL-only resource lookups vs. distribution-backed resources.
 - Document compatibility-only distribution ID behavior.
 
 Acceptance:
 - Updated tests or docs show distribution IDs are not required operational keys.
 - Dashboard/reporting views render rows and status for distribution-backed and URL-only resources without runtime errors.
 
-### Ticket 6: ResourceMapper Status Lookup Helper
-
-Scope:
-- Create service method to query import status for resources registered by URL or resource identifier (not requiring distribution reference).
-- Enable dashboard and reporting systems to look up status without discovering distribution references.
-- Document which status fields are available from URL-only resource lookups vs. distribution-backed resources.
-
-Acceptance:
-- Service tests verify status retrieval for discovered resources without distribution references.
-- Status data is consistent with distribution-backed resource status models.
-
-### Ticket 7: Importer Modularity Regression Assurance
+### Ticket 6: Importer Modularity Regression Assurance
 
 Scope:
 - Validate stage-level override and fallback behavior remains unchanged after dataset/downloadURL-driven dispatch refactors.
@@ -101,7 +92,7 @@ Acceptance:
 - Kernel/unit tests demonstrate stage override/fallback behavior is preserved.
 - No regression in importer selection or stage invocation order.
 
-### Ticket 8: Cleanup and Orphan Behavior Updates
+### Ticket 7: Cleanup and Orphan Behavior Updates
 
 Scope:
 - Ensure obsolete resource mappings and datastore artifacts can be removed without relying only on orphaned distribution reference entities.
@@ -110,7 +101,7 @@ Scope:
 Acceptance:
 - Tests verify cleanup for referenced and non-referenced distribution workflows.
 
-### Ticket 9: Migration Guidance and Custom Importer Hook Updates
+### Ticket 8: Migration Guidance and Custom Importer Hook Updates
 
 Scope:
 - Document breaking hook payload changes.
