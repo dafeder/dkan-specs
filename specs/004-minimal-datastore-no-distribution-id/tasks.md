@@ -99,46 +99,49 @@
 
 ---
 
-## Ticket 4: API, Drush, SQL Endpoint, and Admin Compatibility Review
+## Ticket 4: DatasetInfo Integration for Discovered Resources
+
+**Goal**: Decide how discovered resources surface through dataset info and reporting views before dashboard compatibility work consumes that shape.
+
+**Independent Test**: Gather dataset info for datasets with discovered resources and verify reporting surfaces render whichever data model is chosen.
+
+### Tests for Ticket 4
+
+- [ ] T041 [P] [US3] Add kernel tests for `DatasetInfo` gathering of discovered resources in `../dkan/modules/dkan_common/tests/src/Kernel/DatasetInfoTest.php`
+
+### Implementation for Ticket 4
+
+- [ ] T048 [US3] Integrate discovered-resource collection into dataset info gathering for reporting surfaces in `../dkan/modules/dkan_common/src/DatasetInfo.php`
+- [ ] T049 [US3] Update datastore dataset-info plugin integration for combined distribution/discovered resource display in `../dkan/modules/dkan_datastore/src/Plugin/DatasetInfo/DatastoreInfo.php`
+
+**Checkpoint**: Dataset info surfaces discovered resources in a way dashboard and reporting code can consume consistently.
+
+---
+
+## Ticket 5: API, Drush, SQL Endpoint, and Admin Compatibility Review
 
 **Goal**: Preserve compatibility where practical while moving operational flows to dataset/resource identifiers.
 
-**Independent Test**: Exercise query, SQL, Drush, and dashboard/reporting paths and verify distribution IDs are optional compatibility metadata rather than required runtime keys.
+**Independent Test**: Exercise query, SQL, Drush, dashboard/reporting, and post-import status paths and verify distribution IDs are optional compatibility metadata rather than required runtime keys, using the DatasetInfo shape established in Ticket 4.
 
-### Tests for Ticket 4
+### Tests for Ticket 5
 
 - [ ] T028 [P] [US2] Add unit tests for SQL endpoint behavior with resource-based execution and compatibility inputs in `../dkan/modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php`
 - [ ] T029 [P] [US2] Add unit tests for drush command compatibility behavior where distribution IDs are optional metadata only in `../dkan/modules/dkan_datastore/tests/src/Functional/Commands/DegradedModeCommandsTest.php`
 - [ ] T040 [P] [US2] Add unit tests for dashboard row rendering of discovered URL-only resources when distribution IDs are absent in `../dkan/modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
+- [ ] T038 [P] [US3] Add unit tests for `PostImportResultFactory` initialization from distribution UUID and dataset+resource_url inputs in `../dkan/modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
 - [ ] T061 [P] [US2] Add functional dashboard continuity test verifying resource rows and status render without distribution IDs in `../dkan/modules/dkan_datastore/tests/src/Functional/Form/DashboardFormNoDistributionIdTest.php`
 
-### Implementation for Ticket 4
+### Implementation for Ticket 5
 
 - [ ] T034 [US2] Update SQL endpoint service/controller to avoid distribution-ID operational assumptions in `../dkan/modules/dkan_datastore/src/SqlEndpoint/WebServiceApi.php`
 - [ ] T035 [US2] Update datastore drush command parameter handling and help text for compatibility-only distribution IDs in `../dkan/modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
 - [ ] T036 [US2] Update reimport workflow to resolve resources from dataset/downloadURL context when distribution references are absent in `../dkan/modules/dkan_datastore/src/Drush/Commands/ReimportCommands.php`
 - [ ] T037 [US2] Document compatibility behavior and migration notes for changed operational keys in `../dkan/docs/source/upgrade.rst`
+- [ ] T045 [US3] Extend post-import result factory initialization to support dataset/resource context in `../dkan/modules/dkan_datastore/src/PostImportResultFactory.php`
 - [ ] T047 [US2] Update dashboard resource row builder to render discovered resources and status values without distribution IDs in `../dkan/modules/dkan_datastore/src/Form/DashboardForm.php`
 
-**Checkpoint**: Compatibility-sensitive datastore entry points continue to work without requiring distribution IDs as operational keys.
-
----
-
-## Ticket 5: PostImportResultFactory Refactoring
-
-**Goal**: Support post-import status initialization from either legacy distribution lookups or dataset/resource context.
-
-**Independent Test**: Initialize post-import status from both distribution-based and dataset/resource-based inputs and verify both paths resolve correctly.
-
-### Tests for Ticket 5
-
-- [ ] T038 [P] [US3] Add unit tests for `PostImportResultFactory` initialization from distribution UUID and dataset+resource_url inputs in `../dkan/modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
-
-### Implementation for Ticket 5
-
-- [ ] T045 [US3] Extend post-import result factory initialization to support dataset/resource context in `../dkan/modules/dkan_datastore/src/PostImportResultFactory.php`
-
-**Checkpoint**: Post-import status can be initialized without requiring a distribution payload.
+**Checkpoint**: Compatibility-sensitive datastore entry points and post-import status flows continue to work without requiring distribution IDs as operational keys.
 
 ---
 
@@ -178,36 +181,17 @@
 
 ---
 
-## Ticket 8: DatasetInfo Integration for Discovered Resources (Optional Scope)
-
-**Goal**: Decide how discovered resources surface through dataset info and reporting views.
-
-**Independent Test**: Gather dataset info for datasets with discovered resources and verify reporting surfaces render whichever data model is chosen.
-
-### Tests for Ticket 8
-
-- [ ] T041 [P] [US3] Add kernel tests for `DatasetInfo` gathering of discovered resources in `../dkan/modules/dkan_common/tests/src/Kernel/DatasetInfoTest.php`
-
-### Implementation for Ticket 8
-
-- [ ] T048 [US3] Integrate discovered-resource collection into dataset info gathering for reporting surfaces in `../dkan/modules/dkan_common/src/DatasetInfo.php`
-- [ ] T049 [US3] Update datastore dataset-info plugin integration for combined distribution/discovered resource display in `../dkan/modules/dkan_datastore/src/Plugin/DatasetInfo/DatastoreInfo.php`
-
-**Checkpoint**: Dataset info surfaces discovered resources in a way reporting code can consume consistently.
-
----
-
-## Ticket 9: Cleanup and Orphan Behavior Updates
+## Ticket 8: Cleanup and Orphan Behavior Updates
 
 **Goal**: Remove obsolete mappings and datastore artifacts without depending solely on orphaned distribution references.
 
 **Independent Test**: Run cleanup flows for referenced and non-referenced resources and verify obsolete mappings and artifacts are removed.
 
-### Tests for Ticket 9
+### Tests for Ticket 8
 
 - [ ] T042 [P] [US3] Add functional cleanup tests for referenced and non-referenced orphan resource paths in `../dkan/modules/dkan_metastore/tests/src/Functional/OrphanCheckerTest.php`
 
-### Implementation for Ticket 9
+### Implementation for Ticket 8
 
 - [ ] T050 [US3] Update orphan cleanup path to remove obsolete mappings/artifacts without requiring orphaned distribution references in `../dkan/modules/dkan_metastore/src/Plugin/QueueWorker/OrphanResourceRemover.php`
 
@@ -215,17 +199,17 @@
 
 ---
 
-## Ticket 10: Migration Guidance and Custom Importer Hook Updates
+## Ticket 9: Migration Guidance and Custom Importer Hook Updates
 
 **Goal**: Capture the required migration steps for changed payloads and compatibility behavior.
 
 **Independent Test**: Review the migration guidance against the changed hook payloads and compatibility behavior and verify each required update is documented.
 
-### Tests for Ticket 10
+### Tests for Ticket 9
 
 - [ ] T044 [P] [US3] Add unit tests validating removal of legacy distribution-ID hook payload fields in `../dkan/modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
 
-### Implementation for Ticket 10
+### Implementation for Ticket 9
 
 - [ ] T052 [US3] Remove legacy distribution-ID hook payload fields from importer event payload shaping in `../dkan/modules/dkan_datastore/src/Service/ImportService.php`
 - [ ] T053 [US3] Update custom importer hook payload contract documentation for dataset/downloadURL/resource context in `../dkan/docs/source/components/dkan_datastore.rst`
@@ -254,8 +238,9 @@
 - **Ticket 1**: Depends on Shared Foundation for implementation tasks T018-T019, while fixture tasks T002-T004 can start earlier.
 - **Ticket 2**: Depends on Shared Foundation and builds directly on Ticket 1 discovery handoff.
 - **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 dispatch/result behavior for end-to-end cache validation.
-- **Ticket 4**: Depends on Shared Foundation and integrates most cleanly after Ticket 2 establishes the resource/dataset operational path.
-- **Tickets 5-10**: Depend on Shared Foundation; Tickets 5-9 benefit from Ticket 2 resource registration/dispatch behavior, and Ticket 10 should land after the affected payload changes are settled.
+- **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 2 resource registration behavior so DatasetInfo can surface discovered resources.
+- **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization updates.
+- **Tickets 6-9**: Depend on Shared Foundation; Tickets 6-8 benefit from Ticket 2 resource registration/dispatch behavior, and Ticket 9 should land after the affected payload changes are settled.
 - **Release Gate Validation**: Depends on completion of the intended ticket set.
 
 ### Within Each Ticket
@@ -270,8 +255,8 @@
 - Ticket 1 fixture and test tasks T002-T004 and T013-T014 can run in parallel.
 - Shared Foundation value object and test tasks T006-T007 and T011-T012 can run in parallel.
 - Ticket test tasks marked [P] can run in parallel across separate test files.
-- Ticket 4 controller and command refactors can split across SQL, Drush, dashboard, and upgrade docs files.
-- Tickets 6, 8, and 9 can proceed in parallel once Ticket 2 resource registration behavior is stable.
+- Ticket 5 controller, admin, Drush, and post-import compatibility refactors can split across SQL, Drush, dashboard, and status files once Ticket 4 settles DatasetInfo output.
+- Tickets 6, 7, and 8 can proceed in parallel once Ticket 2 resource registration behavior is stable.
 
 ## Parallel Example: Ticket 1
 
@@ -281,7 +266,7 @@ Task: "T013 [US1] Add lifecycle functional tests in ../dkan/modules/dkan_metasto
 Task: "T014 [US1] Add subscriber contract tests in ../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php"
 ```
 
-## Parallel Example: Ticket 4
+## Parallel Example: Ticket 5
 
 ```bash
 Task: "T028 [US2] Add SQL endpoint unit tests in ../dkan/modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php"
@@ -289,12 +274,12 @@ Task: "T029 [US2] Add drush compatibility tests in ../dkan/modules/dkan_datastor
 Task: "T040 [US2] Add dashboard row unit tests in ../dkan/modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php"
 ```
 
-## Parallel Example: Ticket 8 / Ticket 9
+## Parallel Example: Ticket 4 / Ticket 8
 
 ```bash
 Task: "T041 [US3] Add DatasetInfo gathering tests in ../dkan/modules/dkan_common/tests/src/Kernel/DatasetInfoTest.php"
 Task: "T042 [US3] Add orphan cleanup functional tests in ../dkan/modules/dkan_metastore/tests/src/Functional/OrphanCheckerTest.php"
-Task: "T049 [US3] Update orphan cleanup in ../dkan/modules/dkan_metastore/src/Plugin/QueueWorker/OrphanResourceRemover.php"
+Task: "T048 [US3] Integrate discovered-resource collection in ../dkan/modules/dkan_common/src/DatasetInfo.php"
 ```
 
 ## Implementation Strategy
@@ -309,16 +294,18 @@ Task: "T049 [US3] Update orphan cleanup in ../dkan/modules/dkan_metastore/src/Pl
 ### Incremental Delivery
 
 1. Deliver Tickets 1-2 for MVP dispatch trigger correctness.
-2. Deliver Tickets 3-4 for compatibility, cache, endpoint, and admin continuity updates.
-3. Deliver Tickets 5-9 for post-import status, reporting, cleanup, and importer-regression follow-up work.
-4. Deliver Ticket 10 migration guidance updates.
-5. Finish with Release Gate Validation.
+2. Deliver Ticket 3 cache and invalidation updates.
+3. Deliver Ticket 4 DatasetInfo integration before dashboard/reporting compatibility work.
+4. Deliver Ticket 5 for compatibility, endpoint, admin continuity, and post-import status updates.
+5. Deliver Tickets 6-8 for reporting, cleanup, and importer-regression follow-up work.
+6. Deliver Ticket 9 migration guidance updates.
+7. Finish with Release Gate Validation.
 
 ### Team Parallelization
 
 1. One engineer on Shared Foundation plus Ticket 1 lifecycle/discovery work.
-2. One engineer on Tickets 3-4 controller, cache, SQL, Drush, and dashboard compatibility work after Shared Foundation is ready.
-3. One engineer on Tickets 5-9 status, reporting, cleanup, and importer-regression work after Ticket 2 stabilizes the resource path.
+2. One engineer on Ticket 3 cache work, then Ticket 4 DatasetInfo integration, then Ticket 5 SQL, Drush, dashboard, and post-import compatibility work after Shared Foundation is ready.
+3. One engineer on Tickets 6-8 reporting, cleanup, and importer-regression work after Ticket 2 stabilizes the resource path.
 
 ## Notes
 

@@ -52,28 +52,32 @@ Acceptance:
 - Tests verify invalidation behavior for both referenced and non-referenced distribution workflows, including dataset-only discovery paths.
 - Tests prove cache freshness remains correct when distribution references are absent.
 
-### Ticket 4: API, Drush, SQL Endpoint, and Admin Compatibility Review
+### Ticket 4: DatasetInfo Integration for Discovered Resources
+
+Scope:
+- Decide whether `DatasetInfo::gather()` merges discovered resources into the `distributions[]` array, or provides a separate array for discovered resources.
+- If merged: minimal reporting changes; discovered resources appear alongside distribution-backed resources.
+- If separate: dashboard/reporting iterates both arrays, combining rows for display.
+- Complete this ticket before DashboardForm compatibility work so dashboard row rendering has a settled DatasetInfo shape to consume.
+
+Acceptance:
+- Dashboard correctly displays resources from whichever data model is chosen.
+- Integration tests cover both dataset structures.
+
+### Ticket 5: API, Drush, SQL Endpoint, and Admin Compatibility Review
 
 Scope:
 - Audit paths that accept or infer distribution IDs.
 - Move operational flows to resource/dataset identifiers where needed.
 - Explicitly cover dashboard/reporting continuity for URL-only resources where distribution IDs are absent.
+- Treat DatasetInfo output from Ticket 4 as an input dependency for dashboard/reporting work.
+- Modify `PostImportResultFactory::initializeFromDistribution()` to accept either distribution-based lookups (existing) or dataset+resource_url/resource-identifier (new) because the affected status flows are primarily consumed through admin and Drush interfaces.
+- Enable post-import status retrieval for discovered resources without distribution references as part of the same compatibility pass.
 - Document compatibility-only distribution ID behavior.
 
 Acceptance:
 - Updated tests or docs show distribution IDs are not required operational keys.
 - Dashboard/reporting views render rows and status for distribution-backed and URL-only resources without runtime errors.
-
-### Ticket 5: PostImportResultFactory Refactoring
-
-Scope:
-- Modify `PostImportResultFactory::initializeFromDistribution()` to accept either distribution-based lookups (existing) or dataset+resource_url/resource-identifier (new).
-- Enable post-import status retrieval for discovered resources without distribution references.
-- Maintain backward compatibility with existing distribution-uuid-based lookups.
-
-Acceptance:
-- Unit tests verify status initialization from both distribution_uuid and dataset_uuid+resource_url.
-- Integration tests show post-import status is retrievable for both distribution-backed and URL-only resources.
 
 ### Ticket 6: ResourceMapper Status Lookup Helper
 
@@ -97,19 +101,7 @@ Acceptance:
 - Kernel/unit tests demonstrate stage override/fallback behavior is preserved.
 - No regression in importer selection or stage invocation order.
 
-### Ticket 8: DatasetInfo Integration for Discovered Resources (Optional Scope)
-
-Scope:
-- Decide whether `DatasetInfo::gather()` merges discovered resources into the `distributions[]` array, or provides a separate array for discovered resources.
-- If merged: minimal reporting changes; discovered resources appear alongside distribution-backed resources.
-- If separate: dashboard/reporting iterates both arrays, combining rows for display.
-- May be deferred if resource discovery/registration timing is uncertain relative to dashboard load.
-
-Acceptance:
-- Dashboard correctly displays resources from whichever data model is chosen.
-- Integration tests cover both dataset structures.
-
-### Ticket 9: Cleanup and Orphan Behavior Updates
+### Ticket 8: Cleanup and Orphan Behavior Updates
 
 Scope:
 - Ensure obsolete resource mappings and datastore artifacts can be removed without relying only on orphaned distribution reference entities.
@@ -118,7 +110,7 @@ Scope:
 Acceptance:
 - Tests verify cleanup for referenced and non-referenced distribution workflows.
 
-### Ticket 10: Migration Guidance and Custom Importer Hook Updates
+### Ticket 9: Migration Guidance and Custom Importer Hook Updates
 
 Scope:
 - Document breaking hook payload changes.
