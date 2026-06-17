@@ -60,6 +60,7 @@ specs/004-minimal-datastore-no-distribution-id/
 
 ```text
 ../dkan/modules/dkan_metastore/
+├── src/ResourceDiscovery/
 ├── src/LifeCycle/
 ├── src/Plugin/QueueWorker/
 └── tests/src/
@@ -67,6 +68,7 @@ specs/004-minimal-datastore-no-distribution-id/
 ../dkan/modules/dkan_datastore/
 ├── src/EventSubscriber/
 ├── src/Controller/
+├── src/Dispatch/
 ├── src/Service/
 ├── src/SqlEndpoint/
 ├── src/Form/
@@ -80,7 +82,7 @@ specs/004-minimal-datastore-no-distribution-id/
 ../dkan/docs/source/
 ```
 
-**Structure Decision**: Use the existing DKAN multi-module Drupal layout. Implement behavior changes primarily in `dkan_datastore` and `dkan_metastore`, with shared reporting/status data shape adjustments in `dkan_common`, and migration/update documentation in DKAN docs.
+**Structure Decision**: Use the existing DKAN multi-module Drupal layout. Implement behavior changes primarily in `dkan_datastore` and `dkan_metastore`, with shared reporting/status data shape adjustments in `dkan_common`, and migration/update documentation in DKAN docs. Place metastore-specific discovery classes under `dkan_metastore/src/ResourceDiscovery/` and datastore-specific dispatch classes under `dkan_datastore/src/Dispatch/` rather than the generic `src/Service/` namespace.
 
 ## Complexity Tracking
 

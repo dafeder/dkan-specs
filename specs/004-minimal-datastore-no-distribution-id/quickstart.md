@@ -14,6 +14,7 @@ Scope:
 - Implement discovery where dataset saves already trigger datastore-related decisions: `LifeCycle::referenceMetadata()` -> `LifeCycle::EVENT_PRE_REFERENCE` -> `DatastoreSubscriber::onPreReference()`.
 - Add a discovery helper used by the pre-reference handler to recursively inspect dataset `distribution` entries before reference conversion.
 - Support referenced and non-referenced distribution structures with the same discovery logic.
+- Place metastore-specific discovery classes under `dkan_metastore/src/ResourceDiscovery/` and datastore-specific dispatch classes under `dkan_datastore/src/Dispatch/` rather than the generic `src/Service/` namespace.
 - Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
 - Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, (b) executing resource registration and import-trigger work, and (c) producing structured summary/log outputs in later tickets.
 
