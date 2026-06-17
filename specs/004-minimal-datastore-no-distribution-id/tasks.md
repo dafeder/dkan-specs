@@ -24,14 +24,14 @@
 
 **CRITICAL**: No user story implementation starts until this phase is complete.
 
-- [ ] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/ResourceDiscovery/ResourceDiscoveryResult.php`
+- [ ] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
 - [ ] T006 [P] Create datastore dispatch item value object in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatchItem.php`
 - [ ] T007 [P] Create datastore dispatch result value object in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatchResult.php`
-- [ ] T008 Create dataset distribution discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_metastore/src/ResourceDiscovery/DatasetDistributionDiscovery.php`
+- [ ] T008 Create dataset distribution discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetDistributionDiscovery.php`
 - [ ] T009 Create datastore dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatcher.php`
 - [ ] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
-- [ ] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/ResourceDiscovery/ResourceDiscoveryResultTest.php`
-- [ ] T012 [P] Add unit tests for dataset discovery recursion and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/ResourceDiscovery/DatasetDistributionDiscoveryTest.php`
+- [ ] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
+- [ ] T012 [P] Add unit tests for dataset discovery recursion and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetDistributionDiscoveryTest.php`
 
 **Checkpoint**: Shared contracts and services are in place; user stories can proceed.
 

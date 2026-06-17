@@ -29,7 +29,7 @@
 
 - Q: Should feature terminology use "triggering" rather than "dispatch" for datastore workflow initiation? -> A: Yes; use "triggering datastore imports/ETL processes" for workflow initiation language, and reserve "dispatch" for event dispatching context.
 - Q: For the dataset-save initiated dispatch orchestration service, should the implementation name be `DatastoreDispatcher` rather than `DatasetDispatchCoordinator`? -> A: Yes; prefer `DatastoreDispatcher` for the service name.
-- Q: Should new resource discovery and datastore dispatch classes live in dedicated namespaces rather than the generic `src/Service` namespace? -> A: Yes; place metastore-side discovery classes under `dkan_metastore/src/ResourceDiscovery/` and datastore-side dispatch classes under `dkan_datastore/src/Dispatch/`.
+- Q: Should new resource discovery and datastore dispatch classes live in dedicated namespaces rather than the generic `src/Service` namespace? -> A: Yes; place metastore-side discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and datastore-side dispatch classes under `dkan_datastore/src/Dispatch/`.
 
 ## User Scenarios & Testing *(mandatory)*
 
