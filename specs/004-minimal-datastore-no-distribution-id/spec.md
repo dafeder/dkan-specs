@@ -31,6 +31,10 @@
 - Q: For the dataset-save initiated dispatch orchestration service, should the implementation name be `DatastoreDispatcher` rather than `DatasetDispatchCoordinator`? -> A: Yes; prefer `DatastoreDispatcher` for the service name.
 - Q: Should new resource discovery and datastore dispatch classes live in dedicated namespaces rather than the generic `src/Service` namespace? -> A: Yes; place metastore-side discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and datastore-side dispatch classes under `dkan_datastore/src/Dispatch/`.
 
+### Session 2026-06-17
+
+- Q: When quickstart ticket slices and tasks phase groupings diverge, should the task phase structure be changed to match the existing quickstart ticket names? -> A: Yes; keep the current quickstart ticket names, but regroup `tasks.md` so its phase structure matches those ticket slices.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Dataset-Save Discovery and Import Triggering Without Distribution IDs (Priority: P1)
@@ -159,3 +163,4 @@ As a module developer, I want import customization to remain straightforward so 
 - Referenced and non-referenced distributions produce the same effective dataset discovery structure for datastore discovery, except non-referenced distributions do not expose separate distribution UUIDs.
 - Existing queue and immediate execution modes remain operationally valuable and should be retained.
 - Full multi-importer runtime selection is deferred to future scope.
+- For planning artifacts in this feature, the quickstart ticket slices are the canonical work-package grouping; `tasks.md` should be reorganized to mirror those ticket boundaries rather than using a conflicting phase-first structure.
