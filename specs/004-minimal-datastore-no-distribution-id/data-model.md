@@ -77,23 +77,47 @@ Validation rules:
 - Duplicate file paths continue to follow existing AlreadyRegistered handling.
 - New versions are created only when existing ResourceMapper rules require them.
 
+## ResourceDiscoveryResult
+
+Represents the normalized metastore-side discovery output emitted before datastore triggering.
+
+Fields:
+- `datasetIdentifier`: Dataset being inspected.
+- `discoveredResources`: Ordered list of valid discovered resource candidates, each carrying source `downloadURL` and any metadata needed for downstream registration.
+- `skippedEntries`: Ordered list of skipped distribution entries.
+- `invalidEntries`: Ordered list of malformed entries that could not be normalized.
+
+Relationships:
+- Belongs to one dataset save discovery pass.
+- Contains zero or more candidate items derived from `Distribution Entry` objects.
+- Acts as the single input contract for downstream registration, triggering, and logging flows.
+
+Validation rules:
+- Encounter order must match recursive discovery order in dataset metadata.
+- Valid discovered resource candidates must preserve enough source context to support ResourceMapper registration and later datastore triggering.
+- Skipped and invalid entries must retain a machine-readable reason for downstream logging and summary generation.
+- This object must not imply that ResourceMapper registration, queueing, or datastore execution has already happened.
+- Downstream components must consume this object rather than re-discovering dataset metadata.
+
 ## Datastore Dispatch Result
 
-Machine-readable result for one dataset-save discovery and dispatch execution.
+Machine-readable downstream execution summary derived from one `ResourceDiscoveryResult` after registration/trigger attempts have been made.
 
 Fields:
 - `datasetIdentifier`: Dataset being processed.
-- `processedCount`: Count of valid entries where dispatch was attempted successfully or queued.
-- `skippedCount`: Count of entries skipped before dispatch.
-- `failedCount`: Count of valid entries whose dispatch attempt failed.
-- `items`: Optional per-item result objects with URL/path, status, reason, and resource identifier when available.
+- `processedCount`: Count of discovered resource candidates whose registration and dispatch path completed successfully or was queued successfully.
+- `skippedCount`: Count of discovery items that were not attempted downstream because they were already marked skipped or invalid in the paired `ResourceDiscoveryResult`.
+- `failedCount`: Count of discovered resource candidates whose registration or dispatch attempt failed after discovery succeeded.
+- `items`: Per-item execution outcomes keyed back to the corresponding discovery candidate, with URL/path, status, reason, and resolved resource identifier when available.
 
 Relationships:
 - Belongs to one dataset save event.
-- Contains zero or more per-item outcomes.
+- Is produced from one `ResourceDiscoveryResult`.
+- Contains zero or more per-item execution outcomes.
 
 Validation rules:
-- Counts must equal the actual discovery outcomes.
+- Counts must reconcile against the paired `ResourceDiscoveryResult` and actual downstream attempt outcomes.
+- Successfully discovered candidates may still appear as failed here if registration or triggering fails.
 - Failures for one entry must not prevent attempts for later valid entries.
 
 ## Pipeline Stage

@@ -26,13 +26,29 @@ Rules:
 ## Processing Contract
 
 1. Recursively discover dataset `distribution` data.
-2. For each entry with a valid `downloadURL`, register or resolve a `DataResource` through existing ResourceMapper behavior.
-3. Trigger datastore processing for each valid discovered resource in encounter order.
-4. Do not deduplicate repeated URLs.
-5. Skip invalid/missing entries and continue.
-6. Continue after per-entry dispatch failures.
-7. Emit structured logs for skipped and failed entries.
-8. Return a machine-readable status summary.
+2. Normalize discovery findings into a `ResourceDiscoveryResult` in encounter order.
+3. For each discovered resource candidate with a valid `downloadURL`, register or resolve a `DataResource` through existing ResourceMapper behavior.
+4. Trigger datastore processing for each valid discovered resource in encounter order.
+5. Do not deduplicate repeated URLs.
+6. Skip invalid/missing entries during discovery and continue.
+7. Continue after per-entry dispatch failures.
+8. Emit structured logs for skipped and failed entries.
+9. Return a machine-readable dispatch summary derived from the `ResourceDiscoveryResult` and downstream execution outcomes.
+
+## Intermediate Output
+
+```php
+ResourceDiscoveryResult {
+  string $datasetIdentifier;
+  array $discoveredResources;
+  array $skippedEntries;
+  array $invalidEntries;
+}
+```
+
+Rules:
+- This object is the normalized discovery boundary and does not imply registration or dispatch success.
+- Downstream registration, trigger, and logging steps must consume this object rather than re-discovering dataset metadata.
 
 ## Output
 
