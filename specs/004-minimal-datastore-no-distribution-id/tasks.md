@@ -14,14 +14,14 @@
 **CRITICAL**: Complete this section before starting ticket implementation work.
 
 - [ ] T001 Create feature implementation notes and validation checklist in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
-- [ ] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
-- [ ] T006 [P] Create datastore dispatch item value object in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatchItem.php`
-- [ ] T007 [P] Create datastore dispatch result value object in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatchResult.php`
-- [ ] T008 Create dataset distribution discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetDistributionDiscovery.php`
-- [ ] T009 Create datastore dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatcher.php`
+- [x] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
+- [x] T006 [P] Create dispatch item value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
+- [x] T007 [P] Create dispatch result value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
+- [ ] T008 Create dataset resource discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
+- [ ] T009 Create dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
 - [ ] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [ ] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
-- [ ] T012 [P] Add unit tests for dataset discovery recursion and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetDistributionDiscoveryTest.php`
+- [ ] T012 [P] Add unit tests for dataset resource discovery recursion and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
 
 **Checkpoint**: Shared contracts and services are in place; ticket work can proceed.
 
@@ -64,10 +64,10 @@
 
 ### Implementation for Ticket 2
 
-- [ ] T020 [US1] Implement ResourceMapper registration/resolution from discovered resource values in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatcher.php`
-- [ ] T021 [US1] Implement best-effort per-URL datastore dispatch loop (continue after per-entry failure) in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatcher.php`
-- [ ] T022 [US1] Emit structured logs (stable fields for dataset, URL, status, reason) for skipped entries and per-URL dispatch failures in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatcher.php`
-- [ ] T023 [US1] Return machine-readable processed/skipped/failed dataset dispatch summary from dispatcher in `../dkan/modules/dkan_datastore/src/Dispatch/DatastoreDispatcher.php`
+- [ ] T020 [US1] Implement ResourceMapper registration/resolution from discovered resource values in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
+- [ ] T021 [US1] Implement best-effort per-URL datastore dispatch loop (continue after per-entry failure) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
+- [ ] T022 [US1] Emit structured logs (stable fields for dataset, URL, status, reason) for skipped entries and per-URL dispatch failures in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
+- [ ] T023 [US1] Return machine-readable processed/skipped/failed dataset dispatch summary from dispatcher in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
 - [ ] T024 [US1] Remove runtime dependence on distribution entity dereference for dispatch initiation in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 
 **Checkpoint**: Resource registration and dataset-save dispatch work end-to-end without requiring distribution-ID lookup.

@@ -99,7 +99,7 @@ Validation rules:
 - This object must not imply that ResourceMapper registration, queueing, or datastore execution has already happened.
 - Downstream components must consume this object rather than re-discovering dataset metadata.
 
-## Datastore Dispatch Result
+## DispatchResult
 
 Machine-readable downstream execution summary derived from one `ResourceDiscoveryResult` after registration/trigger attempts have been made.
 

@@ -53,7 +53,7 @@ Rules:
 ## Output
 
 ```php
-DatastoreDispatchResult {
+DispatchResult {
   string $datasetIdentifier;
   int $processedCount;
   int $skippedCount;
@@ -61,7 +61,7 @@ DatastoreDispatchResult {
   array $items;
 }
 
-DatastoreDispatchItem {
+DispatchItem {
   string|null $downloadUrl;
   string|null $resourceIdentifier;
   string $status; // processed|skipped|failed
