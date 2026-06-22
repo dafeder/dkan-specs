@@ -77,78 +77,13 @@ Validation rules:
 - Duplicate file paths continue to follow existing AlreadyRegistered handling.
 - New versions are created only when existing ResourceMapper rules require them.
 
-## ResourceDiscoveryResult
+## Execution Contract Note
 
-Represents the normalized metastore-side discovery output emitted before datastore triggering.
+This feature also depends on two execution-contract objects during dataset-save processing:
 
-Fields:
-- `datasetIdentifier`: Dataset being inspected.
-- `discoveredResources`: Ordered list of valid discovered resource candidates, each carrying source `downloadURL` and any metadata needed for downstream registration.
-- `skippedEntries`: Ordered list of skipped distribution entries.
-- `invalidEntries`: Ordered list of malformed entries that could not be normalized.
+- `ResourceDiscoveryResult`: the normalized discovery output consumed by downstream registration, triggering, and logging.
+- `DispatchResult`: the downstream processed/skipped/failed summary derived from one discovery pass.
 
-Relationships:
-- Belongs to one dataset save discovery pass.
-- Contains zero or more candidate items derived from `Distribution Entry` objects.
-- Acts as the single input contract for downstream registration, triggering, and logging flows.
+Their field-level definitions live in [contracts/dataset-save-dispatch.md](contracts/dataset-save-dispatch.md) because they describe service boundaries rather than durable domain entities.
 
-Validation rules:
-- Encounter order must match recursive discovery order in dataset metadata.
-- Valid discovered resource candidates must preserve enough source context to support ResourceMapper registration and later datastore triggering.
-- Skipped and invalid entries must retain a machine-readable reason for downstream logging and summary generation.
-- This object must not imply that ResourceMapper registration, queueing, or datastore execution has already happened.
-- Downstream components must consume this object rather than re-discovering dataset metadata.
-
-## DispatchResult
-
-Machine-readable downstream execution summary derived from one `ResourceDiscoveryResult` after registration/trigger attempts have been made.
-
-Fields:
-- `datasetIdentifier`: Dataset being processed.
-- `processedCount`: Count of discovered resource candidates whose registration and dispatch path completed successfully or was queued successfully.
-- `skippedCount`: Count of discovery items that were not attempted downstream because they were already marked skipped or invalid in the paired `ResourceDiscoveryResult`.
-- `failedCount`: Count of discovered resource candidates whose registration or dispatch attempt failed after discovery succeeded.
-- `items`: Per-item execution outcomes keyed back to the corresponding discovery candidate, with URL/path, status, reason, and resolved resource identifier when available.
-
-Relationships:
-- Belongs to one dataset save event.
-- Is produced from one `ResourceDiscoveryResult`.
-- Contains zero or more per-item execution outcomes.
-
-Validation rules:
-- Counts must reconcile against the paired `ResourceDiscoveryResult` and actual downstream attempt outcomes.
-- Successfully discovered candidates may still appear as failed here if registration or triggering fails.
-- Failures for one entry must not prevent attempts for later valid entries.
-
-## Pipeline Stage
-
-One of the retained ETL stages.
-
-Fields:
-- `name`: `localize`, `import`, or `post-import`.
-- `executionMode`: Queue-driven or immediate.
-- `outcome`: Stage-specific result from existing datastore workflow.
-
-Relationships:
-- Executes for a Datastore Resource.
-- May be implemented by default behavior or the single active importer.
-
-Validation rules:
-- Stage order remains `localize -> import -> post-import`.
-- Stage overrides must fall back to defaults for non-overridden stages.
-
-## Active Importer
-
-The single configured importer implementation used at runtime.
-
-Fields:
-- `serviceId` or class reference.
-- Stage override support.
-- Default fallback behavior.
-
-Relationships:
-- Used by datastore import factory/service paths.
-
-Validation rules:
-- Only one active importer is selected in this feature.
-- Priority-based multi-plugin selection remains out of scope.
+Runtime behavior constraints such as retained ETL stage order and single active importer selection are documented in the spec and planning artifacts, not modeled here as feature data entities.

@@ -17,7 +17,7 @@
 - [x] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
 - [x] T006 [P] Create dispatch item value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
 - [x] T007 [P] Create dispatch result value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
-- [ ] T008 Create dataset resource discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
+- [x] T008 Create dataset resource discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
 - [ ] T009 Create dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
 - [ ] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [ ] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
@@ -35,11 +35,9 @@
 
 ### Tests for Ticket 1
 
-- [ ] T002 [P] Add dataset discovery fixture variants for referenced/non-referenced distributions in `../dkan/modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
+- [ ] T002 [P] Add dataset discovery fixture variants and lifecycle coverage for referenced/non-referenced distributions in `../dkan/modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
 - [ ] T003 [P] Add mixed-validity distribution fixture data (valid, missing, invalid, repeated downloadURL) in `../dkan/modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
-- [ ] T004 [P] Add datastore dispatch fixture coverage for multi-URL processing in `../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
-- [ ] T013 [P] [US1] Add lifecycle functional tests proving pre-reference discovery executes during dataset presave in `../dkan/modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
-- [ ] T014 [P] [US1] Add unit tests for `DatastoreSubscriber::onPreReference` consumption of discovery result contract in `../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
+- [ ] T004 [P] Add datastore subscriber fixture and contract coverage for multi-URL processing in `../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
 
 ### Implementation for Ticket 1
 
@@ -64,10 +62,7 @@
 
 ### Implementation for Ticket 2
 
-- [ ] T020 [US1] Implement ResourceMapper registration/resolution from discovered resource values in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
-- [ ] T021 [US1] Implement best-effort per-URL datastore dispatch loop (continue after per-entry failure) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
-- [ ] T022 [US1] Emit structured logs (stable fields for dataset, URL, status, reason) for skipped entries and per-URL dispatch failures in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
-- [ ] T023 [US1] Return machine-readable processed/skipped/failed dataset dispatch summary from dispatcher in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
+- [ ] T020 [US1] Implement dispatcher registration, best-effort per-URL processing, structured logging, and processed/skipped/failed summary reporting in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
 - [ ] T024 [US1] Remove runtime dependence on distribution entity dereference for dispatch initiation in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 
 **Checkpoint**: Resource registration and dataset-save dispatch work end-to-end without requiring distribution-ID lookup.
@@ -236,7 +231,7 @@
 
 ## Parallel Opportunities
 
-- Ticket 1 fixture and test tasks T002-T004 and T013-T014 can run in parallel.
+- Ticket 1 test tasks T002-T004 can run in parallel.
 - Shared Foundation value object and test tasks T006-T007 and T011-T012 can run in parallel.
 - Ticket test tasks marked [P] can run in parallel across separate test files.
 - Ticket 5 controller, admin, Drush, dashboard, and status compatibility refactors can split across SQL, Drush, dashboard, and status files once Ticket 4 settles DatasetInfo output.
@@ -246,8 +241,8 @@
 
 ```bash
 Task: "T002 [P] Add dataset discovery fixture variants in ../dkan/modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php"
-Task: "T013 [US1] Add lifecycle functional tests in ../dkan/modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php"
-Task: "T014 [US1] Add subscriber contract tests in ../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php"
+Task: "T003 [P] Add mixed-validity distribution fixtures in ../dkan/modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php"
+Task: "T004 [P] Add subscriber multi-URL contract coverage in ../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php"
 ```
 
 ## Parallel Example: Ticket 5
