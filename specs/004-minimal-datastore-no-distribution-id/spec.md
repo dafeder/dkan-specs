@@ -47,7 +47,7 @@ As a DKAN administrator, I want dataset-save hooks to discover distribution down
 
 **Acceptance Scenarios**:
 
-1. **Given** a dataset save event containing multiple referenced or non-referenced distribution entries with valid `downloadURL` fields, **When** metastore workflow hooks run, **Then** datastore processing is triggered for each valid `downloadURL` identified during recursive discovery.
+1. **Given** a dataset save event containing multiple referenced or non-referenced top-level `distribution` entries with valid `downloadURL` fields, **When** metastore workflow hooks run, **Then** datastore processing is triggered for each valid `downloadURL` identified from `$.distribution[]` discovery.
 2. **Given** a dataset save event where some distribution entries are invalid or missing `downloadURL`, **When** discovery runs, **Then** invalid entries are skipped, valid entries still trigger datastore imports/ETL processes, and skipped entries are logged or reported.
 3. **Given** dataset-save initiated datastore import triggering, **When** processing is triggered, **Then** runtime workflow initiation proceeds without distribution-ID entity lookup.
 
@@ -108,7 +108,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-009**: This feature MUST keep importer selection to one globally configured active importer for runtime execution in this phase.
 - **FR-010**: Priority-based multi-plugin importer selection MUST remain out of scope for this feature version.
 - **FR-011**: Metastore workflow logic for datastore initiation MUST run through dataset-save hooks or events rather than requiring distribution-save hooks.
-- **FR-012**: On dataset save, the workflow MUST recursively inspect the dataset `distribution` array to identify valid `downloadURL` values for both referenced and non-referenced distribution structures.
+- **FR-012**: On dataset save, the workflow MUST inspect the top-level dataset `distribution` array (`$.distribution[]`) to identify valid `downloadURL` values for both referenced and non-referenced distribution structures.
 - **FR-013**: The workflow MUST trigger datastore processing for all valid `downloadURL` values discovered during discovery.
 - **FR-014**: The workflow MUST preserve existing import-triggering behavior by processing discovered `downloadURL` values as encountered, without introducing new deduplication requirements in this scoped feature.
 - **FR-015**: During discovery, entries with invalid or missing `downloadURL` values MUST be skipped without blocking import triggering for valid entries.

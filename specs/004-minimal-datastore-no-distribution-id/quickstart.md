@@ -12,14 +12,14 @@ Each ticket is intended to be small enough for one developer to complete in a we
 
 Scope:
 - Implement discovery where dataset saves already trigger datastore-related decisions: `LifeCycle::referenceMetadata()` -> `LifeCycle::EVENT_PRE_REFERENCE` -> `DatastoreSubscriber::onPreReference()`.
-- Add a dataset resource discovery helper used by the pre-reference handler to recursively inspect dataset `distribution` entries before reference conversion and emit normalized resource candidates.
+- Add a dataset resource discovery helper used by the pre-reference handler to inspect top-level dataset `distribution` entries (`$.distribution[]`) before reference conversion and emit normalized resource candidates.
 - Support referenced and non-referenced distribution structures with the same discovery logic.
 - Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and datastore-specific dispatch classes under `dkan_datastore/src/Dispatch/` rather than the generic `src/Service/` namespace.
 - Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
 - Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, (b) executing resource registration and import-trigger work, and (c) producing structured summary/log outputs in later tickets.
 
 Acceptance:
-- Unit tests cover referenced, embedded, nested, repeated, invalid, and missing `downloadURL` entries.
+- Unit tests cover referenced/non-referenced top-level distribution entries, repeated URLs, and invalid/missing `downloadURL` entries.
 - Subscriber/lifecycle tests verify discovery runs from the pre-reference event path during dataset presave.
 - Contract tests verify downstream components consume the `ResourceDiscoveryResult` object (rather than re-discovering metadata) for trigger decisions and registration/import planning.
 

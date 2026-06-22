@@ -21,11 +21,11 @@ DatasetDispatchInput {
 Rules:
 - `datasetMetadata` may contain referenced or non-referenced distribution structures.
 - Distribution UUIDs may be present but are not required.
-- Discovery uses `distribution` entries and nested `downloadURL` values.
+- Discovery is limited to top-level `$.distribution[]` entries and their `downloadURL` values.
 
 ## Processing Contract
 
-1. Recursively discover dataset `distribution` data.
+1. Discover dataset resources only from top-level `$.distribution[]` entries.
 2. Normalize discovery findings into a `ResourceDiscoveryResult` in encounter order.
 3. For each discovered resource candidate with a valid `downloadURL`, register or resolve a `DataResource` through existing ResourceMapper behavior.
 4. Trigger datastore processing for each valid discovered resource in encounter order.

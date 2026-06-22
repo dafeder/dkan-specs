@@ -6,7 +6,7 @@ Represents the saved metadata object that triggers datastore discovery.
 
 Fields:
 - `identifier`: Dataset UUID or metastore identifier.
-- `distribution`: Array or nested structure containing distribution entries.
+- `distribution`: Top-level array containing distribution entries.
 - `metadata`: Raw or dereferenced dataset metadata used during save lifecycle.
 
 Relationships:

@@ -17,11 +17,11 @@
 - [x] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
 - [x] T006 [P] Create dispatch item value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
 - [x] T007 [P] Create dispatch result value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
-- [x] T008 Implement dataset resource discovery service logic for recursive downloadURL traversal, normalization into discovery candidates, and skip-reason capture in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
+- [x] T008 Implement dataset resource discovery service logic for top-level `$.distribution[]` `downloadURL` discovery, normalization into discovery candidates, and skip-reason capture in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
 - [x] T009 Create dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
 - [x] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [x] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
-- [ ] T012 [P] Add unit tests for dataset resource discovery recursion and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
+- [ ] T012 [P] Add unit tests for top-level `$.distribution[]` resource discovery and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
 
 **Checkpoint**: Shared contracts and services are in place; ticket work can proceed.
 
