@@ -18,8 +18,8 @@
 - [x] T006 [P] Create dispatch item value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
 - [x] T007 [P] Create dispatch result value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
 - [x] T008 Create dataset resource discovery service for recursive downloadURL discovery in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
-- [ ] T009 Create dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
-- [ ] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
+- [x] T009 Create dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
+- [x] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [ ] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
 - [ ] T012 [P] Add unit tests for dataset resource discovery recursion and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
 
