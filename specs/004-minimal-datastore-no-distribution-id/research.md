@@ -41,3 +41,9 @@ Alternatives considered: Treating these as incidental cleanup was rejected becau
 Rationale: The implementation can be split into independent sub-week tickets: dataset discovery/summary model, ResourceMapper registration, dispatch integration, observability, cache dependency updates, reporting/post-import updates, cleanup/orphan updates, and migration/test documentation.
 
 Alternatives considered: A single broad implementation ticket was rejected because it would mix metastore lifecycle changes, datastore service changes, reporting, and migration work. A full decoupled-datastore implementation was rejected as outside this scoped feature.
+
+## Decision: Prefer the smallest abstraction surface that preserves the required contracts
+
+Rationale: This scoped feature needs clear discovery and dispatch contracts, but it does not benefit from introducing extra classes that only repackage straightforward control flow. New classes should exist only when they protect a real boundary, a reusable contract, or a meaningful test seam.
+
+Alternatives considered: Splitting each small responsibility into its own class was rejected because it increases implementation churn and migration surface without adding equivalent value for this scoped change. Keeping all new logic inline in existing subscribers/services was also rejected because the feature still needs a small number of explicit contracts for discovery results and downstream dispatch behavior.

@@ -138,3 +138,4 @@ This deferred work keeps 004 focused on the minimal refactor and lets logging in
 - Do not add priority-based multi-importer selection.
 - Do not deduplicate repeated discovered URLs. (?)
 - Treat distribution references as supported metadata, not required operational keys.
+- Prefer the smallest class set that preserves clear discovery/dispatch contracts; collapse abstractions that do not protect a real boundary, reuse point, or test seam.
