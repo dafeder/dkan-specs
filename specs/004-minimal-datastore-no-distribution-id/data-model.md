@@ -82,7 +82,7 @@ Validation rules:
 This feature also depends on two execution-contract objects during dataset-save processing:
 
 - `ResourceDiscoveryResult`: the normalized discovery output consumed by downstream registration, triggering, and logging.
-- `DispatchResult`: the downstream processed/skipped/failed summary derived from one discovery pass.
+- `InitiationSummary`: the downstream processed/skipped/failed initiation summary derived from one discovery pass.
 
 Their field-level definitions live in [contracts/dataset-save-dispatch.md](contracts/dataset-save-dispatch.md) because they describe service boundaries rather than durable domain entities.
 

@@ -3,7 +3,7 @@
 **Input**: Design documents from `specs/004-minimal-datastore-no-distribution-id/`
 **Prerequisites**: `plan.md`, `spec.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`
 
-**Tests**: Included because the specification requires independently testable user stories and measurable outcomes for discovery, dispatch, compatibility, and reporting behavior.
+**Tests**: Included because the specification requires independently testable user stories and measurable outcomes for discovery, initiation, compatibility, and reporting behavior.
 
 **Path Note**: DKAN implementation paths below are relative to `/Users/dan.feder/Sites/dkan`. Spec artifacts are relative to `/Users/dan.feder/Work/dkan-specs`.
 
@@ -15,13 +15,14 @@
 
 - [ ] T001 Create feature implementation notes and validation checklist in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
 - [x] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
-- [x] T006 [P] Create dispatch item value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
-- [x] T007 [P] Create dispatch result value object in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
+- [ ] T006 [P] Remove placeholder dispatch item value object and related references to de-scope the standalone dispatch subsystem in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
+- [ ] T007 [P] Remove placeholder dispatch result value object and related references to de-scope the standalone dispatch subsystem in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
+- [ ] T013 [P] Create initiation summary value object contract for processed/skipped/failed initiation outcomes in `../dkan/modules/dkan_datastore/src/InitiationSummary.php`
 - [x] T008 Implement dataset resource discovery service logic for top-level `$.distribution[]` `downloadURL` discovery, normalization into discovery candidates, and skip-reason capture in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
-- [x] T009 Create dispatcher service (register/dispatch/report pipeline) in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
-- [x] T010 Register discovery and dispatcher services in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
+- [ ] T009 Fold initiation orchestration into existing subscriber + datastore service flow (no standalone dispatcher service) in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [ ] T010 Remove standalone dispatcher service wiring in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [x] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
-- [ ] T012 [P] Add unit tests for top-level `$.distribution[]` resource discovery and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
+- [x] T012 [P] Add unit tests for top-level `$.distribution[]` resource discovery and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
 
 **Checkpoint**: Shared contracts and services are in place; ticket work can proceed.
 
@@ -42,7 +43,7 @@
 ### Implementation for Ticket 1
 
 - [ ] T018 [US1] Refactor pre-reference datastore trigger path to use metastore discovery service in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T019 [US1] Wire `LifeCycle::EVENT_PRE_REFERENCE` dataset metadata payload to dispatcher integration in `../dkan/modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
+- [ ] T019 [US1] Wire `LifeCycle::EVENT_PRE_REFERENCE` dataset metadata payload to subscriber-driven initiation integration in `../dkan/modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
 
 **Checkpoint**: Dataset-save discovery runs from the pre-reference lifecycle path and hands off a shared discovery contract.
 
@@ -62,7 +63,7 @@
 
 ### Implementation for Ticket 2
 
-- [ ] T020 [US1] Implement dispatcher registration, best-effort per-URL processing, structured logging, and processed/skipped/failed summary reporting in `../dkan/modules/dkan_datastore/src/Dispatch/Dispatcher.php`
+- [ ] T020 [US1] Implement registration, best-effort per-URL initiation, structured logging, and processed/skipped/failed summary reporting in existing subscriber/datastore-service flow in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 - [ ] T024 [US1] Remove runtime dependence on distribution entity dereference for dispatch initiation in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 
 **Checkpoint**: Resource registration and dataset-save dispatch work end-to-end without requiring distribution-ID lookup.
@@ -216,7 +217,7 @@
 - **Shared Foundation**: No dependency; blocks implementation work for all tickets.
 - **Ticket 1**: Depends on Shared Foundation for implementation tasks T018-T019, while fixture tasks T002-T004 can start earlier.
 - **Ticket 2**: Depends on Shared Foundation and builds directly on Ticket 1 discovery handoff.
-- **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 dispatch/result behavior for end-to-end cache validation.
+- **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 initiation-summary behavior for end-to-end cache validation.
 - **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 2 resource registration behavior so DatasetInfo can surface discovered resources.
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
 - **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 2 resource registration/dispatch behavior, and Ticket 8 should land after the affected payload changes are settled.
@@ -232,7 +233,7 @@
 ## Parallel Opportunities
 
 - Ticket 1 test tasks T002-T004 can run in parallel.
-- Shared Foundation value object and test tasks T006-T007 and T011-T012 can run in parallel.
+- Shared Foundation test tasks T011-T012 can run in parallel.
 - Ticket test tasks marked [P] can run in parallel across separate test files.
 - Ticket 5 controller, admin, Drush, dashboard, and status compatibility refactors can split across SQL, Drush, dashboard, and status files once Ticket 4 settles DatasetInfo output.
 - Tickets 6 and 7 can proceed in parallel once Ticket 2 resource registration behavior is stable.
@@ -267,7 +268,7 @@ Task: "T048 [US3] Integrate discovered-resource collection in ../dkan/modules/dk
 
 1. Complete Shared Foundation.
 2. Deliver Ticket 1 dataset-save discovery in the pre-reference lifecycle flow.
-3. Deliver Ticket 2 registration, dispatch, logging, and summary reporting.
+3. Deliver Ticket 2 registration, initiation, logging, and summary reporting.
 4. Validate the combined Ticket 1 and Ticket 2 path independently before taking compatibility/reporting refactors.
 
 ### Incremental Delivery

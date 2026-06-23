@@ -1,8 +1,8 @@
-# Contract: Dataset-Save Datastore Dispatch
+# Contract: Dataset-Save Datastore Initiation
 
 ## Purpose
 
-Define the internal service contract for discovering dataset distribution `downloadURL` values and initiating datastore processing without requiring distribution UUIDs.
+Define the internal contract for discovering dataset distribution `downloadURL` values and initiating existing datastore processing without requiring distribution UUIDs.
 
 ## Caller
 
@@ -31,9 +31,9 @@ Rules:
 4. Trigger datastore processing for each valid discovered resource in encounter order.
 5. Do not deduplicate repeated URLs.
 6. Skip invalid/missing entries during discovery and continue.
-7. Continue after per-entry dispatch failures.
+7. Continue after per-entry initiation failures.
 8. Emit structured logs for skipped and failed entries.
-9. Return a machine-readable dispatch summary derived from the `ResourceDiscoveryResult` and downstream execution outcomes.
+9. Return a machine-readable initiation summary derived from the `ResourceDiscoveryResult` and downstream initiation outcomes.
 
 ## Intermediate Output
 
@@ -53,7 +53,7 @@ Rules:
 ## Output
 
 ```php
-DispatchResult {
+InitiationSummary {
   string $datasetIdentifier;
   int $processedCount;
   int $skippedCount;
@@ -61,20 +61,24 @@ DispatchResult {
   array $items;
 }
 
-DispatchItem {
+InitiationItem {
   string|null $downloadUrl;
   string|null $resourceIdentifier;
-  string $status; // processed|skipped|failed
+  string $status; // initiated|skipped|failed_to_initiate
   string|null $reason;
 }
 ```
+
+Notes:
+- A standalone dispatcher service is optional and not required by this contract.
+- Implementations may perform initiation orchestration directly in subscriber/service flow while preserving this input/output behavior.
 
 ## Error Behavior
 
 - Invalid distribution entry: record skipped entry, continue.
 - Missing `downloadURL`: record skipped entry, continue.
 - ResourceMapper registration failure: record failed entry, continue.
-- Datastore dispatch failure: record failed entry, continue.
+- Datastore initiation failure: record failed entry, continue.
 - Unexpected fatal dataset-level failure: bubble exception after logging dataset context.
 
 ## Compatibility

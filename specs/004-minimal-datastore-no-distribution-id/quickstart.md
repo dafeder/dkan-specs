@@ -14,7 +14,7 @@ Scope:
 - Implement discovery where dataset saves already trigger datastore-related decisions: `LifeCycle::referenceMetadata()` -> `LifeCycle::EVENT_PRE_REFERENCE` -> `DatastoreSubscriber::onPreReference()`.
 - Add a dataset resource discovery helper used by the pre-reference handler to inspect top-level dataset `distribution` entries (`$.distribution[]`) before reference conversion and emit normalized resource candidates.
 - Support referenced and non-referenced distribution structures with the same discovery logic.
-- Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and datastore-specific dispatch classes under `dkan_datastore/src/Dispatch/` rather than the generic `src/Service/` namespace.
+- Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and keep initiation orchestration in the existing datastore subscriber/service flow rather than introducing a parallel dispatch subsystem.
 - Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
 - Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, (b) executing resource registration and import-trigger work, and (c) producing structured summary/log outputs in later tickets.
 
@@ -138,4 +138,5 @@ This deferred work keeps 004 focused on the minimal refactor and lets logging in
 - Do not add priority-based multi-importer selection.
 - Do not deduplicate repeated discovered URLs. (?)
 - Treat distribution references as supported metadata, not required operational keys.
+- Avoid a standalone dispatch subsystem when existing datastore initiation flow already provides the required behavior.
 - Prefer the smallest class set that preserves clear discovery/dispatch contracts; collapse abstractions that do not protect a real boundary, reuse point, or test seam.
