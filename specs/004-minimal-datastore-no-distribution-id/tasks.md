@@ -3,7 +3,7 @@
 **Input**: Design documents from `specs/004-minimal-datastore-no-distribution-id/`
 **Prerequisites**: `plan.md`, `spec.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`
 
-**Tests**: Included because the specification requires independently testable user stories and measurable outcomes for discovery, initiation, compatibility, and reporting behavior.
+**Tests**: Included because the specification requires independently testable user stories and measurable outcomes for discovery, import initiation, compatibility, and reporting behavior.
 
 **Path Note**: DKAN implementation paths below are relative to `/Users/dan.feder/Sites/dkan`. Spec artifacts are relative to `/Users/dan.feder/Work/dkan-specs`.
 
@@ -15,12 +15,11 @@
 
 - [ ] T001 Create feature implementation notes and validation checklist in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
 - [x] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
-- [ ] T006 [P] Remove placeholder dispatch item value object and related references to de-scope the standalone dispatch subsystem in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
-- [ ] T007 [P] Remove placeholder dispatch result value object and related references to de-scope the standalone dispatch subsystem in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
-- [ ] T013 [P] Create initiation summary value object contract for processed/skipped/failed initiation outcomes in `../dkan/modules/dkan_datastore/src/InitiationSummary.php`
+- [ ] T006 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
+- [ ] T007 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
 - [x] T008 Implement dataset resource discovery service logic for top-level `$.distribution[]` `downloadURL` discovery, normalization into discovery candidates, and skip-reason capture in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
-- [ ] T009 Fold initiation orchestration into existing subscriber + datastore service flow (no standalone dispatcher service) in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T010 Remove standalone dispatcher service wiring in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
+- [ ] T009 Defer initiation orchestration refactor and keep existing subscriber + datastore service flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [ ] T010 Defer standalone dispatcher service wiring cleanup and keep current service definitions unchanged for this phase in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [x] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
 - [x] T012 [P] Add unit tests for top-level `$.distribution[]` resource discovery and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
 
@@ -43,7 +42,7 @@
 ### Implementation for Ticket 1
 
 - [ ] T018 [US1] Refactor pre-reference datastore trigger path to use metastore discovery service in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T019 [US1] Wire `LifeCycle::EVENT_PRE_REFERENCE` dataset metadata payload to subscriber-driven initiation integration in `../dkan/modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
+- [ ] T019 [US1] Wire `LifeCycle::EVENT_PRE_REFERENCE` dataset metadata payload to existing datastore initiation flow in `../dkan/modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
 
 **Checkpoint**: Dataset-save discovery runs from the pre-reference lifecycle path and hands off a shared discovery contract.
 
@@ -63,7 +62,7 @@
 
 ### Implementation for Ticket 2
 
-- [ ] T020 [US1] Implement registration, best-effort per-URL initiation, structured logging, and processed/skipped/failed summary reporting in existing subscriber/datastore-service flow in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [ ] T020 [US1] Implement registration, best-effort per-URL initiation, and structured logging using existing datastore initiation/status surfaces (no new initiation summary contract) in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 - [ ] T024 [US1] Remove runtime dependence on distribution entity dereference for dispatch initiation in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 
 **Checkpoint**: Resource registration and dataset-save dispatch work end-to-end without requiring distribution-ID lookup.
@@ -217,7 +216,7 @@
 - **Shared Foundation**: No dependency; blocks implementation work for all tickets.
 - **Ticket 1**: Depends on Shared Foundation for implementation tasks T018-T019, while fixture tasks T002-T004 can start earlier.
 - **Ticket 2**: Depends on Shared Foundation and builds directly on Ticket 1 discovery handoff.
-- **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 initiation-summary behavior for end-to-end cache validation.
+- **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 initiation/logging behavior for end-to-end cache validation.
 - **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 2 resource registration behavior so DatasetInfo can surface discovered resources.
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
 - **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 2 resource registration/dispatch behavior, and Ticket 8 should land after the affected payload changes are settled.

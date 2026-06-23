@@ -79,11 +79,12 @@ Validation rules:
 
 ## Execution Contract Note
 
-This feature also depends on two execution-contract objects during dataset-save processing:
+This feature depends on one execution-contract object during dataset-save processing:
 
 - `ResourceDiscoveryResult`: the normalized discovery output consumed by downstream registration, triggering, and logging.
-- `InitiationSummary`: the downstream processed/skipped/failed initiation summary derived from one discovery pass.
 
-Their field-level definitions live in [contracts/dataset-save-dispatch.md](contracts/dataset-save-dispatch.md) because they describe service boundaries rather than durable domain entities.
+Its field-level definition lives in [contracts/dataset-save-dispatch.md](contracts/dataset-save-dispatch.md) because it describes a service boundary rather than a durable domain entity.
+
+This phase does not introduce a new initiation-summary value-object contract; existing datastore initiation/import status surfaces remain in use.
 
 Runtime behavior constraints such as retained ETL stage order and single active importer selection are documented in the spec and planning artifacts, not modeled here as feature data entities.

@@ -16,7 +16,7 @@ Scope:
 - Support referenced and non-referenced distribution structures with the same discovery logic.
 - Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and keep initiation orchestration in the existing datastore subscriber/service flow rather than introducing a parallel dispatch subsystem.
 - Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
-- Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, (b) executing resource registration and import-trigger work, and (c) producing structured summary/log outputs in later tickets.
+- Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, and (b) executing resource registration and import-trigger work while relying on existing datastore status surfaces.
 
 Acceptance:
 - Unit tests cover referenced/non-referenced top-level distribution entries, repeated URLs, and invalid/missing `downloadURL` entries.
@@ -139,4 +139,5 @@ This deferred work keeps 004 focused on the minimal refactor and lets logging in
 - Do not deduplicate repeated discovered URLs. (?)
 - Treat distribution references as supported metadata, not required operational keys.
 - Avoid a standalone dispatch subsystem when existing datastore initiation flow already provides the required behavior.
+- Do not introduce a new `InitiationSummary` contract in this phase; rely on existing datastore initiation/import status mechanisms.
 - Prefer the smallest class set that preserves clear discovery/dispatch contracts; collapse abstractions that do not protect a real boundary, reuse point, or test seam.

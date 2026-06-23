@@ -10,18 +10,15 @@ Metastore dataset-save lifecycle hooks/events.
 
 ## Inputs
 
-```php
-DatasetDispatchInput {
-  string $datasetIdentifier;
-  object|array $datasetMetadata;
-  bool $deferred = true;
-}
-```
+Input parameters:
+- `datasetIdentifier` (string)
+- `datasetMetadata` (object|array)
 
 Rules:
 - `datasetMetadata` may contain referenced or non-referenced distribution structures.
 - Distribution UUIDs may be present but are not required.
 - Discovery is limited to top-level `$.distribution[]` entries and their `downloadURL` values.
+- Initiation is queue/deferred in this feature scope; no caller-supplied mode switch is required.
 
 ## Processing Contract
 
@@ -33,7 +30,7 @@ Rules:
 6. Skip invalid/missing entries during discovery and continue.
 7. Continue after per-entry initiation failures.
 8. Emit structured logs for skipped and failed entries.
-9. Return a machine-readable initiation summary derived from the `ResourceDiscoveryResult` and downstream initiation outcomes.
+9. Use existing datastore initiation/status surfaces for downstream observability; no new initiation-summary contract object is required in this phase.
 
 ## Intermediate Output
 
@@ -50,28 +47,9 @@ Rules:
 - This object is the normalized discovery boundary and does not imply registration or dispatch success.
 - Downstream registration, trigger, and logging steps must consume this object rather than re-discovering dataset metadata.
 
-## Output
-
-```php
-InitiationSummary {
-  string $datasetIdentifier;
-  int $processedCount;
-  int $skippedCount;
-  int $failedCount;
-  array $items;
-}
-
-InitiationItem {
-  string|null $downloadUrl;
-  string|null $resourceIdentifier;
-  string $status; // initiated|skipped|failed_to_initiate
-  string|null $reason;
-}
-```
-
 Notes:
 - A standalone dispatcher service is optional and not required by this contract.
-- Implementations may perform initiation orchestration directly in subscriber/service flow while preserving this input/output behavior.
+- Implementations may perform initiation orchestration directly in subscriber/service flow while preserving this behavior.
 
 ## Error Behavior
 
