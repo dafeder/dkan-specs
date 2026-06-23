@@ -5,7 +5,7 @@
 
 **Tests**: Included because the specification requires independently testable user stories and measurable outcomes for discovery, import initiation, compatibility, and reporting behavior.
 
-**Path Note**: DKAN implementation paths below are relative to `/Users/dan.feder/Sites/dkan`. Spec artifacts are relative to `/Users/dan.feder/Work/dkan-specs`.
+**Path Note**: DKAN implementation paths below are relative to the DKAN repository root. Spec artifacts are relative to the `dkan-specs` repository root.
 
 ## Shared Foundation (Complete Before Ticket Work)
 
@@ -13,13 +13,13 @@
 
 **CRITICAL**: Complete this section before starting ticket implementation work.
 
-- [ ] T001 Create feature implementation notes and validation checklist in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
+- [x] T001 Create feature implementation notes and validation checklist in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
 - [x] T005 Create resource discovery result value object in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
-- [ ] T006 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
-- [ ] T007 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
+- [x] T006 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchItem.php`
+- [x] T007 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/Dispatch/DispatchResult.php`
 - [x] T008 Implement dataset resource discovery service logic for top-level `$.distribution[]` `downloadURL` discovery, normalization into discovery candidates, and skip-reason capture in `../dkan/modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
-- [ ] T009 Defer initiation orchestration refactor and keep existing subscriber + datastore service flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T010 Defer standalone dispatcher service wiring cleanup and keep current service definitions unchanged for this phase in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
+- [x] T009 Defer initiation orchestration refactor and keep existing subscriber + datastore service flow unchanged for this phase in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [x] T010 Defer standalone dispatcher service wiring cleanup and keep current service definitions unchanged for this phase in `../dkan/modules/dkan_datastore/dkan_datastore.services.yml`
 - [x] T011 Add unit tests for discovery result object normalization and encounter ordering in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/ResourceDiscoveryResultTest.php`
 - [x] T012 [P] Add unit tests for top-level `$.distribution[]` resource discovery and skip reasons in `../dkan/modules/dkan_metastore/tests/src/Unit/LifeCycle/ResourceDiscovery/DatasetResourceDiscoveryTest.php`
 
@@ -59,11 +59,13 @@
 - [ ] T015 [P] [US1] Add kernel tests validating URL registration through ResourceMapper without distribution lookup in `../dkan/modules/dkan_metastore/tests/src/Kernel/ResourceMapperTest.php`
 - [ ] T016 [P] [US1] Add functional tests for mixed-validity distribution discovery and best-effort dispatch continuation in `../dkan/modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
 - [ ] T017 [P] [US1] Add kernel tests for queue-driven versus immediate dispatch behavior from discovered URLs in `../dkan/modules/dkan_datastore/tests/src/Kernel/DatastoreServiceEventsTest.php`
+- [ ] T063 [P] [US1] Add unit coverage asserting `DispatchResult` shape and processed/skipped/failed count accuracy for dataset-save execution outcomes in `../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
 
 ### Implementation for Ticket 2
 
 - [ ] T020 [US1] Implement registration, best-effort per-URL initiation, and structured logging using existing datastore initiation/status surfaces (no new initiation summary contract) in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 - [ ] T024 [US1] Remove runtime dependence on distribution entity dereference for dispatch initiation in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [ ] T062 [US1] Implement machine-readable `DispatchResult` generation for each dataset-save execution with processed/skipped/failed counts in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 
 **Checkpoint**: Resource registration and dataset-save dispatch work end-to-end without requiring distribution-ID lookup.
 

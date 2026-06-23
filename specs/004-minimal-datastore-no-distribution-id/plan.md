@@ -1,6 +1,6 @@
 # Implementation Plan: Minimal Datastore Without Distribution ID Requirement
 
-**Branch**: `main` | **Date**: 2026-06-15 | **Spec**: `specs/004-minimal-datastore-no-distribution-id/spec.md`
+**Branch**: `004-minimal-datastore-no-distribution-id` | **Date**: 2026-06-15 | **Spec**: `specs/004-minimal-datastore-no-distribution-id/spec.md`
 **Input**: Feature specification from `/specs/004-minimal-datastore-no-distribution-id/spec.md`
 
 ## Summary
@@ -82,7 +82,15 @@ specs/004-minimal-datastore-no-distribution-id/
 ../dkan/docs/source/
 ```
 
-**Structure Decision**: Use the existing DKAN multi-module Drupal layout. Implement behavior changes primarily in `dkan_datastore` and `dkan_metastore`, with shared reporting/status data shape adjustments in `dkan_common`, and migration/update documentation in DKAN docs. Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and datastore-specific dispatch classes under `dkan_datastore/src/Dispatch/` rather than the generic `src/Service/` namespace.
+**Structure Decision**: Use the existing DKAN multi-module Drupal layout. Implement behavior changes primarily in `dkan_datastore` and `dkan_metastore`, with shared reporting/status data shape adjustments in `dkan_common`, and migration/update documentation in DKAN docs. Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/`. Datastore dispatch-subsystem namespace/service refactors are deferred for this phase, and existing datastore initiation flow remains in place.
+
+## Delivery Phases
+
+- **Phase 0**: Shared Foundation
+- **Phase 1**: Ticket 1 and Ticket 2 (MVP)
+- **Phase 2**: Ticket 3 through Ticket 5 (cache, compatibility, reporting)
+- **Phase 3**: Ticket 6 through Ticket 8 (modularity regression, cleanup, migration guidance)
+- **Release Gate**: Validation and quality checks
 
 ## Complexity Tracking
 

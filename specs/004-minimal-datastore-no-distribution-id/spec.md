@@ -35,6 +35,12 @@
 
 - Q: When quickstart ticket slices and tasks phase groupings diverge, should the task phase structure be changed to match the existing quickstart ticket names? -> A: Yes; keep the current quickstart ticket names, but regroup `tasks.md` so its phase structure matches those ticket slices.
 
+### Session 2026-06-23
+
+- Q: Are datastore dispatch namespace/service refactors in scope for this phase? -> A: No. Keep existing datastore initiation flow for this phase and defer standalone datastore dispatch-subsystem refactors.
+- Q: How should legacy distribution-ID-based hook payload field removal be managed? -> A: Through a documented deprecation transition with an explicit migration period and versioned removal gate.
+- Note: For this phase, this session supersedes the Session 2026-06-16 datastore dispatch-namespace/class guidance.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Dataset-Save Discovery and Import Triggering Without Distribution IDs (Priority: P1)
@@ -112,12 +118,12 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-013**: The workflow MUST trigger datastore processing for all valid `downloadURL` values discovered during discovery.
 - **FR-014**: The workflow MUST preserve existing import-triggering behavior by processing discovered `downloadURL` values as encountered, without introducing new deduplication requirements in this scoped feature.
 - **FR-015**: During discovery, entries with invalid or missing `downloadURL` values MUST be skipped without blocking import triggering for valid entries.
-- **FR-016**: The workflow MUST emit logging or administrator-visible reporting for skipped invalid/missing `downloadURL` entries.
+- **FR-016**: The workflow MUST provide administrator-visible reporting for skipped invalid/missing `downloadURL` entries, including skip reasons.
 - **FR-017**: Distribution referencing and legacy distribution ID inputs MAY be accepted for backward compatibility, but MUST NOT be required or control workflow initiation when dataset distribution `downloadURL` values are available.
 - **FR-018**: During multi-`downloadURL` processing, failure of an individual URL MUST NOT prevent import-triggering attempts for remaining valid discovered URLs.
-- **FR-019**: The workflow MUST emit logging or administrator-visible reporting for each per-URL processing failure during best-effort import triggering.
-- **FR-020**: Legacy distribution-ID-based hook payload fields MUST be removed in this feature scope; no compatibility alias fields are required.
-- **FR-021**: The workflow MUST emit structured logs for skipped invalid/missing `downloadURL` entries and per-URL processing failures.
+- **FR-019**: The workflow MUST provide administrator-visible reporting for each per-URL processing failure during best-effort import triggering.
+- **FR-020**: Legacy distribution-ID-based hook payload fields MUST be removed in this feature scope through a documented deprecation transition, including an explicit migration period and versioned removal gate.
+- **FR-021**: The workflow MUST emit structured machine-readable logs for skipped invalid/missing `downloadURL` entries and per-URL processing failures.
 - **FR-022**: The workflow MUST produce a machine-readable `DispatchResult` for each dataset-save workflow execution, with counts for processed, skipped, and failed URLs.
 - **FR-023**: Existing `ResourceMapper`/resource mapping storage MUST remain the canonical registry for datastore resource identifiers, versions, perspectives, file paths, MIME types, and checksums.
 - **FR-024**: Dataset-save discovery MUST register or resolve valid distribution `downloadURL` values as `DataResource`/resource mapping records before triggering datastore imports/ETL processes.
@@ -163,4 +169,5 @@ As a module developer, I want import customization to remain straightforward so 
 - Referenced and non-referenced distributions produce the same effective dataset discovery structure for datastore discovery, except non-referenced distributions do not expose separate distribution UUIDs.
 - Existing queue and immediate execution modes remain operationally valuable and should be retained.
 - Full multi-importer runtime selection is deferred to future scope.
+- Legacy distribution-ID-based hook payload field removal follows a documented deprecation transition with a migration period and explicit versioned removal gate.
 - For planning artifacts in this feature, the quickstart ticket slices are the canonical work-package grouping; `tasks.md` should be reorganized to mirror those ticket boundaries rather than using a conflicting phase-first structure.
