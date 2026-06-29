@@ -27,24 +27,25 @@
 
 ---
 
-## Ticket 1: Pre-Reference Dataset Discovery in LifeCycle Flow
+## Ticket 1: Dataset-Save Resource Discovery and Registration in LifeCycle Flow
 
-**Goal**: Implement dataset-save discovery in the pre-reference lifecycle path using a reusable discovery contract.
+**Goal**: Implement dataset-save resource discovery and registration in the dataset presave lifecycle path, decoupled from the metadata referencing workflow, using a reusable discovery contract.
 
-**Independent Test**: Save datasets with referenced and non-referenced distribution structures and verify pre-reference discovery identifies valid `downloadURL` values while invalid/missing entries are skipped and reported.
+**Independent Test**: Save datasets with referenced and non-referenced distribution structures and verify dataset-save discovery identifies valid `downloadURL` values and registers them (triggering datastore processing) while invalid/missing entries are skipped and reported, regardless of whether distribution referencing is enabled.
 
 ### Tests for Ticket 1
 
-- [ ] T002 [P] Add dataset discovery fixture variants and lifecycle coverage for referenced/non-referenced distributions in `modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
+- [x] T002 [P] Add dataset discovery fixture variants and lifecycle coverage for referenced/non-referenced distributions in `modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
 - [ ] T003 [P] Add mixed-validity distribution fixture data (valid, missing, invalid, repeated downloadURL) in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
 - [ ] T004 [P] Add datastore subscriber fixture and contract coverage for multi-URL processing in `modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
 
 ### Implementation for Ticket 1
 
-- [ ] T018 [US1] Refactor pre-reference datastore trigger path to use metastore discovery service in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T019 [US1] Wire `LifeCycle::EVENT_PRE_REFERENCE` dataset metadata payload to existing datastore initiation flow in `modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
+- [ ] T018 [US1] Decouple datastore import triggering from the referencing/pre-reference path so registration no longer depends on distribution referencing being enabled, and ensure the triggering-property "new revision" decision is determined before resource registration in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [ ] T019 [US1] Add a dedicated dataset-save discovery + resource registration step in `LifeCycle::datasetPresave()` (before `referenceMetadata()`) that runs `DatasetResourceDiscovery` over top-level `$.distribution[]` and registers valid `downloadURL` values via `ResourceMapper`, independent of the referencing workflow, in `modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
+- [ ] T064 [US1] Make resource registration single-owner so the referencer consumes already-registered resources instead of re-registering during referencing (avoiding duplicate registration and version churn) in `modules/dkan_metastore/src/Reference/Referencer.php`
 
-**Checkpoint**: Dataset-save discovery runs from the pre-reference lifecycle path and hands off a shared discovery contract.
+**Checkpoint**: Dataset-save discovery and resource registration run from the dataset presave path, decoupled from referencing, and hand off a shared discovery contract.
 
 ---
 
@@ -216,7 +217,7 @@
 ### Ticket Dependencies
 
 - **Shared Foundation**: No dependency; blocks implementation work for all tickets.
-- **Ticket 1**: Depends on Shared Foundation for implementation tasks T018-T019, while fixture tasks T002-T004 can start earlier.
+- **Ticket 1**: Depends on Shared Foundation for implementation tasks T018-T019 and T064, while fixture tasks T002-T004 can start earlier.
 - **Ticket 2**: Depends on Shared Foundation and builds directly on Ticket 1 discovery handoff.
 - **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 initiation/logging behavior for end-to-end cache validation.
 - **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 2 resource registration behavior so DatasetInfo can surface discovered resources.
@@ -268,7 +269,7 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 ### MVP First (Tickets 1-2)
 
 1. Complete Shared Foundation.
-2. Deliver Ticket 1 dataset-save discovery in the pre-reference lifecycle flow.
+2. Deliver Ticket 1 dataset-save discovery and registration in the dataset presave lifecycle flow.
 3. Deliver Ticket 2 registration, initiation, logging, and summary reporting.
 4. Validate the combined Ticket 1 and Ticket 2 path independently before taking compatibility/reporting refactors.
 

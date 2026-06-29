@@ -8,11 +8,11 @@ Implement the minimal datastore change so dataset-save discovery triggers datast
 
 Each ticket is intended to be small enough for one developer to complete in a week or less with manual coding and review.
 
-### Ticket 1: Pre-Reference Dataset Discovery in LifeCycle Flow
+### Ticket 1: Dataset-Save Resource Discovery and Registration in LifeCycle Flow
 
 Scope:
-- Implement discovery where dataset saves already trigger datastore-related decisions: `LifeCycle::referenceMetadata()` -> `LifeCycle::EVENT_PRE_REFERENCE` -> `DatastoreSubscriber::onPreReference()`.
-- Add a dataset resource discovery helper used by the pre-reference handler to inspect top-level dataset `distribution` entries (`$.distribution[]`) before reference conversion and emit normalized resource candidates.
+- Implement discovery and resource registration in the dataset presave lifecycle path (`LifeCycle::datasetPresave()`), decoupled from the metadata referencing workflow, so datastore triggering does not depend on `property_list` distribution referencing being enabled.
+- Add a dataset resource discovery helper used by the presave step to inspect top-level dataset `distribution` entries (`$.distribution[]`) and emit normalized resource candidates, then register valid `downloadURL` values via `ResourceMapper` so the existing `EVENT_REGISTRATION` -> `DatastoreSubscriber::onRegistration()` import path runs.
 - Support referenced and non-referenced distribution structures with the same discovery logic.
 - Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and keep initiation orchestration in the existing datastore subscriber/service flow rather than introducing a parallel dispatch subsystem.
 - Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
@@ -20,7 +20,7 @@ Scope:
 
 Acceptance:
 - Unit tests cover referenced/non-referenced top-level distribution entries, repeated URLs, and invalid/missing `downloadURL` entries.
-- Subscriber/lifecycle tests verify discovery runs from the pre-reference event path during dataset presave.
+- Lifecycle tests verify discovery and registration run from the dataset presave path, decoupled from referencing, for both referenced and non-referenced distributions.
 - Contract tests verify downstream components consume the `ResourceDiscoveryResult` object (rather than re-discovering metadata) for trigger decisions and registration/import planning.
 
 ### Ticket 2: ResourceMapper Registration and Import Trigger Integration

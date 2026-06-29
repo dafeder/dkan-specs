@@ -12,6 +12,12 @@ Rationale: The most affected behavior is resource discovery when datasets are sa
 
 Alternatives considered: Distribution-save hook behavior was rejected because non-referenced distributions may not produce standalone distribution entities. Separate referenced/non-referenced discovery paths were rejected because the effective dataset structure is equivalent for discovery.
 
+## Decision: Decouple resource discovery/registration from the metadata referencing workflow
+
+Rationale: Resource registration currently happens as a side effect of referencing (`Referencer::distributionHandling()`), and the referencer only processes properties present in `property_list`. When distribution referencing is disabled (`property_list['distribution'] === '0'`), the `distribution` property is filtered out, so registration and datastore import triggering silently never run. Performing discovery and registration in `LifeCycle::datasetPresave()` (before `referenceMetadata()`), independent of referencing, ensures datastore initiation always occurs for valid `downloadURL` values regardless of referencing configuration.
+
+Alternatives considered: Keeping discovery/registration on the `EVENT_PRE_REFERENCE` path was rejected because it couples datastore initiation to optional metadata referencing. Triggering from a distribution-save hook was rejected for the same reason as above (non-referenced distributions may not produce distribution entities).
+
 ## Decision: Preserve existing dispatch order and non-deduplication semantics
 
 Rationale: The scoped feature aims to remove the distribution ID requirement without changing runtime behavior more than necessary. Dispatching each discovered valid `downloadURL` as encountered preserves current behavior and keeps implementation ticket scope smaller.

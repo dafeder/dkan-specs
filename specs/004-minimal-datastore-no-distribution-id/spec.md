@@ -41,6 +41,10 @@
 - Q: How should legacy distribution-ID-based hook payload field removal be managed? -> A: Through a documented deprecation transition with an explicit migration period and versioned removal gate.
 - Note: For this phase, this session supersedes the Session 2026-06-16 datastore dispatch-namespace/class guidance.
 
+### Session 2026-06-24
+
+- Q: Should dataset-save resource discovery and registration be tied to the metadata referencing workflow (`EVENT_PRE_REFERENCE`)? -> A: No. Discovery and resource registration must run in the dataset presave lifecycle path, decoupled from referencing, because distribution referencing is optional (`property_list` may disable it) and must not gate datastore initiation.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Dataset-Save Discovery and Import Triggering Without Distribution IDs (Priority: P1)
@@ -113,7 +117,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-008**: Import customization MUST support stage-level override behavior with default fallback for non-overridden stages.
 - **FR-009**: This feature MUST keep importer selection to one globally configured active importer for runtime execution in this phase.
 - **FR-010**: Priority-based multi-plugin importer selection MUST remain out of scope for this feature version.
-- **FR-011**: Metastore workflow logic for datastore initiation MUST run through dataset-save hooks or events rather than requiring distribution-save hooks.
+- **FR-011**: Metastore workflow logic for datastore initiation MUST run through dataset-save lifecycle handling (dataset presave) rather than requiring distribution-save hooks, and MUST be independent of the metadata referencing workflow so initiation occurs whether or not distribution referencing is enabled.
 - **FR-012**: On dataset save, the workflow MUST inspect the top-level dataset `distribution` array (`$.distribution[]`) to identify valid `downloadURL` values for both referenced and non-referenced distribution structures.
 - **FR-013**: The workflow MUST trigger datastore processing for all valid `downloadURL` values discovered during discovery.
 - **FR-014**: The workflow MUST preserve existing import-triggering behavior by processing discovered `downloadURL` values as encountered, without introducing new deduplication requirements in this scoped feature.
