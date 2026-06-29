@@ -49,6 +49,7 @@ As a DKAN developer, I want schema declarations to define references and datasto
 1. **Given** a schema declaration identifies a property as a schema reference, **When** metadata is saved, **Then** that property is processed using the declared referenced schema.
 2. **Given** a schema declaration identifies a property as a resource reference, **When** metadata is saved, **Then** that property is processed using the declared resource-reference behavior.
 3. **Given** a schema declaration identifies a property as a datastore import trigger, **When** that property changes on update, **Then** the datastore import trigger behavior runs for affected resources.
+4. **Given** dependent DKAN logic requires the effective data dictionary, **When** it uses the schema module's declared data-dictionary resolution method, **Then** the same data dictionary is resolved consistently for all in-scope dependent logic.
 
 ---
 
@@ -95,6 +96,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - If `docroot/schema/collections` exists, legacy filesystem schema discovery wins and module YAML declarations are ignored.
 - A declaration omits optional UI schema information.
 - A schema declaration changes while existing metadata records already use earlier behavior.
+- Dependent logic requests a data dictionary in a context where no applicable declared dictionary can be resolved.
 
 ## Requirements *(mandatory)*
 
@@ -132,6 +134,8 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-029**: The system MUST provide an administrator-visible view or report showing all available declarations for each schema machine name, the selected active declaration, and the reason it won.
 - **FR-030**: Administrator-visible declaration validation messages MUST identify the invalid declaration, the reason it was excluded, and any remaining active schema selected for the affected machine name.
 - **FR-031**: This phase MUST model validation and UI schema locations as normalized module-relative paths directly on schema declarations and MUST NOT require a separate source-type abstraction.
+- **FR-032**: A schema module MUST provide a data-dictionary resolution method that dependent DKAN logic can invoke to resolve the effective data dictionary for in-scope business behavior.
+- **FR-033**: Data-dictionary resolution through the schema module method MUST be deterministic for equivalent inputs and MUST return actionable errors when no declared data dictionary can be resolved.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -141,6 +145,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **UI Schema**: Optional form-specific schema data loaded from a module-relative declaration path and used for metadata form rendering and editing experience.
 - **Reference Definition**: Declarative rule that maps a property to schema, identifier, resource, or future reference behavior.
 - **Trigger Definition**: Declarative rule that maps a property change to named system behavior such as datastore import.
+- **Data Dictionary Resolution Method**: A schema module-provided capability used by dependent DKAN logic to resolve the effective data dictionary for a given business context.
 - **Default Schema Module**: Module-provided package of DKAN's default DCAT-US-style schemas and declarations.
 - **Custom Schema Module**: Site-owned module that declares custom schemas and can replace or extend default schema behavior according to documented rules.
 - **Schema Selection Report**: Administrator-visible output that lists discovered declarations, active selections, weights, fallback ordering, and conflict-resolution reasons.
@@ -163,6 +168,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **SC-011**: For 100% of duplicate schema machine-name scenarios in scope, schema discovery selects one active schema and exposes the selected declaration and selection reason in administrator-visible reporting.
 - **SC-012**: For 100% of environments where `docroot/schema/collections` exists, schema discovery uses filesystem schemas instead of module YAML declarations and reports that source selection to administrators.
 - **SC-013**: In 100% of invalid-declaration scenarios in scope, valid declarations remain discoverable and the invalid declaration is excluded with an administrator-visible warning.
+- **SC-014**: In 100% of in-scope dependent-logic scenarios covered by automated tests, data dictionary resolution is performed through the schema module-provided method and produces consistent results for equivalent inputs.
 
 ## Assumptions
 

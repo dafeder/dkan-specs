@@ -34,3 +34,4 @@
 - Validation passed on first review.
 - The specification intentionally names YAML declarations and module-owned schema declarations because those are part of the requested product behavior, not an incidental implementation choice.
 - No clarification questions are required before planning.
+- Re-validated on 2026-06-29 after adding data-dictionary resolution requirements; all checklist items remain complete.
