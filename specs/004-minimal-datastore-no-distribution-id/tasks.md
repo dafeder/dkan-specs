@@ -36,9 +36,9 @@
 ### Tests for Ticket 1
 
 - [x] T002 [P] Add dataset discovery fixture variants and lifecycle coverage for referenced/non-referenced distributions in `modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
-- [ ] T003 [P] Add mixed-validity distribution fixture data (valid, missing, invalid, repeated downloadURL) for dataset presave discovery/registration coverage in `modules/dkan_metastore/tests/src/Kernel/LifeCycle/LifeCycleTest.php`
-- [ ] T066 [P] Add dual-mode (`distribution` vs `0`) `describedBy` data-dictionary API behavior coverage in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
-- [ ] T004 [P] Add datastore subscriber fixture and contract coverage for multi-URL processing in `modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
+- [x] T003 [P] Add mixed-validity distribution fixture data (valid, missing, invalid, repeated downloadURL) for dataset presave discovery/registration coverage in `modules/dkan_metastore/tests/src/Kernel/LifeCycle/LifeCycleTest.php`
+- [x] T066 [P] Add dual-mode (`distribution` vs `0`) `describedBy` data-dictionary API behavior coverage in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
+- [x] T004 [P] Add datastore subscriber fixture and contract coverage for multi-URL processing in `modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
 
 ### Implementation for Ticket 1
 
