@@ -1,44 +1,59 @@
 # Implementation Plan: Minimal Datastore Without Distribution ID Requirement
 
-**Branch**: `004-minimal-datastore-no-distribution-id` | **Date**: 2026-06-15 | **Spec**: `specs/004-minimal-datastore-no-distribution-id/spec.md`
-**Input**: Feature specification from `/specs/004-minimal-datastore-no-distribution-id/spec.md`
+**Branch**: `004-minimal-datastore-no-distribution-id` | **Date**: 2026-06-30 | **Spec**: `specs/004-minimal-datastore-no-distribution-id/spec.md`
+**Input**: Feature specification from `specs/004-minimal-datastore-no-distribution-id/spec.md`
 
 ## Summary
 
-Remove distribution UUIDs as required runtime keys for datastore initiation and downstream status/query workflows by shifting initiation to dataset-save discovery of distribution downloadURL values, while preserving ResourceMapper/DataResource, ETL stage behavior, queue/immediate execution modes, and single-active-importer modularity. The implementation keeps compatibility inputs where practical, but operational flow becomes dataset plus discovered resource driven.
+Remove distribution IDs as required runtime keys while preserving current datastore behavior wherever practical. Resource discovery/registration must run from dataset presave (not referencing-gated paths), and compatibility surfaces (cache, API/Drush/SQL/admin, post-import status, cleanup, migration docs) must continue to work for both referenced and non-referenced distribution structures. This plan now explicitly includes data-dictionary `describedBy` handling as a required non-regression when distribution referencing is disabled.
 
 ## Technical Context
 
-**Language/Version**: PHP 8.x on Drupal 10 module architecture
-**Primary Dependencies**: DKAN modules (`dkan_metastore`, `dkan_datastore`, `dkan_common`), Drupal service container/event system, existing ResourceMapper/DataResource services
-**Storage**: Drupal entities and metastore resource mapping records; datastore table storage remains unchanged
-**Testing**: PHPUnit unit, kernel, and functional suites in DKAN module test directories; PHPCS for coding standards
-**Target Platform**: DKAN Drupal application runtime (web + CLI/Drush)
-**Project Type**: Drupal module feature update across metastore/datastore/common
-**Performance Goals**: Preserve current dispatch characteristics; no new deduplication; best-effort multi-URL continuation
-**Constraints**: Keep class/method surfaces stable where practical; no multi-importer priority selection; no datastore-owned canonical resource model redesign
-**Scale/Scope**: Feature-scoped refactor focused on dataset-save dispatch, compatibility surfaces, cache invalidation, status/reporting, and cleanup behavior
+**Language/Version**: PHP 8.x (Drupal 10 module code)  
+**Primary Dependencies**: Drupal core services/events, DKAN metastore/datastore modules, ResourceMapper/DataResource flow  
+**Storage**: Drupal entity + DKAN resource mapping storage (existing)  
+**Testing**: PHPUnit (unit, kernel, functional), PHPCS  
+**Target Platform**: DKAN on Drupal (server-side PHP)  
+**Project Type**: Backend modules + docs/spec artifacts  
+**Performance Goals**: Preserve current queue/immediate behavior and dispatch throughput semantics; no new dedup or batching  
+**Constraints**: Keep architectural churn low; preserve existing datastore initiation/status surfaces in this phase; distribution references optional but not required operational keys  
+**Scale/Scope**: Scoped 004 feature only; no full datastore ownership redesign
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Principle I (Metadata-First Design): PASS
-  - Feature is metadata-driven and centered on dataset distribution discovery and schema-compatible metadata handling.
-- Principle II (Modular Component Architecture): PASS
-  - Changes preserve metastore/datastore separation and rely on documented service/event integration, not hidden data coupling.
-- Principle III (API-Driven Integration): PASS WITH CONSTRAINTS
-  - Public API/SQL/Drush compatibility surfaces are explicitly tracked for migration and behavior updates.
-- Principle IV (Standards Compliance & Data Quality): PASS
-  - Invalid/missing downloadURL entries are explicitly skipped/reported; structured observability and machine-readable summaries are required.
-- Principle V (Extensibility Through Drupal): PASS
-  - Importer modularity and stage-level override behavior are retained via existing Drupal extension patterns.
-- Principle VI (Test Coverage & Documentation Excellence): PASS WITH REQUIRED WORK
-  - Tasks include unit/kernel/functional coverage and migration docs; completion requires executing and recording required suite results.
+- Principle I (Metadata-first): PASS. Dataset/distribution metadata handling and `describedBy` data-dictionary behavior are explicitly specified and tested.
+- Principle II (Modular architecture): PASS. Changes preserve metastore/datastore boundaries and use documented internal service/event contracts.
+- Principle III (API-driven integration): PASS. External surfaces remain API/Drush/UI consumers; operational key migration is documented.
+- Principle IV (Standards and quality): PASS. Non-referenced distribution and data-dictionary handling are tested; failures are reported with administrator-facing diagnostics.
+- Principle V (Extensibility): PASS. Existing extension points remain; migration notes cover payload changes.
+- Principle VI (Tests and docs): PASS with enforcement. Tasks require unit/kernel/functional coverage and migration documentation before completion.
 
-Post-design re-check:
-- Research, data model, contracts, and quickstart artifacts cover discovery, compatibility, cache invalidation, reporting, and cleanup paths.
-- No constitutional violations identified; implementation must complete structured logging and migration documentation tasks to preserve Principle VI compliance.
+## Phase 0: Research
+
+Research decisions captured in `research.md` and resolved for this planning pass:
+
+- Keep `ResourceMapper` as scoped canonical registry.
+- Move discovery/registration to dataset presave and decouple from referencing.
+- Preserve non-deduplicated URL processing semantics.
+- Use best-effort per-URL trigger behavior with structured logs + machine-readable summary.
+- Accept distribution references as compatibility metadata only.
+- Add explicit non-regression decision: `describedBy` data-dictionary validation/normalization remains correct when `property_list['distribution']` disables distribution referencing.
+
+## Phase 1: Design and Contracts
+
+Design artifacts for this feature:
+
+- `data-model.md`: dataset/distribution/resource entities and validation constraints.
+- `contracts/dataset-save-dispatch.md`: dataset-save discovery + initiation contract.
+- `contracts/compatibility-surfaces.md`: compatibility-sensitive API/CLI/admin surfaces.
+- `quickstart.md`: ticket slicing, acceptance checks, and implementation sequencing.
+
+Additional design focus for this pass:
+
+- Explicitly cover `distribution[].describedBy` data-dictionary behavior for referenced and non-referenced distributions.
+- Ensure data-dictionary URI normalization and validation are not gated by distribution referencing settings.
 
 ## Project Structure
 
@@ -51,47 +66,54 @@ specs/004-minimal-datastore-no-distribution-id/
 ├── data-model.md
 ├── quickstart.md
 ├── contracts/
-│   ├── compatibility-surfaces.md
-│   └── dataset-save-dispatch.md
+│   ├── dataset-save-dispatch.md
+│   └── compatibility-surfaces.md
 └── tasks.md
 ```
 
-### Source Code (repository root)
+### Source Code (DKAN repository root)
 
 ```text
 modules/dkan_metastore/
 ├── src/LifeCycle/
-│   └── ResourceDiscovery/
-├── src/Plugin/QueueWorker/
+├── src/Reference/
 └── tests/src/
+    ├── Unit/LifeCycle/ResourceDiscovery/
+    ├── Functional/Api1/
+    └── Functional/
 
 modules/dkan_datastore/
 ├── src/EventSubscriber/
 ├── src/Controller/
-├── src/Dispatch/
-├── src/Service/
-├── src/SqlEndpoint/
-├── src/Form/
 ├── src/Drush/Commands/
+├── src/Service/
 └── tests/src/
+    ├── Unit/
+    ├── Kernel/
+    └── Functional/
 
 modules/dkan_common/
 ├── src/
-└── tests/src/
+└── tests/src/Kernel/
 
 docs/source/
 ```
 
-**Structure Decision**: Use the existing DKAN multi-module Drupal layout. Implement behavior changes primarily in `dkan_datastore` and `dkan_metastore`, with shared reporting/status data shape adjustments in `dkan_common`, and migration/update documentation in DKAN docs. Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/`. Datastore dispatch-subsystem namespace/service refactors are deferred for this phase, and existing datastore initiation flow remains in place.
+**Structure Decision**: Keep existing DKAN module structure and service/event flow. Add only scoped lifecycle/contract updates needed for dataset-save discovery, dispatch triggering, compatibility surfaces, and explicit `describedBy` non-regression behavior.
 
 ## Delivery Phases
 
-- **Phase 0**: Shared Foundation
-- **Phase 1**: Ticket 1 and Ticket 2 (MVP)
-- **Phase 2**: Ticket 3 through Ticket 5 (cache, compatibility, reporting)
-- **Phase 3**: Ticket 6 through Ticket 8 (modularity regression, cleanup, migration guidance)
-- **Release Gate**: Validation and quality checks
+1. Shared Foundation complete and validated.
+2. Ticket 1-2 (MVP): dataset-save discovery/registration + dispatch triggering.
+3. Ticket 3-5: cache, compatibility surfaces, dataset info, status/admin continuity.
+4. Ticket 6-8: importer regression, cleanup/orphan behavior, migration guidance.
+5. Release validation: PHPUnit + PHPCS evidence captured in quickstart.
+
+## Post-Design Constitution Re-Check
+
+- Re-check status: PASS.
+- No constitutional violations introduced by adding explicit data-dictionary/non-referenced coverage.
 
 ## Complexity Tracking
 
-No constitutional violations require exception handling at this stage.
+No constitution violations requiring justification in this planning pass.

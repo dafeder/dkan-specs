@@ -45,6 +45,10 @@
 
 - Q: Should dataset-save resource discovery and registration be tied to the metadata referencing workflow (`EVENT_PRE_REFERENCE`)? -> A: No. Discovery and resource registration must run in the dataset presave lifecycle path, decoupled from referencing, because distribution referencing is optional (`property_list` may disable it) and must not gate datastore initiation.
 
+### Session 2026-06-30
+
+- Q: Must `distribution[].describedBy` data-dictionary URI validation/normalization continue to work when distribution referencing is disabled (`property_list['distribution'] = '0'`)? -> A: Yes. Data-dictionary handling is required for both referenced and non-referenced distribution structures and must not be gated by distribution referencing settings.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Dataset-Save Discovery and Import Triggering Without Distribution IDs (Priority: P1)
@@ -102,6 +106,7 @@ As a module developer, I want import customization to remain straightforward so 
 - Distribution entries with invalid or missing `downloadURL` values are skipped and reported while valid entries continue through import triggering.
 - During multi-`downloadURL` import triggering, failure for one URL does not block processing of remaining URLs; each failure is logged/reported.
 - Dashboard/reporting views must not require distribution IDs to render resource rows or status values.
+- Data-dictionary `describedBy` URI validation and normalization must continue to work for both referenced and non-referenced distributions.
 
 ## Requirements *(mandatory)*
 
@@ -137,6 +142,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-028**: Resource cleanup and purge behavior MUST remove obsolete resource mappings and datastore artifacts from dataset/downloadURL context without depending on orphaned distribution reference entities as the only cleanup trigger.
 - **FR-029**: Post-import status/result creation MUST use datastore resource mapping or dataset/downloadURL context rather than requiring a distribution payload.
 - **FR-030**: Dashboard and administrator reporting flows MUST render resource rows and status for both distribution-backed and URL-only discovered resources without requiring distribution IDs.
+- **FR-031**: Data-dictionary discovery/validation behavior for `distribution[].describedBy` MUST work for both referenced and non-referenced distributions, and MUST NOT depend on distribution referencing being enabled in metastore `property_list` settings.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -165,6 +171,7 @@ As a module developer, I want import customization to remain straightforward so 
 - **SC-011**: Datastore summary/query/import-status cache dependencies and invalidations can be exercised without runtime distribution-ID lookup.
 - **SC-012**: Resource cleanup tests verify obsolete mappings and datastore artifacts are removed from dataset/downloadURL context when distribution reference entities are absent.
 - **SC-013**: For dataset resources lacking distribution IDs, 100% of in-scope dashboard/reporting views render resource rows and status values without runtime errors.
+- **SC-014**: For datasets using referenced and non-referenced distributions, `describedBy` data-dictionary URI normalization/validation behavior passes equivalently, including update/patch flows.
 
 ## Assumptions
 

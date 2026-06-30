@@ -23,6 +23,7 @@ Represents a distribution object inside the dataset structure.
 
 Fields:
 - `downloadURL`: Source URL or resource identifier candidate discovered during discovery.
+- `describedBy`: Optional data-dictionary URI/URL for schema reference.
 - `identifier`: Optional distribution UUID when the distribution is referenced.
 - `format`/`mediaType`: Optional metadata used to infer MIME type.
 - `title`: Optional display metadata.
@@ -34,6 +35,7 @@ Relationships:
 
 Validation rules:
 - `downloadURL` must be present and valid enough for existing ResourceMapper/DataResource registration.
+- `describedBy` validation/normalization behavior must remain equivalent for referenced and non-referenced distributions.
 - Invalid or missing `downloadURL` entries are skipped and reported.
 - Repeated `downloadURL` values are processed as encountered; no new deduplication is required.
 

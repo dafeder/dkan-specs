@@ -42,6 +42,12 @@ Rationale: Code review found additional distribution-ID assumptions in cache inv
 
 Alternatives considered: Treating these as incidental cleanup was rejected because they affect acceptance testing and migration guidance. Deferring all secondary surfaces was rejected because the spec requires import/query workflows to avoid runtime distribution dereference in normal operation.
 
+## Decision: Keep `describedBy` data-dictionary handling independent from distribution referencing mode
+
+Rationale: Functional testing shows a non-referenced variant of `DistributionHandlingTest::testDescribedByDataDictionary` can fail when distribution referencing is disabled via `property_list['distribution'] = '0'`. This indicates `describedBy` URI validation/normalization behavior is still coupled to optional distribution referencing paths. For this feature, referenced/non-referenced distribution structures must retain equivalent `describedBy` behavior because distribution references are compatibility metadata, not operational gates.
+
+Alternatives considered: Deferring `describedBy` behavior to a later cleanup was rejected because it is a direct runtime regression in non-referenced mode. Restricting `describedBy` support to referenced distributions was rejected because it contradicts the feature's non-referenced compatibility objective.
+
 ## Decision: Keep ticket scope below one manual week by slicing by surface area
 
 Rationale: The implementation can be split into independent sub-week tickets: dataset discovery/summary model, ResourceMapper registration, dispatch integration, observability, cache dependency updates, reporting/post-import updates, cleanup/orphan updates, and migration/test documentation.

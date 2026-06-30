@@ -31,12 +31,12 @@
 
 **Goal**: Implement dataset-save resource discovery and registration in the dataset presave lifecycle path, decoupled from the metadata referencing workflow, using a reusable discovery contract.
 
-**Independent Test**: Save datasets with referenced and non-referenced distribution structures and verify dataset-save discovery identifies valid `downloadURL` values and registers them (triggering datastore processing) while invalid/missing entries are skipped and reported, regardless of whether distribution referencing is enabled.
+**Independent Test**: Save datasets with referenced and non-referenced distribution structures and verify dataset-save discovery identifies valid `downloadURL` values and registers them (triggering datastore processing) while invalid/missing entries are skipped and reported, regardless of whether distribution referencing is enabled; additionally verify `distribution[].describedBy` data-dictionary handling behaves equivalently in both modes.
 
 ### Tests for Ticket 1
 
 - [x] T002 [P] Add dataset discovery fixture variants and lifecycle coverage for referenced/non-referenced distributions in `modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
-- [ ] T003 [P] Add mixed-validity distribution fixture data (valid, missing, invalid, repeated downloadURL) in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
+- [ ] T003 [P] Add mixed-validity distribution fixture data (valid, missing, invalid, repeated downloadURL) and dual-mode (`distribution` vs `0`) `describedBy` data-dictionary coverage in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
 - [ ] T004 [P] Add datastore subscriber fixture and contract coverage for multi-URL processing in `modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
 
 ### Implementation for Ticket 1
@@ -44,8 +44,9 @@
 - [ ] T018 [US1] Decouple datastore import triggering from the referencing/pre-reference path so registration no longer depends on distribution referencing being enabled, and ensure the triggering-property "new revision" decision is determined before resource registration in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 - [ ] T019 [US1] Add a dedicated dataset-save discovery + resource registration step in `LifeCycle::datasetPresave()` (before `referenceMetadata()`) that runs `DatasetResourceDiscovery` over top-level `$.distribution[]` and registers valid `downloadURL` values via `ResourceMapper`, independent of the referencing workflow, in `modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
 - [ ] T064 [US1] Make resource registration single-owner so the referencer consumes already-registered resources instead of re-registering during referencing (avoiding duplicate registration and version churn) in `modules/dkan_metastore/src/Reference/Referencer.php`
+- [ ] T065 [US1] Ensure `distribution[].describedBy` data-dictionary URI validation/normalization is not gated by distribution referencing mode so non-referenced distributions retain existing behavior in `modules/dkan_metastore/src/Reference/Referencer.php`
 
-**Checkpoint**: Dataset-save discovery and resource registration run from the dataset presave path, decoupled from referencing, and hand off a shared discovery contract.
+**Checkpoint**: Dataset-save discovery and resource registration run from the dataset presave path, decoupled from referencing, hand off a shared discovery contract, and preserve `describedBy` data-dictionary behavior in referenced and non-referenced modes.
 
 ---
 

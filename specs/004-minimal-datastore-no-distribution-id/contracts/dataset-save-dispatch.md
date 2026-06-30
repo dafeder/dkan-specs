@@ -31,6 +31,7 @@ Rules:
 7. Continue after per-entry initiation failures.
 8. Emit structured logs for skipped and failed entries.
 9. Use existing datastore initiation/status surfaces for downstream observability; no new initiation-summary contract object is required in this phase.
+10. Preserve `distribution[].describedBy` data-dictionary URI validation/normalization behavior for referenced and non-referenced distribution configurations; this behavior must not depend on distribution referencing mode.
 
 ## Intermediate Output
 

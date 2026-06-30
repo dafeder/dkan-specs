@@ -17,10 +17,12 @@ Scope:
 - Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and keep initiation orchestration in the existing datastore subscriber/service flow rather than introducing a parallel dispatch subsystem.
 - Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
 - Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, and (b) executing resource registration and import-trigger work while relying on existing datastore status surfaces.
+- Preserve `distribution[].describedBy` data-dictionary URI validation/normalization behavior for both referenced and non-referenced distributions, independent of whether distribution referencing is enabled.
 
 Acceptance:
 - Unit tests cover referenced/non-referenced top-level distribution entries, repeated URLs, and invalid/missing `downloadURL` entries.
 - Lifecycle tests verify discovery and registration run from the dataset presave path, decoupled from referencing, for both referenced and non-referenced distributions.
+- Functional API tests verify `describedBy` data-dictionary behavior (absolute URL persistence, `dkan://` normalization, invalid URI rejection, and foreign URL pass-through) for both referenced and non-referenced distribution configurations.
 - Contract tests verify downstream components consume the `ResourceDiscoveryResult` object (rather than re-discovering metadata) for trigger decisions and registration/import planning.
 
 ### Ticket 2: ResourceMapper Registration and Import Trigger Integration
