@@ -4,6 +4,8 @@
 
 Implement the minimal datastore change so dataset-save discovery triggers datastore processing from distribution `downloadURL` values without requiring distribution UUIDs, while preserving current ResourceMapper, ETL, queue, and importer behavior where practical.
 
+Correction applied in this planning pass: dataset-save handling must not stop at resource registration. It must also restore reference mapping from discovered `downloadURL` values to compound datastore identifiers used by downstream status/reporting/query surfaces.
+
 ## Suggested Manual Ticket Slices
 
 Each ticket is intended to be small enough for one developer to complete in a week or less with manual coding and review.
@@ -11,24 +13,23 @@ Each ticket is intended to be small enough for one developer to complete in a we
 ### Ticket 1: Dataset-Save Resource Discovery and Registration in LifeCycle Flow
 
 Scope:
-- Implement discovery and resource registration in the dataset presave lifecycle path (`LifeCycle::datasetPresave()`), decoupled from the metadata referencing workflow, so datastore triggering does not depend on `property_list` distribution referencing being enabled.
-- Add a dataset resource discovery helper used by the presave step to inspect top-level dataset `distribution` entries (`$.distribution[]`) and emit normalized resource candidates, then register valid `downloadURL` values via `ResourceMapper` so the existing `EVENT_REGISTRATION` -> `DatastoreSubscriber::onRegistration()` import path runs.
-- Support referenced and non-referenced distribution structures with the same discovery logic.
-- Place metastore-specific discovery classes under `dkan_metastore/src/LifeCycle/ResourceDiscovery/` and keep initiation orchestration in the existing datastore subscriber/service flow rather than introducing a parallel dispatch subsystem.
-- Emit a normalized `ResourceDiscoveryResult` (valid discovered resource values, skipped entries, invalid entries, and reasons) in encounter order for downstream trigger/logging tickets.
-- Use the emitted `ResourceDiscoveryResult` as the single input contract for: (a) deciding whether datastore-trigger criteria are met, and (b) executing resource registration and import-trigger work while relying on existing datastore status surfaces.
+- Move resource discovery ownership to the metastore Reference layer and introduce an explicit mapping step that maps discovered top-level `distribution[].downloadURL` entries to compound datastore identifiers.
+- Invoke the Reference-owned discovery/reference-mapping flow from dataset presave orchestration so triggering remains independent of optional `property_list` distribution-reference toggles.
+- Emit a normalized `ResourceDiscoveryResult` containing valid discovered resources, skipped entries with reasons, and encounter order metadata.
+- Register valid discovered resources via `ResourceMapper` so the existing `EVENT_REGISTRATION` -> `DatastoreSubscriber::onRegistration()` import path runs.
+- Make discovered resources single-owner so downstream components consume discovered resource outputs rather than re-discovering/re-registering.
 - Preserve `distribution[].describedBy` data-dictionary URI validation/normalization behavior for both referenced and non-referenced distributions, independent of whether distribution referencing is enabled.
 
 Acceptance:
 - Unit tests cover referenced/non-referenced top-level distribution entries, repeated URLs, and invalid/missing `downloadURL` entries.
-- Lifecycle tests verify discovery and registration run from the dataset presave path, decoupled from referencing, for both referenced and non-referenced distributions.
+- Lifecycle/kernel tests verify dataset presave invokes Reference-owned discovery/reference-mapping and registration for both referenced and non-referenced distributions.
 - Functional API tests verify `describedBy` data-dictionary behavior (absolute URL persistence, `dkan://` normalization, invalid URI rejection, and foreign URL pass-through) for both referenced and non-referenced distribution configurations.
-- Contract tests verify downstream components consume the `ResourceDiscoveryResult` object (rather than re-discovering metadata) for trigger decisions and registration/import planning.
+- Contract tests verify downstream components consume the discovered-resource-bearing `ResourceDiscoveryResult` object (rather than re-discovering metadata) for trigger decisions and registration/import planning.
 
 ### Ticket 2: ResourceMapper Registration and Import Trigger Integration
 
 Scope:
-- Register or resolve valid discovered resource values as `DataResource`/ResourceMapper records.
+- Register or resolve valid discovered resources as `DataResource`/ResourceMapper records.
 - Trigger existing datastore processing from resolved resources.
 - Preserve queue-driven default and immediate override behavior.
 - Handle import-trigger failures gracefully (best-effort: one URL failure does not block others).
@@ -45,7 +46,7 @@ Scope:
 	- `AbstractQueryController::extractMetastoreDependencies()`, `queryResource()`, and `queryDatasetResource()` (currently distribution-heavy dependency arrays passed to `cachedJsonResponse()`).
 	- `ImportController::summary()` / `getDependencies()` and SQL endpoint query responses (currently inferring or tagging `distribution` dependencies).
 	- `QueryDownloadController` streaming responses (currently max-age header caching via `addCacheHeaders()`, without metastore dependency tags).
-- Define the target dependency strategy per endpoint family (query JSON, SQL endpoint JSON, import summary/status, streaming downloads) so invalidation is correct when only dataset + discovered URLs are available.
+- Define the target dependency strategy per endpoint family (query JSON, SQL endpoint JSON, import summary/status, streaming downloads) so invalidation is correct when only dataset + discovered-resource-derived compound identifiers are available.
 - Update invalidation triggers so cache entries are invalidated when discovered URL sets, resource mappings, or import outcomes change, without requiring resource-to-distribution-to-dataset resolution.
 - Keep distribution-reference-based dependencies as optional backward-compatible augmentation only when distribution references exist; they can add extra invalidation links, but they must not be required for invalidation correctness.
 - Document which cache tags/keys are invalidated by dataset changes vs. resource/import state changes.
@@ -64,13 +65,13 @@ Scope:
 
 Acceptance:
 - Dashboard correctly displays resources from whichever data model is chosen.
-- Integration tests cover both dataset structures.
+- Integration tests cover both dataset structures and discovered-resource identifier continuity.
 
 ### Ticket 5: API, Drush, SQL Endpoint, and Admin Compatibility Review
 
 Scope:
 - Audit paths that accept or infer distribution IDs.
-- Move operational flows to resource/dataset identifiers where needed.
+- Move operational flows to discovered-resource/dataset identifiers where needed.
 - Explicitly cover dashboard/reporting continuity for URL-only resources where distribution IDs are absent.
 - Treat DatasetInfo output from Ticket 4 as an input dependency for dashboard/reporting work.
 - Modify `PostImportResultFactory::initializeFromDistribution()` to accept either distribution-based lookups (existing) or dataset+resource_url/resource-identifier (new) because the affected status flows are primarily consumed through admin and Drush interfaces.
@@ -136,6 +137,7 @@ This deferred work keeps 004 focused on the minimal refactor and lets logging in
 ## Planning Notes
 
 - Keep `ResourceMapper` as the resource registry.
+- Keep downloadURL -> compound datastore identifier mapping within discovered resources as a first-class reference contract.
 - Do not introduce datastore-owned canonical resource IDs in this feature; that belongs to the broader decoupled datastore work.
 - Do not add priority-based multi-importer selection.
 - Do not deduplicate repeated discovered URLs. (?)

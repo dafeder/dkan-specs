@@ -1,61 +1,49 @@
 # Research: Minimal Datastore Without Distribution ID Requirement
 
-## Decision: Keep ResourceMapper/DataResource as the scoped resource registry
+## Decision: Keep ResourceMapper/DataResource as the canonical runtime registry
 
-Rationale: Current metastore reference handling registers distribution `downloadURL` values through `ResourceMapper`, and datastore import/localize flows already consume `DataResource` identifiers, versions, perspectives, file paths, MIME types, and checksums. Keeping this registry preserves the existing ETL mechanics while removing distribution UUIDs as required operational keys.
+Rationale: The corrected flow still needs stable datastore resource identity, version, and perspective handling. Existing `ResourceMapper` + `DataResource` behavior already defines those rules and remains the least disruptive path while removing mandatory distribution-ID runtime keys.
 
-Alternatives considered: Replacing ResourceMapper with a new canonical datastore resource model was rejected for this scoped feature because it belongs to the broader decoupled datastore architecture. Continuing to use distribution UUIDs as required keys was rejected because it fails non-referenced distribution workflows.
+Alternatives considered: Introducing a new datastore-owned registry was rejected as out-of-scope architecture churn. Reverting to distribution UUID as the operational key was rejected because it fails non-referenced distribution workflows.
 
-## Decision: Initiate datastore processing from dataset-save discovery
+## Decision: Restore reference mapping from `downloadURL` to compound datastore identifier
 
-Rationale: The most affected behavior is resource discovery when datasets are saved. Both referenced and non-referenced distribution structures expose effective `distribution[].downloadURL` values after dataset handling, except non-referenced distributions do not have their own distribution UUIDs. A single recursive discovery pass avoids separate logic branches and supports both shapes.
+Rationale: The prior workflow relied on both registration and reference mapping, not registration alone. The new implementation direction must restore the missing step that links each discovered `downloadURL` to the compound datastore identifier used by downstream status/reporting/query flows.
 
-Alternatives considered: Distribution-save hook behavior was rejected because non-referenced distributions may not produce standalone distribution entities. Separate referenced/non-referenced discovery paths were rejected because the effective dataset structure is equivalent for discovery.
+Alternatives considered: Registration-only discovery was rejected because it loses identity semantics needed by compatibility surfaces. Late reconstruction of references from mapping tables was rejected because it creates ambiguous lookups and duplicate churn risk.
 
-## Decision: Decouple resource discovery/registration from the metadata referencing workflow
+## Decision: Move discovery ownership to the Reference layer while keeping dataset-presave invocation
 
-Rationale: Resource registration currently happens as a side effect of referencing (`Referencer::distributionHandling()`), and the referencer only processes properties present in `property_list`. When distribution referencing is disabled (`property_list['distribution'] === '0'`), the `distribution` property is filtered out, so registration and datastore import triggering silently never run. Performing discovery and registration in `LifeCycle::datasetPresave()` (before `referenceMetadata()`), independent of referencing, ensures datastore initiation always occurs for valid `downloadURL` values regardless of referencing configuration.
+Rationale: Discovery and reference mapping are metadata-reference responsibilities and belong under metastore Reference concerns. However, invocation still must occur from dataset presave orchestration so workflow initiation is not gated by optional distribution referencing toggles.
 
-Alternatives considered: Keeping discovery/registration on the `EVENT_PRE_REFERENCE` path was rejected because it couples datastore initiation to optional metadata referencing. Triggering from a distribution-save hook was rejected for the same reason as above (non-referenced distributions may not produce distribution entities).
+Alternatives considered: LifeCycle-only discovery service ownership was rejected because it separates discovery from the reference contract it must produce. Running only inside configurable property-list reference handlers was rejected because disabling distribution reference processing can suppress required datastore initiation.
 
-## Decision: Preserve existing dispatch order and non-deduplication semantics
+## Decision: Keep top-level `$.distribution[]` as the discovery scope and preserve encounter-order semantics
 
-Rationale: The scoped feature aims to remove the distribution ID requirement without changing runtime behavior more than necessary. Dispatching each discovered valid `downloadURL` as encountered preserves current behavior and keeps implementation ticket scope smaller.
+Rationale: The current spec and tests target top-level distribution entries. Processing valid URLs in encounter order without deduplication preserves established behavior and limits migration risk.
 
-Alternatives considered: URL deduplication was rejected because it would introduce new semantics and potentially hide existing repeated dispatch behavior. Selecting only the first URL was rejected because the clarified requirement is to process all valid distribution entries.
+Alternatives considered: Recursive deep metadata scans were rejected because they exceed this feature scope and can trigger unintended resources. Deduplication was rejected because it changes semantics and may hide intended repeated processing.
 
-## Decision: Use best-effort per-URL dispatch with structured logs and status summary
+## Decision: Make discovered-resource references single-owner, and let downstream components consume discovered resources
 
-Rationale: Dataset distribution arrays may contain mixed-quality entries. Best-effort dispatch keeps valid resources moving even when individual entries are invalid or fail processing. Structured logs and a machine-readable summary provide administrator visibility and testable outcomes.
+Rationale: Reference ownership must be clear to prevent double-registration and inconsistent identifiers. A single reference-owned discovered resource output should drive registration, initiation, and reporting inputs.
 
-Alternatives considered: Fail-fast dispatch was rejected because it would make one bad URL block unrelated valid entries. Summary-only reporting was rejected because administrators also need traceable per-entry diagnostics.
+Alternatives considered: Re-performing discovery/reference mapping in multiple layers was rejected due to drift and duplicate side effects. Letting referencer and lifecycle each register independently was rejected because it causes version churn and inconsistent status linkage.
 
-## Decision: Accept distribution references as compatibility metadata but never require them for initiation
+## Decision: Preserve best-effort processing with machine-readable skip/failure visibility
 
-Rationale: Existing DKAN installations and referenced distribution flows remain valid. The feature changes the operational requirement, not the metadata capability: distribution UUIDs may exist and may help cache/reporting context, but discovery and datastore initiation are driven by `downloadURL` discovery.
+Rationale: Mixed-validity distributions are expected. One bad entry cannot block other valid URLs. Structured skip/failure outcomes and aggregate counts remain required for administrator visibility and testability.
 
-Alternatives considered: Removing distribution referencing was rejected as unnecessary and too disruptive. Preferring distribution-ID paths when present was rejected because it keeps the old dependency on the critical path.
+Alternatives considered: Fail-fast behavior was rejected because it reduces ingestion reliability. Free-form logging only was rejected because acceptance criteria require machine-readable outcome reporting.
 
-## Decision: Move secondary distribution-ID dependencies into explicit implementation tickets
+## Decision: Keep `describedBy` validation/normalization independent of reference mode
 
-Rationale: Code review found additional distribution-ID assumptions in cache invalidation/dependencies, Drush reverse lookup, SQL/API/admin reporting, post-import result creation, and cleanup/orphan behavior. These surfaces should be handled explicitly because they can keep the runtime dependency alive even after initiation is fixed.
+Rationale: `describedBy` data-dictionary behavior is part of metadata correctness and must remain equivalent in referenced and non-referenced distribution workflows even as ownership moves under Reference.
 
-Alternatives considered: Treating these as incidental cleanup was rejected because they affect acceptance testing and migration guidance. Deferring all secondary surfaces was rejected because the spec requires import/query workflows to avoid runtime distribution dereference in normal operation.
+Alternatives considered: Tying `describedBy` handling to distribution-reference mode was rejected as a regression vector. Deferring this to later cleanup was rejected because it violates current feature requirements.
 
-## Decision: Keep `describedBy` data-dictionary handling independent from distribution referencing mode
+## Decision: Sequence compatibility work after corrected reference ownership is in place
 
-Rationale: Functional testing shows a non-referenced variant of `DistributionHandlingTest::testDescribedByDataDictionary` can fail when distribution referencing is disabled via `property_list['distribution'] = '0'`. This indicates `describedBy` URI validation/normalization behavior is still coupled to optional distribution referencing paths. For this feature, referenced/non-referenced distribution structures must retain equivalent `describedBy` behavior because distribution references are compatibility metadata, not operational gates.
+Rationale: Cache, status, dashboard, SQL, and Drush compatibility surfaces depend on stable discovered-resource reference semantics. Correcting ownership first reduces rework and test instability.
 
-Alternatives considered: Deferring `describedBy` behavior to a later cleanup was rejected because it is a direct runtime regression in non-referenced mode. Restricting `describedBy` support to referenced distributions was rejected because it contradicts the feature's non-referenced compatibility objective.
-
-## Decision: Keep ticket scope below one manual week by slicing by surface area
-
-Rationale: The implementation can be split into independent sub-week tickets: dataset discovery/summary model, ResourceMapper registration, dispatch integration, observability, cache dependency updates, reporting/post-import updates, cleanup/orphan updates, and migration/test documentation.
-
-Alternatives considered: A single broad implementation ticket was rejected because it would mix metastore lifecycle changes, datastore service changes, reporting, and migration work. A full decoupled-datastore implementation was rejected as outside this scoped feature.
-
-## Decision: Prefer the smallest abstraction surface that preserves the required contracts
-
-Rationale: This scoped feature needs clear discovery and dispatch contracts, but it does not benefit from introducing extra classes that only repackage straightforward control flow. New classes should exist only when they protect a real boundary, a reusable contract, or a meaningful test seam.
-
-Alternatives considered: Splitting each small responsibility into its own class was rejected because it increases implementation churn and migration surface without adding equivalent value for this scoped change. Keeping all new logic inline in existing subscribers/services was also rejected because the feature still needs a small number of explicit contracts for discovery results and downstream dispatch behavior.
+Alternatives considered: Updating compatibility surfaces before restoring reference mapping was rejected because contracts would still be in flux.
