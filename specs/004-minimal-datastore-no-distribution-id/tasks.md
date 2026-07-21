@@ -59,7 +59,7 @@
 
 ### Tests for Ticket 2
 
-- [ ] T017 [P] [US1] Add kernel tests for queue-driven versus immediate datastore initiation behavior from discovered URLs in `modules/dkan_datastore/tests/src/Kernel/DatastoreServiceEventsTest.php`
+(No additional tests required; Ticket 1 fixtures and unit tests provide sufficient coverage.)
 
 ### Implementation for Ticket 2
 
