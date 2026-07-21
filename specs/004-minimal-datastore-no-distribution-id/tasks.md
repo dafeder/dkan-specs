@@ -35,17 +35,17 @@
 
 ### Tests for Ticket 1
 
-- [x] T002 [P] Add dataset discovery fixture variants and lifecycle coverage for referenced/non-referenced distributions in `modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
-- [ ] T003 [P] Add two-distribution fixture coverage where one baseline valid distribution is always present and the second distribution varies across valid/missing/invalid downloadURL cases for dataset presave discovery/registration coverage in `modules/dkan_metastore/tests/src/Kernel/LifeCycle/LifeCycleTest.php`
-- [ ] T066 [P] Add dual-mode (`distribution` vs `0`) `describedBy` data-dictionary API behavior coverage in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
-- [x] T004 [P] Add datastore subscriber fixture and contract coverage for multi-URL processing in `modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
+- [x] T002 [P] [US1] Add dataset discovery fixture variants and lifecycle coverage for referenced/non-referenced distributions in `modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php`
+- [x] T003 [P] [US1] Add two-distribution fixture coverage where one baseline valid distribution is always present and the second distribution varies across valid/missing/invalid downloadURL cases for dataset presave discovery/registration coverage in `modules/dkan_metastore/tests/src/Kernel/LifeCycle/LifeCycleTest.php`
+- [x] T066 [P] [US1] Add dual-mode (`distribution` vs `0`) `describedBy` data-dictionary API behavior coverage in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
+- [x] T004 [P] [US1] Add datastore subscriber fixture and contract coverage for multi-URL processing in `modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
 
 ### Implementation for Ticket 1
 
-- [ ] T018 [US1] Decouple datastore import triggering from the referencing/pre-reference path so registration no longer depends on distribution referencing being enabled, and ensure the triggering-property "new revision" decision is determined before resource registration in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T019 [US1] Add a dedicated dataset-save discovery + resource registration step in `LifeCycle::datasetPresave()` (before `referenceMetadata()`) that runs `DatasetResourceDiscovery` over top-level `$.distribution[]` and registers valid `downloadURL` values via `ResourceMapper`, independent of the referencing workflow, in `modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
-- [ ] T064 [US1] Make resource registration single-owner so the referencer consumes already-registered resources instead of re-registering during referencing (avoiding duplicate registration and version churn) in `modules/dkan_metastore/src/Reference/Referencer.php`
-- [ ] T065 [US1] Ensure `distribution[].describedBy` data-dictionary URI validation/normalization is not gated by distribution referencing mode so non-referenced distributions retain existing behavior in `modules/dkan_metastore/src/Reference/Referencer.php`
+- [x] T018 [US1] Decouple datastore import triggering from the referencing/pre-reference path so registration no longer depends on distribution referencing being enabled, and ensure the triggering-property "new revision" decision is determined before resource registration in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [x] T019 [US1] Add a dedicated dataset-save discovery + resource registration step in `LifeCycle::datasetPresave()` (before `referenceMetadata()`) that runs `DatasetResourceDiscovery` over top-level `$.distribution[]` and registers valid `downloadURL` values via `ResourceMapper`, independent of the referencing workflow, in `modules/dkan_metastore/src/LifeCycle/LifeCycle.php`
+- [x] T064 [US1] Make resource registration single-owner so the referencer consumes already-registered resources instead of re-registering during referencing (avoiding duplicate registration and version churn) in `modules/dkan_metastore/src/Reference/Referencer.php`
+- [x] T065 [US1] Ensure `distribution[].describedBy` data-dictionary URI validation/normalization is not gated by distribution referencing mode so non-referenced distributions retain existing behavior in `modules/dkan_metastore/src/Reference/Referencer.php`
 
 **Checkpoint**: Dataset-save discovery and resource registration run from the dataset presave path, decoupled from referencing, hand off a shared discovery contract, and preserve `describedBy` data-dictionary behavior in referenced and non-referenced modes.
 
@@ -59,18 +59,14 @@
 
 ### Tests for Ticket 2
 
-- [ ] T015 [P] [US1] Add kernel tests validating URL registration through ResourceMapper without distribution lookup in `modules/dkan_metastore/tests/src/Kernel/ResourceMapperTest.php`
-- [ ] T016 [P] [US1] Add functional tests for mixed-validity distribution discovery and best-effort dispatch continuation in `modules/dkan_metastore/tests/src/Functional/Api1/DistributionHandlingTest.php`
-- [ ] T017 [P] [US1] Add kernel tests for queue-driven versus immediate dispatch behavior from discovered URLs in `modules/dkan_datastore/tests/src/Kernel/DatastoreServiceEventsTest.php`
-- [ ] T063 [P] [US1] Add unit coverage asserting `DispatchResult` shape and processed/skipped/failed count accuracy for dataset-save execution outcomes in `modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php`
+- [ ] T017 [P] [US1] Add kernel tests for queue-driven versus immediate datastore initiation behavior from discovered URLs in `modules/dkan_datastore/tests/src/Kernel/DatastoreServiceEventsTest.php`
 
 ### Implementation for Ticket 2
 
-- [ ] T020 [US1] Implement registration, best-effort per-URL initiation, and structured logging using existing datastore initiation/status surfaces (no new initiation summary contract) in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T024 [US1] Remove runtime dependence on distribution entity dereference for dispatch initiation in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T062 [US1] Implement machine-readable `DispatchResult` generation for each dataset-save execution with processed/skipped/failed counts in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [x] T020 [US1] Implement best-effort per-URL datastore initiation from resource registration events using existing datastore initiation/status surfaces (no new initiation summary contract) in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [x] T024 [US1] Remove runtime dependence on distribution entity dereference for datastore initiation in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 
-**Checkpoint**: Resource registration and dataset-save dispatch work end-to-end without requiring distribution-ID lookup.
+**Checkpoint**: Resource registration and dataset-save initiation work end-to-end without requiring distribution-ID lookup.
 
 ---
 
@@ -84,16 +80,14 @@
 
 - [ ] T025 [P] [US2] Add unit tests for query controller dependency extraction without mandatory distribution IDs in `modules/dkan_datastore/tests/src/Unit/Controller/AbstractQueryControllerTest.php`
 - [ ] T026 [P] [US2] Add kernel tests for import summary cache dependencies using resource/dataset context in `modules/dkan_datastore/tests/src/Kernel/Controller/ImportControllerTest.php`
-- [ ] T027 [P] [US2] Add functional tests for query download caching/invalidation behavior when distributions are non-referenced in `modules/dkan_datastore/tests/src/Functional/Controller/QueryDownloadControllerTest.php`
-- [ ] T054 [P] Add kernel test coverage for dataset dispatch summary counter accuracy (processed/skipped/failed) in `modules/dkan_datastore/tests/src/Kernel/DatastoreServiceEventsTest.php`
+- [ ] T054 [P] [US2] Add kernel test coverage for dataset dispatch summary counter accuracy (processed/skipped/failed) in `modules/dkan_datastore/tests/src/Kernel/DatastoreServiceEventsTest.php`
 
 ### Implementation for Ticket 3
 
-- [ ] T030 [US2] Update metastore dependency extraction to not require distribution lookup for cache tags/contexts in `modules/dkan_datastore/src/Controller/AbstractQueryController.php`
-- [ ] T031 [US2] Update query resource and dataset-resource execution paths to prioritize resource/dataset identifiers in `modules/dkan_datastore/src/Controller/AbstractQueryController.php`
-- [ ] T032 [US2] Refactor import summary dependency generation to support dataset+resource mapping invalidation in `modules/dkan_datastore/src/Controller/ImportController.php`
-- [ ] T033 [US2] Update query download response caching to align with resource/dataset invalidation strategy in `modules/dkan_datastore/src/Controller/QueryDownloadController.php`
-- [ ] T059 Review cache invalidation strategy notes for query/import/streaming endpoints and capture final decisions in `specs/004-minimal-datastore-no-distribution-id/research.md`
+- [x] T030 [US2] Update metastore dependency extraction to not require distribution lookup for cache tags/contexts in `modules/dkan_datastore/src/Controller/AbstractQueryController.php`
+- [x] T031 [US2] Update query resource and dataset-resource execution paths to prioritize resource/dataset identifiers in `modules/dkan_datastore/src/Controller/AbstractQueryController.php`
+- [x] T032 [US2] Refactor import summary dependency generation to support dataset+resource mapping invalidation in `modules/dkan_datastore/src/Controller/ImportController.php`
+- [ ] T059 [US2] Capture final cache strategy decisions for query/import dependency-tag invalidation and streaming download TTL/header behavior (no dependency-tag invalidation) in `specs/004-minimal-datastore-no-distribution-id/research.md`
 
 **Checkpoint**: In-scope datastore cache surfaces invalidate correctly without requiring runtime distribution-ID lookup.
 
@@ -107,14 +101,16 @@
 
 ### Tests for Ticket 4
 
-- [ ] T041 [P] [US3] Add kernel tests for `DatasetInfo` gathering of discovered resources in `modules/dkan_common/tests/src/Kernel/DatasetInfoTest.php`
+- [x] T041 [P] [US3] Add kernel tests for `DatasetInfo` gathering of discovered resources in `modules/dkan_common/tests/src/Kernel/DatasetInfoTest.php`
 
 ### Implementation for Ticket 4
 
-- [ ] T048 [US3] Integrate discovered-resource collection into dataset info gathering for reporting surfaces in `modules/dkan_common/src/DatasetInfo.php`
-- [ ] T049 [US3] Update datastore dataset-info plugin integration for combined distribution/discovered resource display in `modules/dkan_datastore/src/Plugin/DatasetInfo/DatastoreInfo.php`
+- [x] T048 [US3] Integrate discovered-resource collection into dataset info gathering for reporting surfaces in `modules/dkan_common/src/DatasetInfo.php`
+- [x] T049 [US3] Update datastore dataset-info plugin integration for combined distribution/discovered resource display in `modules/dkan_datastore/src/Plugin/DatasetInfo/DatastoreInfo.php`
 
 **Checkpoint**: Dataset info surfaces discovered resources in a way dashboard and reporting code can consume consistently.
+
+**Status**: ✅ COMPLETE — Implemented on feat-non-ref-distro branch (PR #4748)
 
 ---
 
@@ -197,9 +193,9 @@
 
 - [ ] T052 [US3] Remove legacy distribution-ID hook payload fields from importer event payload shaping in `modules/dkan_datastore/src/Service/ImportService.php`
 - [ ] T053 [US3] Update custom importer hook payload contract documentation for dataset/downloadURL/resource context in `docs/source/components/dkan_datastore.rst`
-- [ ] T055 [P] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
-- [ ] T058 [P] Add migration examples for legacy distribution-ID callers and updated importer hook payloads in `docs/source/upgrade.rst`
-- [ ] T060 Update completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
+- [ ] T055 [P] [US3] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
+- [ ] T058 [P] [US3] Add migration examples for legacy distribution-ID callers and updated importer hook payloads in `docs/source/upgrade.rst`
+- [ ] T060 [US3] Update completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
 
 **Checkpoint**: Migration expectations are documented for downstream maintainers and importer implementers.
 
@@ -221,7 +217,7 @@
 - **Shared Foundation**: No dependency; blocks implementation work for all tickets.
 - **Ticket 1**: Depends on Shared Foundation for implementation tasks T018-T019 and T064, while fixture tasks T002-T004 can start earlier.
 - **Ticket 2**: Depends on Shared Foundation and builds directly on Ticket 1 discovery handoff.
-- **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 initiation/logging behavior for end-to-end cache validation.
+- **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 initiation behavior for end-to-end cache validation.
 - **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 2 resource registration behavior so DatasetInfo can surface discovered resources.
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
 - **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 2 resource registration/dispatch behavior, and Ticket 8 should land after the affected payload changes are settled.
@@ -272,7 +268,7 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 
 1. Complete Shared Foundation.
 2. Deliver Ticket 1 dataset-save discovery and registration in the dataset presave lifecycle flow.
-3. Deliver Ticket 2 registration, initiation, logging, and summary reporting.
+3. Deliver Ticket 2 registration, initiation, and summary reporting.
 4. Validate the combined Ticket 1 and Ticket 2 path independently before taking compatibility/reporting refactors.
 
 ### Incremental Delivery
@@ -296,3 +292,11 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - [P] marks tasks that can run concurrently because they touch separate files with no direct dependency.
 - [US1], [US2], and [US3] map each task to the corresponding user story in `spec.md`.
 - Distribution IDs remain accepted only as compatibility metadata; resource/dataset context is the operational key path.
+- T015 was intentionally removed because `ResourceMapper` and `ResourceMapperTest` are already decoupled from distribution lifecycle concerns; lifecycle behavior is covered in datastore/metastore integration tests.
+- T024 is considered complete: `DatastoreSubscriber` no longer performs direct runtime distribution entity dereference for datastore initiation, and remaining coupling is event ordering via `EVENT_PRE_REFERENCE` rather than distribution lookup.
+- T020 is considered complete for initiation behavior: best-effort per-URL datastore initiation from `ResourceMapper::EVENT_REGISTRATION` is in place.
+- T016 was intentionally removed because mixed-validity discovery/continuation behavior is already covered in lifecycle/subscriber tests; `DistributionHandlingTest` remains focused on API contract behavior (not duplicated workflow coverage).
+- T027 was intentionally removed because streaming download responses are TTL/header-cached and do not participate in dependency-tag invalidation behavior.
+- T033 was intentionally removed because `QueryDownloadController` returns streamed responses with cache headers and does not use dependency-tag invalidation like JSON endpoints.
+- T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
+- T063 was intentionally removed because it only validated `DispatchResult` shape/count behavior, which is no longer part of the implementation after `DispatchResult` removal.
