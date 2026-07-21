@@ -47,3 +47,16 @@ Alternatives considered: Tying `describedBy` handling to distribution-reference 
 Rationale: Cache, status, dashboard, SQL, and Drush compatibility surfaces depend on stable discovered-resource reference semantics. Correcting ownership first reduces rework and test instability.
 
 Alternatives considered: Updating compatibility surfaces before restoring reference mapping was rejected because contracts would still be in flux.
+
+## Decision: Cache dependency invalidation strategy based on dataset/resource context
+
+Rationale: Query and import summary cache dependencies now resolve through dataset/resource mappings instead of requiring runtime distribution ID lookups. This decouples cache invalidation from optional distribution referencing configuration.
+
+**Query Controller**: `resolveResourceDependencies()` accepts either a resource identifier or distribution UUID, resolves both to their containing dataset(s), and returns dependency arrays. In referenced mode, the distribution UUID is looked up to find the containing dataset; in non-referenced mode, the resource identifier maps directly to dataset(s) via discovery records.
+
+**Import Controller**: `getDependencies()` collects dataset and resource cache tags from discovered resources and resource mapper lookups. Invalidation includes both dataset and resource entity tags.
+
+**Download Controller**: Streaming download responses do not use dependency-tag based invalidation; only direct cache headers (`Cache-Control`, `ETag`) control caching behavior.
+
+Alternatives considered: Requiring distribution IDs as mandatory operational keys was rejected because non-referenced distributions have no distribution entity. Deferring to query-time distribution lookup was rejected because it creates cache invalidation blind spots in non-referenced workflows.
+

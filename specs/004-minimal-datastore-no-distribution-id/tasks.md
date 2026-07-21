@@ -87,7 +87,7 @@
 - [x] T030 [US2] Update metastore dependency extraction to not require distribution lookup for cache tags/contexts in `modules/dkan_datastore/src/Controller/AbstractQueryController.php`
 - [x] T031 [US2] Update query resource and dataset-resource execution paths to prioritize resource/dataset identifiers in `modules/dkan_datastore/src/Controller/AbstractQueryController.php`
 - [x] T032 [US2] Refactor import summary dependency generation to support dataset+resource mapping invalidation in `modules/dkan_datastore/src/Controller/ImportController.php`
-- [ ] T059 [US2] Capture final cache strategy decisions for query/import dependency-tag invalidation and streaming download TTL/header behavior (no dependency-tag invalidation) in `specs/004-minimal-datastore-no-distribution-id/research.md`
+- [x] T059 [US2] Capture final cache strategy decisions for query/import dependency-tag invalidation and streaming download TTL/header behavior (no dependency-tag invalidation) in `specs/004-minimal-datastore-no-distribution-id/research.md`
 
 **Checkpoint**: In-scope datastore cache surfaces invalidate correctly without requiring runtime distribution-ID lookup.
 
