@@ -51,22 +51,19 @@
 
 ---
 
-## Ticket 2: ResourceMapper Registration and Import Trigger Integration
+## Ticket 2: Data Dictionary Reference Compatibility
 
-**Goal**: Register discovered resources and trigger datastore processing without distribution-ID lookup.
+**Goal**: Ensure data-dictionary discovery and reference lookup work correctly across referenced and non-referenced distribution modes.
 
-**Independent Test**: Save datasets with valid discovered URLs and verify each valid resource is registered and processed, while failures do not block later URLs.
-
-### Tests for Ticket 2
-
-(No additional tests required; Ticket 1 fixtures and unit tests provide sufficient coverage.)
+**Independent Test**: Save datasets with `describedBy` data-dictionary references in both referenced and non-referenced distribution structures and verify dictionary discovery and lookup behavior remains equivalent.
 
 ### Implementation for Ticket 2
 
-- [x] T020 [US1] Implement best-effort per-URL datastore initiation from resource registration events using existing datastore initiation/status surfaces (no new initiation summary contract) in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [x] T024 [US1] Remove runtime dependence on distribution entity dereference for datastore initiation in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [x] T067 [P] Make `ReferenceLookup::getReferencers()` recursive to support nested property matching in metadata objects for compound datastore identifiers in `modules/dkan_metastore/src/Reference/ReferenceLookup.php`
+- [x] T068 [P] Fix `DataDictionaryDiscoveryTest` with proper reflection and mock setup for `extractDictionaryId()` private method and URL/URI generator mappings in `modules/dkan_metastore/tests/src/Unit/DataDictionary/DataDictionaryDiscoveryTest.php`
+- [x] T069 [P] Update dictionary-related test coverage for non-referenced distribution behavior in `modules/dkan_datastore/tests/src/Unit/Controller/QueryDownloadControllerTest.php`, `modules/dkan_metastore/tests/src/Unit/Enforcement/DictionaryEnforcerTest.php`, and `modules/dkan_datastore/tests/src/Kernel/Plugin/DatasetInfo/StrictModeOffDictionaryEnforcerTest.php`
 
-**Checkpoint**: Resource registration and dataset-save initiation work end-to-end without requiring distribution-ID lookup.
+**Checkpoint**: Data-dictionary discovery and reference lookup work correctly in both referenced and non-referenced distribution modes.
 
 ---
 
@@ -215,12 +212,12 @@
 ### Ticket Dependencies
 
 - **Shared Foundation**: No dependency; blocks implementation work for all tickets.
+- **Ticket 2**: Depends on Shared Foundation; dictionary behavior fixes are blocking prerequisites for Tickets 3-5.
 - **Ticket 1**: Depends on Shared Foundation for implementation tasks T018-T019 and T064, while fixture tasks T002-T004 can start earlier.
-- **Ticket 2**: Depends on Shared Foundation and builds directly on Ticket 1 discovery handoff.
-- **Ticket 3**: Depends on Shared Foundation and benefits from Ticket 2 initiation behavior for end-to-end cache validation.
-- **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 2 resource registration behavior so DatasetInfo can surface discovered resources.
+- **Ticket 3**: Depends on Shared Foundation and Ticket 2 (dictionary fixes), then benefits from Ticket 1 resource registration behavior for end-to-end cache validation.
+- **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 1 resource registration behavior so DatasetInfo can surface discovered resources.
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
-- **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 2 resource registration/dispatch behavior, and Ticket 8 should land after the affected payload changes are settled.
+- **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 1 resource registration/dispatch behavior, and Ticket 8 should land after the affected payload changes are settled.
 - **Release Gate Validation**: Depends on completion of the intended ticket set.
 
 ### Within Each Ticket
@@ -293,9 +290,11 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - [US1], [US2], and [US3] map each task to the corresponding user story in `spec.md`.
 - Distribution IDs remain accepted only as compatibility metadata; resource/dataset context is the operational key path.
 - T015 was intentionally removed because `ResourceMapper` and `ResourceMapperTest` are already decoupled from distribution lifecycle concerns; lifecycle behavior is covered in datastore/metastore integration tests.
+- T016 was intentionally removed because mixed-validity discovery/continuation behavior is already covered in lifecycle/subscriber tests; `DistributionHandlingTest` remains focused on API contract behavior (not duplicated workflow coverage).
+- T017 was intentionally removed because testing queue-driven versus immediate datastore initiation behavior is out of scope for Ticket 2 and is better covered by the lifecycle behavior and subscriber unit tests from Ticket 1.
+- T020 and T024 (original Ticket 2 implementation tasks) are now considered complete and merged into the broader discovery/initiation flow covered by Ticket 1; Ticket 2 has been repurposed for data dictionary reference compatibility fixes.
 - T024 is considered complete: `DatastoreSubscriber` no longer performs direct runtime distribution entity dereference for datastore initiation, and remaining coupling is event ordering via `EVENT_PRE_REFERENCE` rather than distribution lookup.
 - T020 is considered complete for initiation behavior: best-effort per-URL datastore initiation from `ResourceMapper::EVENT_REGISTRATION` is in place.
-- T016 was intentionally removed because mixed-validity discovery/continuation behavior is already covered in lifecycle/subscriber tests; `DistributionHandlingTest` remains focused on API contract behavior (not duplicated workflow coverage).
 - T027 was intentionally removed because streaming download responses are TTL/header-cached and do not participate in dependency-tag invalidation behavior.
 - T033 was intentionally removed because `QueryDownloadController` returns streamed responses with cache headers and does not use dependency-tag invalidation like JSON endpoints.
 - T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
