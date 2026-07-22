@@ -76,7 +76,7 @@
 ### Tests for Ticket 3
 
 - [x] T025 [P] [US2] Add unit tests for query controller dependency extraction without mandatory distribution IDs in `modules/dkan_datastore/tests/src/Unit/Controller/AbstractQueryControllerTest.php`
-- [ ] T026 [P] [US2] Add kernel tests for import summary cache dependencies using resource/dataset context in `modules/dkan_datastore/tests/src/Kernel/Controller/ImportControllerTest.php`
+- [x] T026 [P] [US2] Add kernel tests for import summary cache dependencies using resource/dataset context in `modules/dkan_datastore/tests/src/Kernel/Controller/ImportControllerTest.php`
 
 ### Implementation for Ticket 3
 
