@@ -110,11 +110,11 @@
 
 ---
 
-## Ticket 5: API, Drush, SQL Endpoint, and Admin Compatibility Review
+## Ticket 5: API, Drush, and Admin Compatibility Review
 
 **Goal**: Preserve compatibility where practical while moving operational flows to dataset/resource identifiers.
 
-**Independent Test**: Exercise query, SQL, Drush, dashboard/reporting, post-import status, and resource-mapper status lookup paths and verify distribution IDs are optional compatibility metadata rather than required runtime keys, using the DatasetInfo shape established in Ticket 4.
+**Independent Test**: Exercise query, Drush, dashboard/reporting, post-import status, and resource-mapper status lookup paths and verify distribution IDs are optional compatibility metadata rather than required runtime keys, using the DatasetInfo shape established in Ticket 4.
 
 ### Tests for Ticket 5
 
