@@ -77,7 +77,6 @@
 
 - [x] T025 [P] [US2] Add unit tests for query controller dependency extraction without mandatory distribution IDs in `modules/dkan_datastore/tests/src/Unit/Controller/AbstractQueryControllerTest.php`
 - [ ] T026 [P] [US2] Add kernel tests for import summary cache dependencies using resource/dataset context in `modules/dkan_datastore/tests/src/Kernel/Controller/ImportControllerTest.php`
-- [ ] T054 [P] [US2] Add kernel test coverage for dataset dispatch summary counter accuracy (processed/skipped/failed) in `modules/dkan_datastore/tests/src/Kernel/DatastoreServiceEventsTest.php`
 
 ### Implementation for Ticket 3
 
@@ -299,3 +298,4 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T033 was intentionally removed because `QueryDownloadController` returns streamed responses with cache headers and does not use dependency-tag invalidation like JSON endpoints.
 - T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
 - T063 was intentionally removed because it only validated `DispatchResult` shape/count behavior, which is no longer part of the implementation after `DispatchResult` removal.
+- T054 was intentionally removed because it tested dispatch summary counter accuracy which depended on the eliminated `DispatchResult` class; no replacement task is required.
