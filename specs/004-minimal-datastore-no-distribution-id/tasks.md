@@ -118,7 +118,6 @@
 
 ### Tests for Ticket 5
 
-- [ ] T028 [P] [US2] Add unit tests for SQL endpoint behavior with resource-based execution and compatibility inputs in `modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php`
 - [ ] T029 [P] [US2] Add unit tests for drush command compatibility behavior where distribution IDs are optional metadata only in `modules/dkan_datastore/tests/src/Functional/Commands/DegradedModeCommandsTest.php`
 - [ ] T040 [P] [US2] Add unit tests for dashboard row rendering of discovered URL-only resources when distribution IDs are absent in `modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
 - [ ] T038 [P] [US3] Add unit tests for `PostImportResultFactory` initialization from distribution UUID and dataset+resource_url inputs in `modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
@@ -127,7 +126,6 @@
 
 ### Implementation for Ticket 5
 
-- [ ] T034 [US2] Update SQL endpoint service/controller to avoid distribution-ID operational assumptions in `modules/dkan_datastore/src/SqlEndpoint/WebServiceApi.php`
 - [ ] T035 [US2] Update datastore drush command parameter handling and help text for compatibility-only distribution IDs in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
 - [ ] T036 [US2] Update reimport workflow to resolve resources from dataset/downloadURL context when distribution references are absent in `modules/dkan_datastore/src/Drush/Commands/ReimportCommands.php`
 - [ ] T037 [US2] Document compatibility behavior and migration notes for changed operational keys in `docs/source/upgrade.rst`
@@ -197,6 +195,24 @@
 
 ---
 
+## Ticket 9: SQL Endpoint Compatibility (Separate Maintenance Track)
+
+**Goal**: Update the SQL endpoint to work with resource-based cache dependencies instead of mandatory distribution IDs, recognizing that this surface is barely-maintained and may require careful review.
+
+**Independent Test**: Execute SQL endpoint queries with resource identifiers and verify cache dependencies are correctly collected without requiring distribution ID lookups.
+
+### Tests for Ticket 9
+
+- [ ] T028 [P] [US2] Add unit tests for SQL endpoint behavior with resource-based execution and compatibility inputs in `modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php`
+
+### Implementation for Ticket 9
+
+- [ ] T034 [US2] Update SQL endpoint service/controller to avoid distribution-ID operational assumptions in `modules/dkan_datastore/src/SqlEndpoint/WebServiceApi.php`
+
+**Checkpoint**: SQL endpoint accepts resource identifiers and generates correct cache dependencies.
+
+---
+
 ## Release Gate Validation (After Desired Tickets Complete)
 
 **Purpose**: Run the final feature validation commands after the intended ticket set is complete.
@@ -216,6 +232,7 @@
 - **Ticket 3**: Depends on Shared Foundation and Ticket 2 (dictionary fixes), then benefits from Ticket 1 resource registration behavior for end-to-end cache validation.
 - **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 1 resource registration behavior so DatasetInfo can surface discovered resources.
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
+- **Ticket 9**: Depends on Shared Foundation; SQL endpoint work is on a separate maintenance track because the surface is barely-maintained. Can proceed in parallel with other tickets once Shared Foundation is ready.
 - **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 1 resource registration/dispatch behavior, and Ticket 8 should land after the affected payload changes are settled.
 - **Release Gate Validation**: Depends on completion of the intended ticket set.
 
