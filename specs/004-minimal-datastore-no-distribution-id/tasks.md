@@ -118,7 +118,6 @@
 
 ### Tests for Ticket 5
 
-- [ ] T029 [P] [US2] Add unit tests for drush command compatibility behavior where distribution IDs are optional metadata only in `modules/dkan_datastore/tests/src/Functional/Commands/DegradedModeCommandsTest.php`
 - [ ] T040 [P] [US2] Add unit tests for dashboard row rendering of discovered URL-only resources when distribution IDs are absent in `modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
 - [ ] T038 [P] [US3] Add unit tests for `PostImportResultFactory` initialization from distribution UUID and dataset+resource_url inputs in `modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
 - [ ] T039 [P] [US3] Add kernel tests for import status lookup from resource mapping without distribution references in `modules/dkan_datastore/tests/src/Kernel/Service/Info/ImportInfoTest.php`
@@ -128,10 +127,7 @@
 
 - [ ] T035 [US2] Update datastore drush command parameter handling and help text for compatibility-only distribution IDs in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
 - [ ] T036 [US2] Update reimport workflow to resolve resources from dataset/downloadURL context when distribution references are absent in `modules/dkan_datastore/src/Drush/Commands/ReimportCommands.php`
-- [ ] T037 [US2] Document compatibility behavior and migration notes for changed operational keys in `docs/source/upgrade.rst`
-- [ ] T045 [US3] Extend post-import result factory initialization to support dataset/resource context in `modules/dkan_datastore/src/PostImportResultFactory.php`
-- [ ] T046 [US3] Add resource-mapper-based status lookup helper for URL-only/distribution-backed resources in `modules/dkan_datastore/src/Service/Info/ImportInfoList.php`
-- [ ] T047 [US2] Update dashboard resource row builder to render discovered resources and status values without distribution IDs in `modules/dkan_datastore/src/Form/DashboardForm.php`
+- [x] T047 [US2] Update dashboard resource row builder to render discovered resources and status values without distribution IDs in `modules/dkan_datastore/src/Form/DashboardForm.php`
 
 **Checkpoint**: Compatibility-sensitive datastore entry points, post-import status flows, and status lookup surfaces continue to work without requiring distribution IDs as operational keys.
 
@@ -177,7 +173,7 @@
 
 **Goal**: Capture the required migration steps for changed payloads and compatibility behavior.
 
-**Independent Test**: Review the migration guidance against the changed hook payloads and compatibility behavior and verify each required update is documented.
+**Independent Test**: Review the migration guidance against changed hook payloads and compatibility behavior and verify each required update is documented.
 
 ### Tests for Ticket 8
 
@@ -187,6 +183,7 @@
 
 - [ ] T052 [US3] Remove legacy distribution-ID hook payload fields from importer event payload shaping in `modules/dkan_datastore/src/Service/ImportService.php`
 - [ ] T053 [US3] Update custom importer hook payload contract documentation for dataset/downloadURL/resource context in `docs/source/components/dkan_datastore.rst`
+- [ ] T037 [US3] Document compatibility behavior and migration notes for changed operational keys in `docs/source/upgrade.rst`
 - [ ] T055 [P] [US3] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
 - [ ] T058 [P] [US3] Add migration examples for legacy distribution-ID callers and updated importer hook payloads in `docs/source/upgrade.rst`
 - [ ] T060 [US3] Update completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
@@ -213,6 +210,24 @@
 
 ---
 
+## Ticket 10: Referenced-to-Embedded Distribution Migration Action
+
+**Goal**: Provide an executable migration path to convert referenced distributions into embedded non-referenced distributions for operators who choose that model.
+
+**Independent Test**: Run the migration command against representative datasets, verify metadata conversion correctness and idempotency, and confirm datastore behaviors remain valid after conversion.
+
+### Tests for Ticket 10
+
+- [ ] T071 [P] [US3] Add functional Drush-command tests for referenced-to-embedded distribution migration behavior and idempotency in `modules/dkan_datastore/tests/src/Functional/Commands/DatastoreCommandsTest.php`
+
+### Implementation for Ticket 10
+
+- [ ] T070 [US3] Implement a Drush migration command to convert referenced distributions to embedded non-referenced distributions with dry-run and scoped execution options in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
+
+**Checkpoint**: Operators can run a supported, repeatable migration action to convert referenced distributions to embedded non-referenced distributions.
+
+---
+
 ## Release Gate Validation (After Desired Tickets Complete)
 
 **Purpose**: Run the final feature validation commands after the intended ticket set is complete.
@@ -233,7 +248,8 @@
 - **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 1 resource registration behavior so DatasetInfo can surface discovered resources.
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
 - **Ticket 9**: Depends on Shared Foundation; SQL endpoint work is on a separate maintenance track because the surface is barely-maintained. Can proceed in parallel with other tickets once Shared Foundation is ready.
-- **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 1 resource registration/dispatch behavior, and Ticket 8 should land after the affected payload changes are settled.
+- **Ticket 10**: Depends on Shared Foundation and should follow Ticket 5 compatibility work so migration execution aligns with finalized operational behavior.
+- **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 1 resource registration/dispatch behavior, and Ticket 8 should land after payload changes and migration action behavior are settled.
 - **Release Gate Validation**: Depends on completion of the intended ticket set.
 
 ### Within Each Ticket
@@ -263,7 +279,6 @@ Task: "T004 [P] Add subscriber multi-URL contract coverage in modules/dkan_datas
 
 ```bash
 Task: "T028 [US2] Add SQL endpoint unit tests in modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php"
-Task: "T029 [US2] Add drush compatibility tests in modules/dkan_datastore/tests/src/Functional/Commands/DegradedModeCommandsTest.php"
 Task: "T040 [US2] Add dashboard row unit tests in modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php"
 ```
 
@@ -291,8 +306,9 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 3. Deliver Ticket 4 DatasetInfo integration before dashboard/reporting compatibility work.
 4. Deliver Ticket 5 for compatibility, endpoint, admin continuity, post-import status, and status lookup updates.
 5. Deliver Tickets 6-7 for cleanup and importer-regression follow-up work.
-6. Deliver Ticket 8 migration guidance updates.
-7. Finish with Release Gate Validation.
+6. Deliver Ticket 10 migration action for referenced-to-embedded distribution conversion.
+7. Deliver Ticket 8 migration guidance updates.
+8. Finish with Release Gate Validation.
 
 ### Team Parallelization
 
@@ -312,7 +328,12 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T024 is considered complete: `DatastoreSubscriber` no longer performs direct runtime distribution entity dereference for datastore initiation, and remaining coupling is event ordering via `EVENT_PRE_REFERENCE` rather than distribution lookup.
 - T020 is considered complete for initiation behavior: best-effort per-URL datastore initiation from `ResourceMapper::EVENT_REGISTRATION` is in place.
 - T027 was intentionally removed because streaming download responses are TTL/header-cached and do not participate in dependency-tag invalidation behavior.
+- T029 was intentionally removed because `DegradedModeCommands` toggles degraded query mode state only and does not touch distribution-ID compatibility behavior.
 - T033 was intentionally removed because `QueryDownloadController` returns streamed responses with cache headers and does not use dependency-tag invalidation like JSON endpoints.
+- T046 was intentionally removed because `ImportInfoList`/`ImportInfo` already operate on resource identifiers and job-store state, with no distribution-node lookup dependency to refactor.
+- T045 was intentionally removed because post-import status initialization already consumes resource/dataset information from `DatasetInfo` output and does not require distribution node references.
+- T037 was moved from Ticket 5 to Ticket 8 so migration/upgrade documentation is grouped with migration guidance and custom importer payload updates.
+- T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked as a standalone deliverable rather than a documentation-only concern.
 - T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
 - T063 was intentionally removed because it only validated `DispatchResult` shape/count behavior, which is no longer part of the implementation after `DispatchResult` removal.
 - T054 was intentionally removed because it tested dispatch summary counter accuracy which depended on the eliminated `DispatchResult` class; no replacement task is required.
