@@ -118,14 +118,12 @@
 
 ### Tests for Ticket 5
 
-- [ ] T040 [P] [US2] Add unit tests for dashboard row rendering of discovered URL-only resources when distribution IDs are absent in `modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
-- [ ] T038 [P] [US3] Add unit tests for `PostImportResultFactory` initialization from distribution UUID and dataset+resource_url inputs in `modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
-- [ ] T039 [P] [US3] Add kernel tests for import status lookup from resource mapping without distribution references in `modules/dkan_datastore/tests/src/Kernel/Service/Info/ImportInfoTest.php`
+- [x] T040 [P] [US2] Add unit tests for dashboard row rendering of discovered URL-only resources when distribution IDs are absent in `modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
 - [ ] T061 [P] [US2] Add functional dashboard continuity test verifying resource rows and status render without distribution IDs in `modules/dkan_datastore/tests/src/Functional/Form/DashboardFormNoDistributionIdTest.php`
 
 ### Implementation for Ticket 5
 
-- [ ] T035 [US2] Update datastore drush command parameter handling and help text for compatibility-only distribution IDs in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
+- [x] T035 [US2] Confirm resource-identifier-first datastore Drush parameter handling and update help text to clarify distribution IDs are compatibility metadata (not operational keys) in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
 - [x] T047 [US2] Update dashboard resource row builder to render discovered resources and status values without distribution IDs in `modules/dkan_datastore/src/Form/DashboardForm.php`
 
 **Checkpoint**: Compatibility-sensitive datastore entry points, post-import status flows, and status lookup surfaces continue to work without requiring distribution IDs as operational keys.
@@ -332,6 +330,8 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T046 was intentionally removed because `ImportInfoList`/`ImportInfo` already operate on resource identifiers and job-store state, with no distribution-node lookup dependency to refactor.
 - T045 was intentionally removed because post-import status initialization already consumes resource/dataset information from `DatasetInfo` output and does not require distribution node references.
 - T036 was intentionally removed because `ReimportCommands` already operates correctly in non-referenced mode and does not depend on distribution-node/UUID-specific logic.
+- T038 was intentionally removed because `PostImportResultFactory` already initializes status retrieval from distribution entries via `resource_id`, and this path does not require distribution-node/UUID-specific behavior changes.
+- T039 was intentionally removed because `ImportInfo` status lookup is already resource-mapping based and exercised by existing `ImportInfoTest` coverage without requiring distribution references.
 - T037 was moved from Ticket 5 to Ticket 8 so migration/upgrade documentation is grouped with migration guidance and custom importer payload updates.
 - T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked as a standalone deliverable rather than a documentation-only concern.
 - T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
