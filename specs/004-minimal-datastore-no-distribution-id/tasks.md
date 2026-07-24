@@ -128,26 +128,6 @@
 
 **Checkpoint**: Compatibility-sensitive datastore entry points, post-import status flows, and status lookup surfaces continue to work without requiring distribution IDs as operational keys.
 
----
-
-## Ticket 6: Importer Modularity Regression Assurance
-
-**Goal**: Preserve the single active importer model with stage-level override and fallback behavior.
-
-**Independent Test**: Configure stage overrides and verify overridden stages run while non-overridden stages keep default behavior.
-
-### Tests for Ticket 6
-
-- [ ] T043 [P] [US3] Add kernel tests proving importer stage override/fallback behavior remains intact after refactor in `modules/dkan_datastore/tests/src/Kernel/Service/ImportServiceEventsTest.php`
-
-### Implementation for Ticket 6
-
-- [ ] T051 [US3] Preserve single active importer with stage override fallback behavior in post-refactor import factory/service flow in `modules/dkan_datastore/src/Service/Factory/ImportServiceFactory.php`
-
-**Checkpoint**: Importer override and fallback behavior remains unchanged after the refactor.
-
----
-
 ## Ticket 7: Cleanup and Orphan Behavior Updates
 
 **Goal**: Remove obsolete mappings and datastore artifacts without depending solely on orphaned distribution references.
@@ -246,7 +226,7 @@
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
 - **Ticket 9**: Depends on Shared Foundation; SQL endpoint work is on a separate maintenance track because the surface is barely-maintained. Can proceed in parallel with other tickets once Shared Foundation is ready.
 - **Ticket 10**: Depends on Shared Foundation and should follow Ticket 5 compatibility work so migration execution aligns with finalized operational behavior.
-- **Tickets 6-8**: Depend on Shared Foundation; Tickets 6-7 benefit from Ticket 1 resource registration/dispatch behavior, and Ticket 8 should land after payload changes and migration action behavior are settled.
+- **Tickets 7-8**: Depend on Shared Foundation; Ticket 7 benefits from Ticket 1 resource registration/dispatch behavior, and Ticket 8 should land after payload changes and migration action behavior are settled.
 - **Release Gate Validation**: Depends on completion of the intended ticket set.
 
 ### Within Each Ticket
@@ -262,7 +242,7 @@
 - Shared Foundation test tasks T011-T012 can run in parallel.
 - Ticket test tasks marked [P] can run in parallel across separate test files.
 - Ticket 5 controller, admin, Drush, dashboard, and status compatibility refactors can split across SQL, Drush, dashboard, and status files once Ticket 4 settles DatasetInfo output.
-- Tickets 6 and 7 can proceed in parallel once Ticket 2 resource registration behavior is stable.
+- Ticket 7 can proceed once Ticket 2 resource registration behavior is stable.
 
 ## Parallel Example: Ticket 1
 
@@ -302,7 +282,7 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 2. Deliver Ticket 3 cache and invalidation updates.
 3. Deliver Ticket 4 DatasetInfo integration before dashboard/reporting compatibility work.
 4. Deliver Ticket 5 for compatibility, endpoint, admin continuity, post-import status, and status lookup updates.
-5. Deliver Tickets 6-7 for cleanup and importer-regression follow-up work.
+5. Deliver Ticket 7 for cleanup and orphan-resource follow-up work.
 6. Deliver Ticket 10 migration action for referenced-to-embedded distribution conversion.
 7. Deliver Ticket 8 migration guidance updates.
 8. Finish with Release Gate Validation.
@@ -311,7 +291,7 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 
 1. One engineer on Shared Foundation plus Ticket 1 lifecycle/discovery work.
 2. One engineer on Ticket 3 cache work, then Ticket 4 DatasetInfo integration, then Ticket 5 SQL, Drush, dashboard, and post-import compatibility work after Shared Foundation is ready.
-3. One engineer on Tickets 6-7 cleanup and importer-regression work after Ticket 2 stabilizes the resource path.
+3. One engineer on Ticket 7 cleanup follow-up work after Ticket 2 stabilizes the resource path.
 
 ## Notes
 
@@ -334,6 +314,7 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T039 was intentionally removed because `ImportInfo` status lookup is already resource-mapping based and exercised by existing `ImportInfoTest` coverage without requiring distribution references.
 - T037 was moved from Ticket 5 to Ticket 8 so migration/upgrade documentation is grouped with migration guidance and custom importer payload updates.
 - T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked as a standalone deliverable rather than a documentation-only concern.
+- Ticket 6 (T043/T051) was intentionally removed because the non-referenced-distribution refactor did not modify importer factory/stage-override behavior, and existing dual-mode `DatasetBTBTest` coverage (including `MySqlDatasetBTBTest` inheritance) already validates end-to-end importer behavior across both distribution modes.
 - T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
 - T063 was intentionally removed because it only validated `DispatchResult` shape/count behavior, which is no longer part of the implementation after `DispatchResult` removal.
 - T054 was intentionally removed because it tested dispatch summary counter accuracy which depended on the eliminated `DispatchResult` class; no replacement task is required.
