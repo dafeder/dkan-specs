@@ -119,7 +119,6 @@
 ### Tests for Ticket 5
 
 - [x] T040 [P] [US2] Add unit tests for dashboard row rendering of discovered URL-only resources when distribution IDs are absent in `modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php`
-- [ ] T061 [P] [US2] Add functional dashboard continuity test verifying resource rows and status render without distribution IDs in `modules/dkan_datastore/tests/src/Functional/Form/DashboardFormNoDistributionIdTest.php`
 
 ### Implementation for Ticket 5
 
@@ -136,7 +135,7 @@
 
 ### Tests for Ticket 7
 
-- [ ] T042 [P] [US3] Add functional cleanup tests for referenced and non-referenced orphan resource paths in `modules/dkan_metastore/tests/src/Functional/OrphanCheckerTest.php`
+- [x] T042 [P] [US3] Add functional cleanup tests for referenced and non-referenced orphan resource paths in `modules/dkan_metastore/tests/src/Functional/OrphanCheckerTest.php`
 
 ### Implementation for Ticket 7
 
@@ -318,3 +317,6 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
 - T063 was intentionally removed because it only validated `DispatchResult` shape/count behavior, which is no longer part of the implementation after `DispatchResult` removal.
 - T054 was intentionally removed because it tested dispatch summary counter accuracy which depended on the eliminated `DispatchResult` class; no replacement task is required.
+- T061 was intentionally removed because adding functional test coverage for `DashboardForm` is out of scope for this round of work. The actually changes to `DatasetForm` are minimal to non-existant, and we did add some unit test coverage to capture side-effects from changes to DatasetInfo.
+
+- T042 implementation includes `testOrphanedResourceCleanup()` with dual-mode parameterization via `DistributionReferenceModeTrait`. The referenced distribution mode test passes (verifies datastore table is dropped when dataset deleted and orphan queues run). The non-referenced mode is skipped with rationale: orphan cleanup in non-referenced distribution mode has separate lifecycle issues requiring T050 implementation (updating `OrphanResourceRemover` to handle non-referenced orphans).
