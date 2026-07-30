@@ -26,7 +26,7 @@ Correct the current implementation direction so dataset-save handling does not o
 - **I. Metadata-First Design**: PASS. Discovery/referencing remains driven by dataset metadata (`$.distribution[]`, `downloadURL`, `describedBy`) and preserves schema-dependent behavior.
 - **II. Modular Component Architecture**: PASS. Metastore owns the discovered-resource reference contract; datastore consumes mapped resources through existing interfaces.
 - **III. API-Driven Integration**: PASS. No new bypass path is introduced; internal orchestration still uses documented Drupal services/events.
-- **IV. Standards Compliance & Data Quality**: PASS. Invalid/missing URL and URI validation paths stay explicit and administrator-visible.
+- **IV. Standards Compliance & Data Quality**: PASS. Invalid/missing URL and URI validation paths stay explicit, with no observability-scope expansion in this feature.
 - **V. Extensibility Through Drupal**: PASS. Existing importer extension points remain in place; migration guidance addresses payload transitions.
 - **VI. Test Coverage & Documentation Excellence**: PASS WITH WORK ITEMS. Requires updated unit/kernel/functional coverage plus contract and upgrade docs for the corrected flow.
 

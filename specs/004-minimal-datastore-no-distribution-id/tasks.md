@@ -3,7 +3,7 @@
 **Input**: Design documents from `specs/004-minimal-datastore-no-distribution-id/`
 **Prerequisites**: `plan.md`, `spec.md`, `research.md`, `data-model.md`, `contracts/`, `quickstart.md`
 
-**Tests**: Included because the specification requires independently testable user stories and measurable outcomes for discovery, import initiation, compatibility, and reporting behavior.
+**Tests**: Included because the specification requires independently testable user stories and measurable outcomes for discovery, import initiation, and compatibility behavior.
 
 **Path Note**: DKAN implementation paths below are relative to the DKAN repository root. Spec artifacts are relative to the `dkan-specs` repository root.
 
@@ -16,7 +16,7 @@
 - [x] T001 Create feature implementation notes and validation checklist in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
 - [x] T005 Create resource discovery result value object in `modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/ResourceDiscoveryResult.php`
 - [x] T006 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `modules/dkan_datastore/src/Dispatch/DispatchItem.php`
-- [x] T007 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `modules/dkan_datastore/src/Dispatch/DispatchResult.php`
+- [x] T007 [P] Defer dispatch-subsystem cleanup and keep existing datastore initiation flow unchanged for this phase in `modules/dkan_datastore/src/Dispatch/`
 - [x] T008 Implement dataset resource discovery service logic for top-level `$.distribution[]` `downloadURL` discovery, normalization into discovery candidates, and skip-reason capture in `modules/dkan_metastore/src/LifeCycle/ResourceDiscovery/DatasetResourceDiscovery.php`
 - [x] T009 Defer initiation orchestration refactor and keep existing subscriber + datastore service flow unchanged for this phase in `modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
 - [x] T010 Defer standalone dispatcher service wiring cleanup and keep current service definitions unchanged for this phase in `modules/dkan_datastore/dkan_datastore.services.yml`
@@ -31,7 +31,7 @@
 
 **Goal**: Implement dataset-save resource discovery and registration in the dataset presave lifecycle path, decoupled from the metadata referencing workflow, using a reusable discovery contract.
 
-**Independent Test**: Save datasets with referenced and non-referenced distribution structures and verify dataset-save discovery identifies valid `downloadURL` values and registers them (triggering datastore processing) while invalid/missing entries are skipped and reported, regardless of whether distribution referencing is enabled; additionally verify `distribution[].describedBy` data-dictionary handling behaves equivalently in both modes.
+**Independent Test**: Save datasets with referenced and non-referenced distribution structures and verify dataset-save discovery identifies valid `downloadURL` values and registers them (triggering datastore processing) while invalid/missing entries are skipped, regardless of whether distribution referencing is enabled; additionally verify `distribution[].describedBy` data-dictionary handling behaves equivalently in both modes.
 
 ### Tests for Ticket 1
 
@@ -272,8 +272,8 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 
 1. Complete Shared Foundation.
 2. Deliver Ticket 1 dataset-save discovery and registration in the dataset presave lifecycle flow.
-3. Deliver Ticket 2 registration, initiation, and summary reporting.
-4. Validate the combined Ticket 1 and Ticket 2 path independently before taking compatibility/reporting refactors.
+3. Deliver Ticket 2 registration and initiation.
+4. Validate the combined Ticket 1 and Ticket 2 path independently before taking compatibility refactors.
 
 ### Incremental Delivery
 
@@ -314,9 +314,6 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T037 was moved from Ticket 5 to Ticket 8 so migration/upgrade documentation is grouped with migration guidance and custom importer payload updates.
 - T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked as a standalone deliverable rather than a documentation-only concern.
 - Ticket 6 (T043/T051) was intentionally removed because the non-referenced-distribution refactor did not modify importer factory/stage-override behavior, and existing dual-mode `DatasetBTBTest` coverage (including `MySqlDatasetBTBTest` inheritance) already validates end-to-end importer behavior across both distribution modes.
-- T062 was intentionally removed because the `DispatchResult` class/logic was eliminated as redundant with existing datastore initiation and status/reporting mechanisms; no replacement task is required.
-- T063 was intentionally removed because it only validated `DispatchResult` shape/count behavior, which is no longer part of the implementation after `DispatchResult` removal.
-- T054 was intentionally removed because it tested dispatch summary counter accuracy which depended on the eliminated `DispatchResult` class; no replacement task is required.
 - T061 was intentionally removed because adding functional test coverage for `DashboardForm` is out of scope for this round of work. The actually changes to `DatasetForm` are minimal to non-existant, and we did add some unit test coverage to capture side-effects from changes to DatasetInfo.
 
 - T042/T050 implementation evidence: `orphan_resource_remover` is now effectively dead code for this flow (no active queue producer in the current branch path), and orphan cleanup is handled through lifecycle/subscriber/resource-purger orchestration. Branch changes in `MetastoreSubscriber`, `LifeCycle`, `LifeCycleEvent`, and `ResourcePurger` implement non-referenced orphan cleanup behavior without requiring orphaned distribution-reference queue processing. Functional confirmation is covered by `OrphanCheckerTest::testOrphanedResourceCleanup()` and draft workflow coverage in `tests/src/Functional/DatasetBTBTest.php`.
