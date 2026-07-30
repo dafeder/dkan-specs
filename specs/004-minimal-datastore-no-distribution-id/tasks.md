@@ -139,7 +139,7 @@
 
 ### Implementation for Ticket 7
 
-- [ ] T050 [US3] Update orphan cleanup path to remove obsolete mappings/artifacts without requiring orphaned distribution references in `modules/dkan_metastore/src/Plugin/QueueWorker/OrphanResourceRemover.php`
+- [x] T050 [US3] Update orphan cleanup path to remove obsolete mappings/artifacts for non-referenced distribution mode, via lifecycle/subscriber/resource-purger flow in `modules/dkan_metastore/src/LifeCycle/LifeCycle.php`, `modules/dkan_metastore/src/LifeCycle/LifeCycleEvent.php`, `modules/dkan_metastore/src/EventSubscriber/MetastoreSubscriber.php`, and `modules/dkan_datastore/src/Service/ResourcePurger.php`
 
 **Checkpoint**: Cleanup works for both referenced and non-referenced distribution workflows.
 
@@ -319,4 +319,4 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T054 was intentionally removed because it tested dispatch summary counter accuracy which depended on the eliminated `DispatchResult` class; no replacement task is required.
 - T061 was intentionally removed because adding functional test coverage for `DashboardForm` is out of scope for this round of work. The actually changes to `DatasetForm` are minimal to non-existant, and we did add some unit test coverage to capture side-effects from changes to DatasetInfo.
 
-- T042 implementation includes `testOrphanedResourceCleanup()` with dual-mode parameterization via `DistributionReferenceModeTrait`. The referenced distribution mode test now passes with fix to `MetastoreSubscriber::cleanResourceMapperTable()`. Root cause: the cleanup handler was retrieving orphaned distributions through `MetastoreService::get()`, which triggers the `distributionLoad` lifecycle hook that dereferencing and strips the `%Ref:downloadURL` properties, preventing resource extraction. Fix: retrieve raw JSON directly from storage without dereferencing so `%Ref:downloadURL` properties remain intact for resource extraction and mapper cleanup. The non-referenced mode is skipped with rationale: orphan cleanup in non-referenced distribution mode requires separate lifecycle handling for T050 implementation (updating `OrphanResourceRemover` to handle non-referenced orphans).
+- T042/T050 implementation evidence: `orphan_resource_remover` is now effectively dead code for this flow (no active queue producer in the current branch path), and orphan cleanup is handled through lifecycle/subscriber/resource-purger orchestration. Branch changes in `MetastoreSubscriber`, `LifeCycle`, `LifeCycleEvent`, and `ResourcePurger` implement non-referenced orphan cleanup behavior without requiring orphaned distribution-reference queue processing. Functional confirmation is covered by `OrphanCheckerTest::testOrphanedResourceCleanup()` and draft workflow coverage in `tests/src/Functional/DatasetBTBTest.php`.
