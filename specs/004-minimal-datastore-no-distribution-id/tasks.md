@@ -145,29 +145,6 @@
 
 ---
 
-## Ticket 8: Migration Guidance and Custom Importer Hook Updates
-
-**Goal**: Capture the required migration steps for changed payloads and compatibility behavior.
-
-**Independent Test**: Review the migration guidance against changed hook payloads and compatibility behavior and verify each required update is documented.
-
-### Tests for Ticket 8
-
-- [ ] T044 [P] [US3] Add unit tests validating removal of legacy distribution-ID hook payload fields in `modules/dkan_datastore/tests/src/Unit/Service/PostImportResultTest.php`
-
-### Implementation for Ticket 8
-
-- [ ] T052 [US3] Remove legacy distribution-ID hook payload fields from importer event payload shaping in `modules/dkan_datastore/src/Service/ImportService.php`
-- [ ] T053 [US3] Update custom importer hook payload contract documentation for dataset/downloadURL/resource context in `docs/source/components/dkan_datastore.rst`
-- [ ] T037 [US3] Document compatibility behavior and migration notes for changed operational keys in `docs/source/upgrade.rst`
-- [ ] T055 [P] [US3] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
-- [ ] T058 [P] [US3] Add migration examples for legacy distribution-ID callers and updated importer hook payloads in `docs/source/upgrade.rst`
-- [ ] T060 [US3] Update completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
-
-**Checkpoint**: Migration expectations are documented for downstream maintainers and importer implementers.
-
----
-
 ## Ticket 9: SQL Endpoint Compatibility (Separate Maintenance Track)
 
 **Goal**: Update the SQL endpoint to work with resource-based cache dependencies instead of mandatory distribution IDs, recognizing that this surface is barely-maintained and may require careful review.
@@ -186,11 +163,11 @@
 
 ---
 
-## Ticket 10: Referenced-to-Embedded Distribution Migration Action
+## Ticket 10: Optional Referenced-to-Embedded Distribution Migration and Guidance
 
-**Goal**: Provide an executable migration path to convert referenced distributions into embedded non-referenced distributions for operators who choose that model.
+**Goal**: Provide an optional executable migration path for referenced-to-embedded distribution conversion and consolidate migration guidance for compatibility and operational-key changes.
 
-**Independent Test**: Run the migration command against representative datasets, verify metadata conversion correctness and idempotency, and confirm datastore behaviors remain valid after conversion.
+**Independent Test**: Run the optional migration command against representative datasets, verify metadata conversion correctness and idempotency, and confirm migration documentation/examples cover operational-key transition behavior outside the major-version upgrade guide.
 
 ### Tests for Ticket 10
 
@@ -199,8 +176,12 @@
 ### Implementation for Ticket 10
 
 - [ ] T070 [US3] Implement a Drush migration command to convert referenced distributions to embedded non-referenced distributions with dry-run and scoped execution options in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
+- [ ] T037 [US3] Document compatibility behavior and optional migration notes for changed operational keys in `docs/source/components/dkan_datastore.rst`
+- [ ] T055 [P] [US3] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
+- [ ] T058 [P] [US3] Add optional migration examples for legacy distribution-ID callers in `docs/source/components/dkan_datastore.rst`
+- [ ] T060 [US3] Update migration completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
 
-**Checkpoint**: Operators can run a supported, repeatable migration action to convert referenced distributions to embedded non-referenced distributions.
+**Checkpoint**: Operators can optionally run a supported, repeatable migration action and follow complete migration guidance for compatibility and payload transitions.
 
 ---
 
@@ -224,8 +205,8 @@
 - **Ticket 4**: Depends on Shared Foundation and benefits from Ticket 1 resource registration behavior so DatasetInfo can surface discovered resources.
 - **Ticket 5**: Depends on Shared Foundation and Ticket 4, because dashboard/reporting compatibility work consumes the DatasetInfo shape established there and the same compatibility pass now includes post-import status initialization and status lookup updates.
 - **Ticket 9**: Depends on Shared Foundation; SQL endpoint work is on a separate maintenance track because the surface is barely-maintained. Can proceed in parallel with other tickets once Shared Foundation is ready.
-- **Ticket 10**: Depends on Shared Foundation and should follow Ticket 5 compatibility work so migration execution aligns with finalized operational behavior.
-- **Tickets 7-8**: Depend on Shared Foundation; Ticket 7 benefits from Ticket 1 resource registration/dispatch behavior, and Ticket 8 should land after payload changes and migration action behavior are settled.
+- **Ticket 10**: Depends on Shared Foundation and should follow Ticket 5 compatibility work so migration execution and documentation align with finalized operational behavior.
+- **Ticket 7**: Depends on Shared Foundation and benefits from Ticket 1 resource registration/dispatch behavior.
 - **Release Gate Validation**: Depends on completion of the intended ticket set.
 
 ### Within Each Ticket
@@ -282,9 +263,8 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 3. Deliver Ticket 4 DatasetInfo integration before dashboard/reporting compatibility work.
 4. Deliver Ticket 5 for compatibility, endpoint, admin continuity, post-import status, and status lookup updates.
 5. Deliver Ticket 7 for cleanup and orphan-resource follow-up work.
-6. Deliver Ticket 10 migration action for referenced-to-embedded distribution conversion.
-7. Deliver Ticket 8 migration guidance updates.
-8. Finish with Release Gate Validation.
+6. Deliver Ticket 10 migration action and migration guidance updates.
+7. Finish with Release Gate Validation.
 
 ### Team Parallelization
 
@@ -311,8 +291,9 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T036 was intentionally removed because `ReimportCommands` already operates correctly in non-referenced mode and does not depend on distribution-node/UUID-specific logic.
 - T038 was intentionally removed because `PostImportResultFactory` already initializes status retrieval from distribution entries via `resource_id`, and this path does not require distribution-node/UUID-specific behavior changes.
 - T039 was intentionally removed because `ImportInfo` status lookup is already resource-mapping based and exercised by existing `ImportInfoTest` coverage without requiring distribution references.
-- T037 was moved from Ticket 5 to Ticket 8 so migration/upgrade documentation is grouped with migration guidance and custom importer payload updates.
-- T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked as a standalone deliverable rather than a documentation-only concern.
+- Ticket 8 (T044/T052/T053) was removed because importer hook payload changes are no longer required for this scope; `ImportService` distribution handling retained for cache-tag invalidation behavior.
+- T037 was moved from Ticket 5 to Ticket 10 so migration guidance is grouped with migration execution in component documentation, while `docs/source/upgrade.rst` remains focused on DKAN 2.x to 4.x upgrades.
+- T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked together with migration guidance deliverables.
 - Ticket 6 (T043/T051) was intentionally removed because the non-referenced-distribution refactor did not modify importer factory/stage-override behavior, and existing dual-mode `DatasetBTBTest` coverage (including `MySqlDatasetBTBTest` inheritance) already validates end-to-end importer behavior across both distribution modes.
 - T061 was intentionally removed because adding functional test coverage for `DashboardForm` is out of scope for this round of work. The actually changes to `DatasetForm` are minimal to non-existant, and we did add some unit test coverage to capture side-effects from changes to DatasetInfo.
 
