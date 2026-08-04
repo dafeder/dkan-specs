@@ -163,25 +163,25 @@
 
 ---
 
-## Ticket 10: Optional Referenced-to-Embedded Distribution Migration and Guidance
+## Ticket 10: Optional Unreference-Datasets Migration and Guidance
 
-**Goal**: Provide an optional executable migration path for referenced-to-embedded distribution conversion and consolidate migration guidance for compatibility and operational-key changes.
+**Goal**: Provide an optional executable migration path via `dkan:metastore:unreference-datasets` for referenced-to-embedded distribution conversion, and consolidate migration guidance for compatibility and operational-key changes.
 
-**Independent Test**: Run the optional migration command against representative datasets, verify metadata conversion correctness and idempotency, and confirm migration documentation/examples cover operational-key transition behavior outside the major-version upgrade guide.
+**Independent Test**: Run the optional migration command against representative datasets, verify referenced-to-embedded conversion correctness and idempotency, and confirm migration documentation/examples cover operational-key transition behavior outside the major-version upgrade guide.
 
 ### Tests for Ticket 10
 
-- [ ] T071 [P] [US3] Add functional Drush-command tests for referenced-to-embedded distribution migration behavior and idempotency in `modules/dkan_datastore/tests/src/Functional/Commands/DatastoreCommandsTest.php`
+- [x] T071 [P] [US3] Add functional Drush-command tests for `dkan:metastore:unreference-datasets` referenced-to-embedded distribution migration behavior and idempotency in `modules/dkan_metastore/tests/src/Functional/Drush/Commands/UnreferenceDatasetCommandsTest.php`
 
 ### Implementation for Ticket 10
 
-- [ ] T070 [US3] Implement a Drush migration command to convert referenced distributions to embedded non-referenced distributions with dry-run and scoped execution options in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
+- [x] T070 [US3] Implement the `UnreferenceDatasetCommands` Drush migration command to convert referenced distributions to embedded non-referenced distributions in `modules/dkan_metastore/src/Drush/Commands/UnreferenceDatasetCommands.php`
 - [ ] T037 [US3] Document compatibility behavior and optional migration notes for changed operational keys in `docs/source/components/dkan_datastore.rst`
 - [ ] T055 [P] [US3] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
 - [ ] T058 [P] [US3] Add optional migration examples for legacy distribution-ID callers in `docs/source/components/dkan_datastore.rst`
 - [ ] T060 [US3] Update migration completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
 
-**Checkpoint**: Operators can optionally run a supported, repeatable migration action and follow complete migration guidance for compatibility and payload transitions.
+**Checkpoint**: Maintainers can optionally run the supported, repeatable `dkan:metastore:unreference-datasets` migration action and follow complete migration guidance for compatibility and payload transitions.
 
 ---
 

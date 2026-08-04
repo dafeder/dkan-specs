@@ -95,6 +95,25 @@ As a module developer, I want import customization to remain straightforward so 
 1. **Given** a custom importer for one pipeline stage, **When** an import runs, **Then** overridden stage logic is used and non-overridden stages fall back to default behavior.
 2. **Given** no custom importer stage override, **When** an import runs, **Then** default datastore import behavior is used.
 
+---
+
+### User Story 4 - Optional Drush Command to Convert Referenced Distributions to Embedded (Priority: P4)
+
+As a DKAN administrator, I want an optional Drush command to convert referenced distributions to embedded (non-referenced) distributions on existing datasets so I can migrate at my own pace without manual re-saves.
+
+**Why this priority**: Referenced and non-referenced distributions both work in the updated workflow, but operators who want to fully decouple from the distribution reference entity model need a reliable, repeatable tool to do so.
+
+**Independent Test**: Run the command against a dataset with referenced distributions and verify the referenced distribution entities are orphaned (or deleted), the dataset's distributions are stored inline, and the revision carries the correct author and log message.
+
+**Acceptance Scenarios**:
+
+1. **Given** no `target-property` argument, **When** the command runs, **Then** it prompts the administrator to choose from a list of all referenceable dataset properties.
+2. **Given** a `target-property` is chosen and referencing is currently enabled for that property in `dkan_metastore.settings`, **When** the command runs, **Then** it disables referencing for that property before re-saving datasets.
+3. **Given** a dataset with N referenced distributions, **When** the command runs, **Then** it re-saves the dataset with distributions embedded inline, creating a new revision that retains the original author, updates the modified timestamp, and adds the log message "Automatically re-saved to remove distribution references."
+4. **Given** the `--delete-orphans` flag is absent, **When** referenced distribution entities are no longer referenced, **Then** they are queued for orphan processing rather than immediately deleted.
+5. **Given** the `--delete-orphans` flag is present, **When** referenced distribution entities are no longer referenced, **Then** they are immediately deleted.
+6. **Given** any dataset is processed, **When** the command runs, **Then** it outputs a status line containing the dataset title and the count of distributions being un-referenced.
+
 ### Edge Cases
 
 - Legacy calls that still supply distribution IDs are accepted for compatibility, but IDs are ignored for workflow initiation.
@@ -139,6 +158,12 @@ As a module developer, I want import customization to remain straightforward so 
 - **FR-029**: Post-import status/result creation MUST use datastore resource mapping or dataset/downloadURL context rather than requiring a distribution payload.
 - **FR-030**: Dashboard and administrator reporting flows MUST render resource rows and status for both distribution-backed and URL-only discovered resources without requiring distribution IDs.
 - **FR-031**: Data-dictionary discovery/validation behavior for `distribution[].describedBy` MUST work for both referenced and non-referenced distributions, and MUST NOT depend on distribution referencing being enabled in metastore `property_list` settings.
+- **FR-032**: The `dkan:metastore:embed-distributions` Drush command MUST accept an optional `target-property` argument; when omitted, it MUST prompt the administrator to select from a list of referenceable dataset properties.
+- **FR-033**: When `target-property` maps to a property that is currently enabled for referencing in `dkan_metastore.settings`, the command MUST disable referencing for that property before re-saving datasets.
+- **FR-034**: For each dataset processed, the command MUST re-save it so that the targeted property's values are stored inline, creating a new revision that retains the original author UID, updates the modified timestamp, and sets the revision log message to "Automatically re-saved to remove distribution references."
+- **FR-035**: When the `--delete-orphans` flag is absent, previously referenced entities for the targeted property MUST be queued for orphan processing rather than immediately deleted.
+- **FR-036**: When the `--delete-orphans` flag is present, previously referenced entities for the targeted property MUST be immediately deleted.
+- **FR-037**: For each dataset processed, the command MUST output a status line containing the dataset title and the count of values being un-referenced.
 
 ### Key Entities *(include if feature involves data)*
 
