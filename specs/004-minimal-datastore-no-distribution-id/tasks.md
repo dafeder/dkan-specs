@@ -177,6 +177,7 @@
 
 - [x] T070 [US3] Implement the `UnreferenceDatasetCommands` Drush migration command to convert referenced distributions to embedded non-referenced distributions in `modules/dkan_metastore/src/Drush/Commands/UnreferenceDatasetCommands.php`
 - [ ] T037 [US3] Document caller compatibility and operational-key transition guidance in `docs/source/components/dkan_datastore.rst`, including legacy distribution-ID acceptance and examples for callers moving to dataset/resource-identifier workflows.
+- [ ] T073 [US3] Update datastore API docs generation to remove hard distribution-ID assumptions or provide resource-ID alternatives in parameters/examples for query surfaces in `modules/dkan_datastore/src/Plugin/DkanApiDocs/DatastoreApiDocs.php`, `modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`, and `modules/dkan_datastore/docs/openapi_spec.json`
 - [x] T072 [US3] Document concise content-migration guidance in `docs/source/components/dkan_metastore.rst` for referenced-to-embedded distribution conversion, including command purpose, `orphan` vs `--delete` behavior, and a cautionary note to test in staging with backup/rollback readiness.
 - [ ] T055 [P] [US3] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
 - [ ] T060 [US3] Update migration completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
@@ -294,6 +295,7 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - Ticket 8 (T044/T052/T053) was removed because importer hook payload changes are no longer required for this scope; `ImportService` distribution handling retained for cache-tag invalidation behavior.
 - T037 was moved from Ticket 5 to Ticket 10 so migration guidance is grouped with migration execution in component documentation, while `docs/source/upgrade.rst` remains focused on DKAN 2.x to 4.x upgrades.
 - T058 was consolidated into T037 for caller-transition documentation, and content-migration documentation was split into T072 so operator runbook guidance has its own explicit deliverable.
+- T073 was moved from Ticket 5 to Ticket 10 so API documentation compatibility updates are tracked with migration and transition guidance work.
 - T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked together with migration guidance deliverables.
 - Ticket 6 (T043/T051) was intentionally removed because the non-referenced-distribution refactor did not modify importer factory/stage-override behavior, and existing dual-mode `DatasetBTBTest` coverage (including `MySqlDatasetBTBTest` inheritance) already validates end-to-end importer behavior across both distribution modes.
 - T061 was intentionally removed because adding functional test coverage for `DashboardForm` is out of scope for this round of work. The actually changes to `DatasetForm` are minimal to non-existant, and we did add some unit test coverage to capture side-effects from changes to DatasetInfo.
