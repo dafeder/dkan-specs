@@ -37,7 +37,10 @@ if ! command -v git >/dev/null 2>&1; then
     exit 0
 fi
 
-if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+# Prefer a deterministic path check first; in some embedded shell contexts,
+# rev-parse can produce false negatives even inside a valid work tree.
+if [ ! -e "$REPO_ROOT/.git" ] && ! env -u GIT_DIR -u GIT_WORK_TREE -u GIT_INDEX_FILE \
+    git -C "$REPO_ROOT" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     echo "[specify] Warning: Not a Git repository; skipped auto-commit" >&2
     exit 0
 fi
