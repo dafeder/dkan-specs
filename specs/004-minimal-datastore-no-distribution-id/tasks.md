@@ -124,6 +124,7 @@
 
 - [x] T035 [US2] Confirm resource-identifier-first datastore Drush parameter handling and update help text to clarify distribution IDs are compatibility metadata (not operational keys) in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
 - [x] T047 [US2] Update dashboard resource row builder to render discovered resources and status values without distribution IDs in `modules/dkan_datastore/src/Form/DashboardForm.php`
+- [ ] T073 [US2] Update datastore API docs generation to remove hard distribution-ID assumptions or provide resource-ID alternatives in parameters/examples for query surfaces in `modules/dkan_datastore/src/Plugin/DkanApiDocs/DatastoreApiDocs.php`, `modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`, and `modules/dkan_datastore/docs/openapi_spec.json`
 
 **Checkpoint**: Compatibility-sensitive datastore entry points, post-import status flows, and status lookup surfaces continue to work without requiring distribution IDs as operational keys.
 
@@ -145,21 +146,18 @@
 
 ---
 
-## Ticket 9: SQL Endpoint Compatibility (Separate Maintenance Track)
+## Ticket 9: SQL Endpoint Deprecation
 
-**Goal**: Update the SQL endpoint to work with resource-based cache dependencies instead of mandatory distribution IDs, recognizing that this surface is barely-maintained and may require careful review.
+**Goal**: Deprecate the SQL endpoint and announce/document that it is deprecated and should not be used if distributions are unreferenced / non-referenced.
 
-**Independent Test**: Execute SQL endpoint queries with resource identifiers and verify cache dependencies are correctly collected without requiring distribution ID lookups.
-
-### Tests for Ticket 9
-
-- [ ] T028 [P] [US2] Add unit tests for SQL endpoint behavior with resource-based execution and compatibility inputs in `modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php`
+**Independent Test**: Verify deprecation annotations and `Deprecation`/`Link` HTTP response headers are in place on the SQL endpoint controller/service and documented in the datastore documentation.
 
 ### Implementation for Ticket 9
 
-- [ ] T034 [US2] Update SQL endpoint service/controller to avoid distribution-ID operational assumptions in `modules/dkan_datastore/src/SqlEndpoint/WebServiceApi.php`
+- [ ] T034 [US2] Add deprecation annotations and `Deprecation`/`Link` HTTP response headers to SQL endpoint service/controller in `modules/dkan_datastore/src/SqlEndpoint/WebServiceApi.php`
+- [ ] T074 [US2] Document deprecation of the SQL endpoint and announce that it should not be used with unreferenced/non-referenced distributions in `docs/source/components/dkan_datastore.rst`
 
-**Checkpoint**: SQL endpoint accepts resource identifiers and generates correct cache dependencies.
+**Checkpoint**: SQL endpoint is deprecated with deprecation response headers (`Deprecation`, `Link`) and explicit documentation advising against its use with unreferenced/non-referenced distributions.
 
 ---
 
@@ -176,11 +174,7 @@
 ### Implementation for Ticket 10
 
 - [x] T070 [US3] Implement the `UnreferenceDatasetCommands` Drush migration command to convert referenced distributions to embedded non-referenced distributions in `modules/dkan_metastore/src/Drush/Commands/UnreferenceDatasetCommands.php`
-- [ ] T037 [US3] Document caller compatibility and operational-key transition guidance in `docs/source/components/dkan_datastore.rst`, including legacy distribution-ID acceptance and examples for callers moving to dataset/resource-identifier workflows.
-- [ ] T073 [US3] Update datastore API docs generation to remove hard distribution-ID assumptions or provide resource-ID alternatives in parameters/examples for query surfaces in `modules/dkan_datastore/src/Plugin/DkanApiDocs/DatastoreApiDocs.php`, `modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`, and `modules/dkan_datastore/docs/openapi_spec.json`
 - [x] T072 [US3] Document concise content-migration guidance in `docs/source/components/dkan_metastore.rst` for referenced-to-embedded distribution conversion, including command purpose, `orphan` vs `--delete` behavior, and a cautionary note to test in staging with backup/rollback readiness.
-- [ ] T055 [P] [US3] Capture pre/post compatibility inventory and verify >=80% source-compatible datastore surfaces in `specs/004-minimal-datastore-no-distribution-id/quickstart.md`
-- [ ] T060 [US3] Update migration completion checklist and residual risks in `specs/004-minimal-datastore-no-distribution-id/tasks.md`
 
 **Checkpoint**: Maintainers can optionally run the supported, repeatable `dkan:metastore:unreference-datasets` migration action and follow complete migration guidance for compatibility and payload transitions.
 
@@ -222,7 +216,7 @@
 - Ticket 1 test tasks T002-T004 can run in parallel.
 - Shared Foundation test tasks T011-T012 can run in parallel.
 - Ticket test tasks marked [P] can run in parallel across separate test files.
-- Ticket 5 controller, admin, Drush, dashboard, and status compatibility refactors can split across SQL, Drush, dashboard, and status files once Ticket 4 settles DatasetInfo output.
+- Ticket 5 controller, admin, Drush, dashboard, and status compatibility refactors can split across Drush, dashboard, and status files once Ticket 4 settles DatasetInfo output.
 - Ticket 7 can proceed once Ticket 2 resource registration behavior is stable.
 
 ## Parallel Example: Ticket 1
@@ -231,13 +225,6 @@
 Task: "T002 [P] Add dataset discovery fixture variants in modules/dkan_metastore/tests/src/Functional/OnPreReferenceTest.php"
 Task: "T003 [P] Add mixed-validity distribution fixtures in modules/dkan_metastore/tests/src/Kernel/LifeCycle/LifeCycleTest.php"
 Task: "T004 [P] Add subscriber multi-URL contract coverage in modules/dkan_datastore/tests/src/Unit/EventSubscriber/DatastoreSubscriberTest.php"
-```
-
-## Parallel Example: Ticket 5
-
-```bash
-Task: "T028 [US2] Add SQL endpoint unit tests in modules/dkan_datastore/tests/src/Unit/SqlEndpoint/WebServiceApiTest.php"
-Task: "T040 [US2] Add dashboard row unit tests in modules/dkan_datastore/tests/src/Unit/Form/DashboardFormTest.php"
 ```
 
 ## Parallel Example: Ticket 4 / Ticket 7
@@ -293,10 +280,11 @@ Task: "T048 [US3] Integrate discovered-resource collection in modules/dkan_commo
 - T038 was intentionally removed because `PostImportResultFactory` already initializes status retrieval from distribution entries via `resource_id`, and this path does not require distribution-node/UUID-specific behavior changes.
 - T039 was intentionally removed because `ImportInfo` status lookup is already resource-mapping based and exercised by existing `ImportInfoTest` coverage without requiring distribution references.
 - Ticket 8 (T044/T052/T053) was removed because importer hook payload changes are no longer required for this scope; `ImportService` distribution handling retained for cache-tag invalidation behavior.
-- T037 was moved from Ticket 5 to Ticket 10 so migration guidance is grouped with migration execution in component documentation, while `docs/source/upgrade.rst` remains focused on DKAN 2.x to 4.x upgrades.
-- T058 was consolidated into T037 for caller-transition documentation, and content-migration documentation was split into T072 so operator runbook guidance has its own explicit deliverable.
-- T073 was moved from Ticket 5 to Ticket 10 so API documentation compatibility updates are tracked with migration and transition guidance work.
+- T037 was intentionally removed because caller query parameters and examples are already covered by API docs generation in T073, while migration runbook guidance is covered in T072.
 - T070 and T071 were moved into Ticket 10 so referenced-to-embedded distribution migration execution is tracked together with migration guidance deliverables.
+- T028 was intentionally removed because Ticket 9 scope was reduced from refactoring SQL endpoint cache-tag handling to deprecating the endpoint and documenting that it should not be used with unreferenced/non-referenced distributions.
+- T055 was intentionally removed because tracking an arbitrary percentage-based compatibility inventory was deemed unnecessary.
+- T060 was intentionally removed because Ticket 10 implementation and runbook documentation are complete without requiring an administrative risks section in tasks.md.
 - Ticket 6 (T043/T051) was intentionally removed because the non-referenced-distribution refactor did not modify importer factory/stage-override behavior, and existing dual-mode `DatasetBTBTest` coverage (including `MySqlDatasetBTBTest` inheritance) already validates end-to-end importer behavior across both distribution modes.
 - T061 was intentionally removed because adding functional test coverage for `DashboardForm` is out of scope for this round of work. The actually changes to `DatasetForm` are minimal to non-existant, and we did add some unit test coverage to capture side-effects from changes to DatasetInfo.
 
