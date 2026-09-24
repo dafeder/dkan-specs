@@ -124,7 +124,7 @@
 
 - [x] T035 [US2] Confirm resource-identifier-first datastore Drush parameter handling and update help text to clarify distribution IDs are compatibility metadata (not operational keys) in `modules/dkan_datastore/src/Drush/Commands/DatastoreCommands.php`
 - [x] T047 [US2] Update dashboard resource row builder to render discovered resources and status values without distribution IDs in `modules/dkan_datastore/src/Form/DashboardForm.php`
-- [ ] T073 [US2] Update datastore API docs generation to remove hard distribution-ID assumptions or provide resource-ID alternatives in parameters/examples for query surfaces in `modules/dkan_datastore/src/Plugin/DkanApiDocs/DatastoreApiDocs.php`, `modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`, and `modules/dkan_datastore/docs/openapi_spec.json`
+- [x] T073 [US2] Update datastore API docs generation to remove hard distribution-ID assumptions or provide resource-ID alternatives in parameters/examples for query surfaces in `modules/dkan_datastore/src/Plugin/DkanApiDocs/DatastoreApiDocs.php`, `modules/dkan_metastore/src/Plugin/DkanApiDocs/MetastoreApiDocs.php`, and `modules/dkan_datastore/docs/openapi_spec.json`
 
 **Checkpoint**: Compatibility-sensitive datastore entry points, post-import status flows, and status lookup surfaces continue to work without requiring distribution IDs as operational keys.
 
