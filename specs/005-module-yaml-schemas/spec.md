@@ -18,6 +18,10 @@
 - Q: What path format should schema declarations use for schema files? -> A: Module-relative file paths only (relative to module root).
 - Q: Should this phase keep a separate SchemaSource abstraction? -> A: No; store normalized validation/UI schema paths directly on schema declarations.
 
+### Session 2026-09-25
+
+- Q: Should FR-013 change so only `dataset` is required, with `distribution`/`data-dictionary` optional but supported when declared? -> A: Only `dataset` is a required core schema name; `distribution` and `data-dictionary` are optional core schema names that are supported when declared but not mandatory for basic operation.
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Discover Schemas From Enabled Modules (Priority: P1)
@@ -115,7 +119,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-010**: Schema declarations MUST support trigger definitions that identify the source property and named trigger behavior.
 - **FR-011**: Datastore import trigger behavior MUST be driven by schema declaration trigger definitions rather than datastore trigger fields stored only in administrative configuration.
 - **FR-012**: DKAN business behavior in this phase MUST use fixed core schema machine names, including at minimum `dataset`, `distribution`, and `data-dictionary`, rather than a separate role or alias system.
-- **FR-013**: The initial feature MUST support the default `dataset` and `distribution` schema names and MUST NOT require arbitrary multiple schemas for the same core behavior in this phase.
+- **FR-013**: The initial feature MUST require only the `dataset` core schema name; `distribution` and `data-dictionary` are optional core schema names that MUST be supported when declared, and the system MUST NOT require arbitrary multiple schemas for the same core behavior in this phase.
 - **FR-014**: Literal-string schema handling is out of scope for this phase.
 - **FR-015**: The system MUST keep validation schema behavior separate from UI schema behavior.
 - **FR-016**: Existing schema lookup consumers MUST be able to retrieve validation schemas by declared machine name.
@@ -179,6 +183,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - New custom schemas are expected to live in custom modules when `docroot/schema/collections` is absent; existing `docroot/schema/collections` deployments remain authoritative while present.
 - Legacy filesystem schema discovery remains a backward-compatible override: when `docroot/schema/collections` exists, it wins over module YAML declarations.
 - The initial phase supports one active schema for each core role such as dataset and distribution.
+- Only the `dataset` core schema name is required; `distribution` and `data-dictionary` are optional core schema names supported when declared, and features depending on them (such as datastore import triggers and resource references) are unavailable when they are not declared.
 - The initial phase uses fixed core schema machine names for business behavior; role aliases and multiple schemas for the same core behavior are deferred.
 - Duplicate schema machine names are expected during customization and are resolved deterministically rather than treated as fatal conflicts.
 - Validation schemas are declared as file paths; inline schema content is out of scope for this phase.

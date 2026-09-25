@@ -1,37 +1,38 @@
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Module-Based Schemas With YAML Declarations
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `005-add-module-yaml-schemas` | **Date**: 2026-09-24 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/005-module-yaml-schemas/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/plan-template.md` for the execution workflow.
 
 ## Summary
 
-[Extract from feature spec: primary requirement + technical approach from research]
+Replace DKAN's filesystem-inferred metastore schema discovery with explicit, module-owned `MODULE.schemas.yml` declarations. Enabled modules declare schema machine names, module-relative validation/UI schema paths, reference rules, datastore-trigger rules, and optional weights. A declaration-aware registry replaces `SchemaRetriever` internals, resolves duplicate machine names deterministically (weight, then Drupal module order), preserves `docroot/schema/collections` as an authoritative legacy override, and exposes administrator-visible reporting for source mode, selection reasons, and invalid declarations.
 
 ## Technical Context
 
-<!--
-  ACTION REQUIRED: Replace the content in this section with the technical details
-  for the project. The structure here is presented in advisory capacity to guide
-  the iteration process.
--->
-
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [e.g., library/cli/web-service/mobile-app/compiler/desktop-app or NEEDS CLARIFICATION]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: PHP 8.1+ (Drupal 10 module code)
+**Primary Dependencies**: Drupal core module/service system, Symfony YAML component (via Drupal core), existing DKAN `dkan_metastore` and `dkan_datastore` services (`SchemaRetriever`, `Referencer`)
+**Storage**: YAML declaration files on disk (module-root `MODULE.schemas.yml`); no new database storage; runtime discovery results are cached via Drupal's cache API
+**Testing**: PHPUnit (unit + kernel/integration tests), Behat (existing DKAN feature tests), `composer phpcs` for coding standards
+**Target Platform**: Drupal 10 web application (DKAN distribution), Linux server
+**Project Type**: Single Drupal distribution project (PHP modules under `modules/`) — no separate frontend/backend split
+**Performance Goals**: Schema discovery/registry build must not add noticeable latency to cached metastore API requests; registry snapshot is cacheable so discovery does not re-scan modules per request
+**Constraints**: Must preserve existing `SchemaRetriever`/`getAllIds()` consumer API surface where practical; must preserve `docroot/schema/collections` as an authoritative override for backward compatibility; declarations support file paths only (no inline schema content)
+**Scale/Scope**: DKAN core `dkan_metastore` and `dkan_datastore` modules plus a default schema module; scope covers dataset, distribution, and data-dictionary core schema names
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+- **I. Metadata-First Design**: PASS. Feature is entirely about how metastore JSON schema structure is declared and discovered; validation schemas remain the authority for metadata structure.
+- **II. Modular Component Architecture**: PASS. Schema declarations are owned by modules; `dkan_metastore` and `dkan_datastore` continue to communicate through the existing `SchemaRetriever`/`Referencer` service boundaries rather than reaching into each other's internals.
+- **III. API-Driven Integration**: PASS. Existing `/api/1/metastore/schemas` endpoints remain the external contract; discovery internals change but the documented API surface is preserved (FR-016–FR-018).
+- **IV. Standards Compliance & Data Quality**: PASS. Invalid declarations produce actionable administrator-visible validation messages (FR-006, FR-024, FR-030), consistent with quality-gate requirements.
+- **V. Extensibility Through Drupal**: PASS. Declarations are standard Drupal module-root files tied to module enable/disable lifecycle; default and custom schemas both use this mechanism.
+- **VI. Test Coverage & Documentation Excellence**: PASS (planned). Success criteria SC-004/SC-005/SC-014 require automated test coverage of references, triggers, and data-dictionary resolution; FR-025 requires documentation of the declaration format and migration steps.
+
+No violations requiring Complexity Tracking justification.
 
 ## Project Structure
 
@@ -48,57 +49,37 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 
 ```text
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
-src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+# DKAN Drupal distribution (dkan-noref checkout) — single project, PHP modules
+modules/
+├── dkan_metastore/
+│   ├── src/
+│   │   ├── SchemaRetriever.php        # Becomes declaration-aware registry consumer
+│   │   ├── Reference/Referencer.php   # Reference rules driven by declarations
+│   │   └── ...
+│   ├── tests/
+│   └── dkan_metastore.services.yml
+├── dkan_datastore/
+│   ├── src/                           # Trigger behavior consumes declaration triggers
+│   └── tests/
+├── dkan_sample_content/                # Candidate location for default schema module
+│   └── dkan_sample_content.schemas.yml # or new dedicated default-schema module
+└── [new/updated custom schema modules]/
+    ├── MODULE.schemas.yml
+    ├── schema/collections/*.json
+    └── schema/collections/*.ui.json
+
+schema/collections/                     # Existing default DCAT-US schema documents
+docroot/schema/collections/             # Legacy override location (authoritative when present)
 
 tests/
-├── contract/
-├── integration/
-└── unit/
-
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+├── src/                                # PHPUnit unit/kernel tests
+└── fixtures/                           # Test module fixtures with sample .schemas.yml files
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Single-project Drupal distribution (`dkan-noref`). No frontend/backend split is needed—this feature is entirely PHP module code within `modules/dkan_metastore` and `modules/dkan_datastore`, plus new or updated schema-declaration modules. Declaration discovery, the schema registry, and reporting live in `dkan_metastore` services; datastore trigger consumption lives in `dkan_datastore`.
 
 ## Complexity Tracking
 
-> **Fill ONLY if Constitution Check has violations that must be justified**
-
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+*No Constitution Check violations identified; this section is not applicable.*
