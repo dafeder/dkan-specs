@@ -27,6 +27,7 @@
 - Q: Should FR-012 be reduced further? -> A: Yes; the fixed core schema names are now limited to `dataset` and `data-dictionary`, both supplied by default through the `dkan_metastore` module's bare-minimum declarations unless overridden; `distribution` is no longer a fixed core schema name and is supported only when declared.
 - Q: Should FR-019 and FR-038 be combined? -> A: Yes; the two were redundant. Merged into FR-019 (DCAT-US 1.1 module packaging and supersession behavior); FR-038's slot is removed since it was the last requirement.
 - Q: How should the `catalog` schema (used only to validate the `/data.json` catalog endpoint, not for item entry/retrieval) be addressed? -> A: Note in the spec that no special declaration-level handling exists for it in this phase; a future enhancement may add an optional boolean `items` schema declaration property, defaulting to `true`, settable to `false` to mark a schema as validation-only and excluded from item add/retrieve routes.
+- Q: Should schemas themselves support standard JSON Schema `$ref`/`$id` cross-schema references (not data references)? -> A: Yes, as a **stretch goal** for this phase (not required for the feature to be considered complete). If implemented, `validation_schema` gains an optional `dependencies` list; each entry is either an object shaped like `validation_schema` (`path` or `inline`, optionally with its own nested `dependencies`) or a string naming another top-level schema machine name declared under `schemas`. Before validation, the system would register the schema's own content plus all declared dependencies (recursively) with the schema resolver by their `$id`, so `$ref` values resolve. This applies to `validation_schema` only, not `ui_schema`, and is expected to be implemented primarily in the `GetDKAN/RootedJsonData` library (which already uses opis/json-schema 2.x, supporting `$ref`) rather than in DKAN itself.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -108,6 +109,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - A schema declaration changes while existing metadata records already use earlier behavior.
 - Dependent logic requests a data dictionary in a context where no applicable declared dictionary can be resolved.
 - A `catalog`-style schema exists only to validate a catalog endpoint (for example `/data.json`) and is not intended to allow item entry or retrieval through `dkan_metastore.1.metastore.schemas.id.items`; this phase does not add declaration-level handling to distinguish such schemas.
+- A `validation_schema` uses a JSON Schema `$ref` targeting another schema's `$id` without declaring that schema as a `dependencies` entry.
 
 ## Requirements *(mandatory)*
 
@@ -152,6 +154,15 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-036**: The `dataset` schema in `dkan_metastore.schemas.yml` MUST be reduced to only the properties required by the default `search_api` index configuration: `description`, `keyword`, `modified`, `publisher.name`, `theme`, and `title`.
 - **FR-037**: The `dataset` schema in `dkan_metastore.schemas.yml` MUST include a `distribution` property as an array of objects, where each object is reduced to only `downloadURL`, `title`, `description`, `describedBy`, and `describedByType`.
 
+### Stretch Goal: JSON Schema `$ref`/`$id` Cross-Schema Dependencies
+
+*The following requirements are a stretch goal for this phase. They are desirable but not required for this feature to be considered complete; they MAY be deferred to a follow-up phase if time does not allow.*
+
+- **FR-038**: A schema definition's `validation_schema` SHOULD support an optional `dependencies` list, where each entry is either (a) an object shaped like `validation_schema` (containing `path` or `inline`, and optionally its own nested `dependencies`), or (b) a string naming another schema machine name declared under the same declaration file's `schemas` map.
+- **FR-039**: Before validating data against a schema, if `dependencies` support is implemented, the system SHOULD register that schema's own `validation_schema` content and the content of all declared `dependencies` (resolved recursively) with the schema resolver by their `$id` properties, so that standard JSON Schema `$ref` values within those documents resolve correctly.
+- **FR-040**: If implemented, JSON Schema `$ref`/`$id` cross-schema dependency registration applies to `validation_schema` content only; `ui_schema` content is not subject to `dependencies` registration in this phase.
+- **FR-041**: If implemented, when a `validation_schema` contains a `$ref` that cannot be resolved because the referenced `$id` was not registered via a declared dependency, the system SHOULD treat this the same as a missing schema reference under FR-006: report a validation error, exclude the invalid declaration, and continue discovering other valid declarations.
+
 ### Key Entities *(include if feature involves data)*
 
 - **Schema Declaration File**: A module-root `MODULE.schemas.yml` file that registers one or more schemas and their metadata.
@@ -160,6 +171,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **UI Schema**: Optional form-specific schema data loaded from a module-relative declaration path and used for metadata form rendering and editing experience.
 - **Reference Definition**: Declarative rule that maps a property to a reference type (`object_ref`, `item_url`, or `resource_url`) that must be dereferenced on retrieval.
 - **Behavior Definition**: Declarative rule that maps a property to one or more named system behaviors (`import_trigger`, `resource_mapper`, `data_dictionary`) that are independent of, and may coexist with, that property's reference definition.
+- **Schema Dependency**: A *stretch-goal* entry in a `validation_schema`'s `dependencies` list identifying additional schema content (embedded `path`/`inline` content, or another top-level schema machine name) that would be registered by its `$id` with the schema resolver before validation, enabling standard JSON Schema `$ref` resolution across schema documents. Distinct from Reference Definition and Behavior Definition, which describe data-level (not schema-level) relationships.
 - **Data Dictionary Resolution Method**: A schema module-provided capability used by dependent DKAN logic to resolve the effective data dictionary for a given business context.
 - **Default Schema Module**: The `dkan_metastore` module's own `dkan_metastore.schemas.yml`, providing an absolute bare-minimum `dataset` schema (limited to default `search_api`-indexed properties plus a reduced `distribution` property) and a `data-dictionary` schema identical to the current default.
 - **Included DCAT-US 1.1 module**: An optional module that ships with DKAN core and provides full schemas and declarations for a DCAT-US 1.1 site, superseding the `dkan_metastore` bare-minimum defaults when enabled (FR-019).
@@ -205,3 +217,4 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - Behavior names (`import_trigger`, `resource_mapper`, `data_dictionary`) are a closed, fixed set validated by the declaration JSON Schema contract in this phase; an open/extensible behavior-naming scheme (allowing modules to register additional behavior names) is a possible future enhancement and is out of scope now.
 - The bare-minimum default `dataset`/`distribution` property sets in `dkan_metastore.schemas.yml` are sized to the default `search_api` index configuration; sites needing the fuller Project Open Data field set are expected to enable the DCAT-US 1.1 module or a custom schema module.
 - Validation-only schemas such as `catalog` (used to validate a catalog endpoint, not for item entry/retrieval) are out of scope for declaration-level special handling in this phase; there is no code distinguishing them from item-backed schemas. A possible future enhancement is an optional boolean `items` schema declaration property (default `true`) that, when set to `false`, marks a schema as available for validation/retrieval-by-consumers but excluded from item add/retrieve routes.
+- JSON Schema `$ref`/`$id` cross-schema resolution (schema-structure references, distinct from metastore data references/behaviors) is a **stretch goal** for this phase, not required for completion; if pursued, it is expected to be implemented primarily within the `GetDKAN/RootedJsonData` library, which already depends on opis/json-schema 2.x and supports `$ref` resolution, with DKAN/`dkan_metastore` changes limited to declaration parsing and dependency registration wiring.
