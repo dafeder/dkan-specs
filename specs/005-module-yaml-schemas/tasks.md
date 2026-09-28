@@ -30,7 +30,7 @@
 - [ ] T008 Create schema declaration value object in `../dkan/modules/dkan_metastore/src/Schema/SchemaDeclaration.php`
 - [ ] T009 [P] Create schema source value object in `../dkan/modules/dkan_metastore/src/Schema/SchemaSource.php`
 - [ ] T010 [P] Create reference definition value object in `../dkan/modules/dkan_metastore/src/Schema/ReferenceDefinition.php`
-- [ ] T011 [P] Create trigger definition value object in `../dkan/modules/dkan_metastore/src/Schema/TriggerDefinition.php`
+- [ ] T011 [P] Create behavior definition value object in `../dkan/modules/dkan_metastore/src/Schema/BehaviorDefinition.php`
 - [ ] T012 Create schema registry result object in `../dkan/modules/dkan_metastore/src/Schema/SchemaRegistry.php`
 - [ ] T013 Create declaration warning result object in `../dkan/modules/dkan_metastore/src/Schema/SchemaDeclarationWarning.php`
 - [ ] T014 Register schema declaration services in `../dkan/modules/dkan_metastore/dkan_metastore.services.yml`
@@ -73,35 +73,40 @@
 
 ---
 
-## Phase 4: User Story 2 - Configure References and Triggers Declaratively (Priority: P2)
+## Phase 4: User Story 2 - Configure References and Behaviors Declaratively (Priority: P2)
 
-**Goal**: Schema declarations define reference rules and datastore-triggering properties so metastore and datastore behavior no longer depends on property-name-only conditionals or admin trigger config.
+**Goal**: Schema declarations define reference rules and property behaviors (`import_trigger`, `resource_mapper`, `data_dictionary`) so metastore and datastore behavior no longer depends on property-name-only conditionals or admin trigger config.
 
-**Independent Test**: Declare dataset references, distribution resource references, and datastore import triggers in YAML; save/update metadata and verify reference handling plus datastore import triggering follow those declarations.
+**Independent Test**: Declare dataset references, a `resource_mapper` behavior on a distribution download property, an `import_trigger` behavior, and a `data_dictionary` behavior; save/update metadata and verify reference handling, datastore import triggering, resource mapping, and data-dictionary resolution all follow those declarations.
 
 ### Tests for User Story 2
 
 - [ ] T033 [P] [US2] Add unit tests for reference definition parsing in `../dkan/modules/dkan_metastore/tests/src/Unit/Schema/ReferenceDefinitionTest.php`
 - [ ] T034 [P] [US2] Add kernel tests for declaration-backed dataset-to-distribution references in `../dkan/modules/dkan_metastore/tests/src/Kernel/Reference/DeclarationReferencerTest.php`
-- [ ] T035 [P] [US2] Add functional tests for distribution `downloadURL` resource registration from declaration metadata in `../dkan/modules/dkan_metastore/tests/src/Functional/Api1/DeclarationDistributionHandlingTest.php`
-- [ ] T036 [P] [US2] Add unit tests for datastore trigger definition parsing in `../dkan/modules/dkan_datastore/tests/src/Unit/Schema/DatastoreTriggerDefinitionTest.php`
-- [ ] T037 [P] [US2] Add unit tests for declaration-backed datastore update triggering in `../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DeclarationDatastoreSubscriberTest.php`
+- [ ] T035 [P] [US2] Add functional tests for `resource_mapper` behavior resource registration from declaration metadata in `../dkan/modules/dkan_metastore/tests/src/Functional/Api1/DeclarationDistributionHandlingTest.php`
+- [ ] T036 [P] [US2] Add unit tests for behavior definition parsing (`import_trigger`, `resource_mapper`, `data_dictionary`) in `../dkan/modules/dkan_datastore/tests/src/Unit/Schema/BehaviorDefinitionTest.php`
+- [ ] T037 [P] [US2] Add unit tests for declaration-backed `import_trigger` datastore update triggering in `../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DeclarationDatastoreSubscriberTest.php`
 - [ ] T038 [P] [US2] Add kernel tests proving trigger settings config is no longer authoritative in `../dkan/modules/dkan_datastore/tests/src/Kernel/DeclarationDatastoreTriggerTest.php`
+- [ ] T039 [P] [US2] Add unit tests for data-dictionary resolution from the `data_dictionary` behavior in `../dkan/modules/dkan_metastore/tests/src/Unit/Schema/DataDictionaryResolverTest.php`
+- [ ] T040 [P] [US2] Add kernel tests proving data-dictionary resolution is deterministic and errors actionably when no property declares `data_dictionary` in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/DataDictionaryResolverKernelTest.php`
 
 ### Implementation for User Story 2
 
-- [ ] T039 [US2] Add reference definition access methods to schema registry in `../dkan/modules/dkan_metastore/src/Schema/SchemaRegistry.php`
-- [ ] T040 [US2] Update reference property discovery to use declaration reference definitions in `../dkan/modules/dkan_metastore/src/Reference/HelperTrait.php`
-- [ ] T041 [US2] Update reference processing for declared schema and identifier references in `../dkan/modules/dkan_metastore/src/Reference/Referencer.php`
-- [ ] T042 [US2] Update resource reference handling for declared `downloadURL` behavior in `../dkan/modules/dkan_metastore/src/Reference/Referencer.php`
-- [ ] T043 [US2] Update dereference behavior to use declaration reference definitions in `../dkan/modules/dkan_metastore/src/Reference/Dereferencer.php`
-- [ ] T044 [US2] Update reference cache dependency traversal for declaration-backed references in `../dkan/modules/dkan_metastore/src/MetastoreApiResponse.php`
-- [ ] T045 [US2] Add trigger definition lookup service for datastore consumers in `../dkan/modules/dkan_metastore/src/Schema/SchemaTriggerProvider.php`
-- [ ] T046 [US2] Update datastore pre-reference trigger checks to use declaration trigger definitions in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
-- [ ] T047 [US2] Remove, disable, or supersede datastore triggering property checkboxes in `../dkan/modules/dkan_datastore/src/Form/DatastoreSettingsForm.php`
-- [ ] T048 [US2] Update datastore settings config schema for deprecated trigger config handling in `../dkan/modules/dkan_datastore/config/schema/dkan_datastore.schema.yml`
+- [ ] T041 [US2] Add reference and behavior definition access methods to schema registry in `../dkan/modules/dkan_metastore/src/Schema/SchemaRegistry.php`
+- [ ] T042 [US2] Update reference property discovery to use declaration reference definitions in `../dkan/modules/dkan_metastore/src/Reference/HelperTrait.php`
+- [ ] T043 [US2] Update reference processing for declared schema and identifier references in `../dkan/modules/dkan_metastore/src/Reference/Referencer.php`
+- [ ] T044 [US2] Update resource handling for the declared `resource_mapper` behavior in `../dkan/modules/dkan_metastore/src/Reference/Referencer.php`
+- [ ] T045 [US2] Update dereference behavior to use declaration reference definitions in `../dkan/modules/dkan_metastore/src/Reference/Dereferencer.php`
+- [ ] T046 [US2] Update reference cache dependency traversal for declaration-backed references in `../dkan/modules/dkan_metastore/src/MetastoreApiResponse.php`
+- [ ] T047 [US2] Add behavior definition lookup service for datastore/metastore consumers in `../dkan/modules/dkan_metastore/src/Schema/SchemaBehaviorProvider.php`
+- [ ] T048 [US2] Implement `DataDictionaryResolver` service resolving the effective data dictionary from the property declaring `data_dictionary` in the active schema in `../dkan/modules/dkan_metastore/src/Schema/DataDictionaryResolver.php`
+- [ ] T049 [US2] Register `DataDictionaryResolver` service in `../dkan/modules/dkan_metastore/dkan_metastore.services.yml`
+- [ ] T050 [US2] Update datastore pre-reference `import_trigger` checks to use declaration behavior definitions in `../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php`
+- [ ] T051 [US2] Remove, disable, or supersede datastore triggering property checkboxes in `../dkan/modules/dkan_datastore/src/Form/DatastoreSettingsForm.php`
+- [ ] T052 [US2] Remove, disable, or supersede the metastore reference-field-selection admin form/route in `../dkan/modules/dkan_metastore/src/Form/MetastoreSettingsForm.php`
+- [ ] T053 [US2] Update datastore settings config schema for deprecated trigger config handling in `../dkan/modules/dkan_datastore/config/schema/dkan_datastore.schema.yml`
 
-**Checkpoint**: User Story 2 is independently functional on top of US1: declared references and triggers drive metastore/datastore behavior, and conflicting trigger admin configuration is not authoritative.
+**Checkpoint**: User Story 2 is independently functional on top of US1: declared references and behaviors (`import_trigger`, `resource_mapper`, `data_dictionary`) drive metastore/datastore behavior and data-dictionary resolution, and conflicting admin configuration is not authoritative.
 
 ---
 
@@ -113,18 +118,18 @@
 
 ### Tests for User Story 3
 
-- [ ] T049 [P] [US3] Add unit tests for UI schema source parsing and missing UI schema fallback in `../dkan/modules/dkan_metastore/tests/src/Unit/Schema/UiSchemaDeclarationTest.php`
-- [ ] T050 [P] [US3] Add unit tests for validation schema lookup remaining separate from UI schema lookup in `../dkan/modules/dkan_metastore/tests/src/Unit/SchemaRetrieverTest.php`
-- [ ] T051 [P] [US3] Add kernel tests for `SchemaPropertiesHelper` with declaration-backed validation schema content in `../dkan/modules/dkan_metastore/tests/src/Kernel/SchemaPropertiesHelperDeclarationTest.php`
-- [ ] T052 [P] [US3] Add functional widget tests for declared UI schema usage in `../dkan/modules/dkan_metastore/tests/src/Functional/Plugin/Field/FieldWidget/DeclarationUiSchemaTest.php`
+- [ ] T054 [P] [US3] Add unit tests for UI schema source parsing and missing UI schema fallback in `../dkan/modules/dkan_metastore/tests/src/Unit/Schema/UiSchemaDeclarationTest.php`
+- [ ] T055 [P] [US3] Add unit tests for validation schema lookup remaining separate from UI schema lookup in `../dkan/modules/dkan_metastore/tests/src/Unit/SchemaRetrieverTest.php`
+- [ ] T056 [P] [US3] Add kernel tests for `SchemaPropertiesHelper` with declaration-backed validation schema content in `../dkan/modules/dkan_metastore/tests/src/Kernel/SchemaPropertiesHelperDeclarationTest.php`
+- [ ] T057 [P] [US3] Add functional widget tests for declared UI schema usage in `../dkan/modules/dkan_metastore/tests/src/Functional/Plugin/Field/FieldWidget/DeclarationUiSchemaTest.php`
 
 ### Implementation for User Story 3
 
-- [ ] T053 [US3] Add UI schema retrieval methods to schema registry in `../dkan/modules/dkan_metastore/src/Schema/SchemaRegistry.php`
-- [ ] T054 [US3] Add explicit UI schema retrieval API to schema retriever in `../dkan/modules/dkan_metastore/src/SchemaRetriever.php`
-- [ ] T055 [US3] Update schema properties helper to avoid UI schema assumptions in `../dkan/modules/dkan_metastore/src/SchemaPropertiesHelper.php`
-- [ ] T056 [US3] Update JSON form option source to request declared UI schema content in `../dkan/modules/dkan_metastore/src/Plugin/JsonFormOptionSource/MetastoreSchema.php`
-- [ ] T057 [US3] Update DKAN JSON form widget integration for missing UI schema fallback in `../dkan/modules/dkan_metastore/src/Plugin/Field/FieldWidget/DkanJsonFormWidget.php`
+- [ ] T058 [US3] Add UI schema retrieval methods to schema registry in `../dkan/modules/dkan_metastore/src/Schema/SchemaRegistry.php`
+- [ ] T059 [US3] Add explicit UI schema retrieval API to schema retriever in `../dkan/modules/dkan_metastore/src/SchemaRetriever.php`
+- [ ] T060 [US3] Update schema properties helper to avoid UI schema assumptions in `../dkan/modules/dkan_metastore/src/SchemaPropertiesHelper.php`
+- [ ] T061 [US3] Update JSON form option source to request declared UI schema content in `../dkan/modules/dkan_metastore/src/Plugin/JsonFormOptionSource/MetastoreSchema.php`
+- [ ] T062 [US3] Update DKAN JSON form widget integration for missing UI schema fallback in `../dkan/modules/dkan_metastore/src/Plugin/Field/FieldWidget/DkanJsonFormWidget.php`
 
 **Checkpoint**: User Story 3 is independently functional on top of US1: validation schemas and UI schemas are retrieved separately, and omitted UI schemas do not block validation or form rendering.
 
@@ -138,23 +143,35 @@
 
 ### Tests for User Story 4
 
-- [ ] T058 [P] [US4] Add kernel tests for default schema module declaration availability in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/DefaultSchemaModuleTest.php`
-- [ ] T059 [P] [US4] Add functional migration tests for custom module schema replacement by weight in `../dkan/modules/dkan_metastore/tests/src/Functional/Schema/CustomSchemaMigrationTest.php`
-- [ ] T060 [P] [US4] Add functional report tests for ignored declarations under legacy override in `../dkan/modules/dkan_metastore/tests/src/Functional/Schema/SchemaSelectionReportTest.php`
-- [ ] T061 [P] [US4] Add documentation example validation test for declaration snippets in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/SchemaDeclarationDocumentationTest.php`
+- [ ] T063 [P] [US4] Add kernel tests for default schema module declaration availability in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/DefaultSchemaModuleTest.php`
+- [ ] T064 [P] [US4] Add kernel tests asserting the bare-minimum `dataset` schema in `dkan_metastore.schemas.yml` exposes only `description`, `keyword`, `modified`, `publisher.name`, `theme`, `title`, and `distribution` in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/DefaultDatasetSchemaMinimalFieldsTest.php`
+- [ ] T065 [P] [US4] Add kernel tests asserting the bare-minimum `distribution` items expose only `downloadURL`, `title`, `description`, `describedBy`, `describedByType` in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/DefaultDistributionSchemaMinimalFieldsTest.php`
+- [ ] T066 [P] [US4] Add functional migration tests for custom module schema replacement by weight in `../dkan/modules/dkan_metastore/tests/src/Functional/Schema/CustomSchemaMigrationTest.php`
+- [ ] T067 [P] [US4] Add functional report tests for ignored declarations under legacy override in `../dkan/modules/dkan_metastore/tests/src/Functional/Schema/SchemaSelectionReportTest.php`
+- [ ] T068 [P] [US4] Add documentation example validation test for declaration snippets in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/SchemaDeclarationDocumentationTest.php`
+- [ ] T069 [P] [US4] Add kernel tests for DCAT-US 1.1 module full `dataset`/`distribution`/`data-dictionary` schema availability in `../dkan/modules/dkan_dcat_us_1_1/tests/src/Kernel/Schema/DcatUs11ModuleSchemaTest.php`
+- [ ] T070 [P] [US4] Add kernel tests proving DCAT-US 1.1 module declarations supersede `dkan_metastore` bare-minimum defaults via weight/module-order selection (FR-038) in `../dkan/modules/dkan_dcat_us_1_1/tests/src/Kernel/Schema/DcatUs11SupersedesDefaultTest.php`
 
 ### Implementation for User Story 4
 
-- [ ] T062 [US4] Add default schema declaration file for DKAN schemas in `../dkan/dkan.schemas.yml`
-- [ ] T063 [US4] Map default validation schema paths in `../dkan/dkan.schemas.yml`
-- [ ] T064 [US4] Map default UI schema paths in `../dkan/dkan.schemas.yml`
-- [ ] T065 [US4] Add default reference definitions for dataset, distribution, resource, and data-dictionary behavior in `../dkan/dkan.schemas.yml`
-- [ ] T066 [US4] Add default datastore trigger definitions in `../dkan/dkan.schemas.yml`
-- [ ] T067 [US4] Add update or install handling for default schema availability in `../dkan/modules/dkan_metastore/dkan_metastore.install`
-- [ ] T068 [US4] Update custom schema guide for module declarations and legacy override behavior in `../dkan/docs/source/user-guide/guide_custom_schemas.rst`
-- [ ] T069 [US4] Add developer guide declaration format documentation in `../dkan/docs/source/developer-guide/schema_declarations.rst`
-- [ ] T070 [US4] Update metastore component documentation for declaration-backed discovery in `../dkan/docs/source/components/dkan_metastore.rst`
-- [ ] T071 [US4] Update upgrade notes for `docroot/schema/collections` override and migration path in `../dkan/docs/source/upgrade.rst`
+- [ ] T071 [US4] Add default schema declaration file in `../dkan/modules/dkan_metastore/dkan_metastore.schemas.yml`
+- [ ] T072 [US4] Author bare-minimum `dataset` validation schema JSON (only `description`, `keyword`, `modified`, `publisher.name`, `theme`, `title`, `distribution`) in `../dkan/modules/dkan_metastore/schema/collections/dataset.json`
+- [ ] T073 [US4] Author bare-minimum `distribution` item properties (only `downloadURL`, `title`, `description`, `describedBy`, `describedByType`) within the `dataset.json` `distribution` property
+- [ ] T074 [US4] Copy the current `data-dictionary` schema unchanged into `../dkan/modules/dkan_metastore/schema/collections/data-dictionary.json`
+- [ ] T075 [US4] Map default validation schema paths in `../dkan/modules/dkan_metastore/dkan_metastore.schemas.yml`
+- [ ] T076 [US4] Map default UI schema paths in `../dkan/modules/dkan_metastore/dkan_metastore.schemas.yml`
+- [ ] T077 [US4] Add default reference definitions on the `dataset` schema's `distribution[]` items (`describedBy` → `item_url` targeting `data-dictionary`, `downloadURL` → `resource_url`) in `../dkan/modules/dkan_metastore/dkan_metastore.schemas.yml`
+- [ ] T078 [US4] Add default `import_trigger`, `resource_mapper`, and `data_dictionary` behavior definitions on the `dataset` schema's relevant properties in `../dkan/modules/dkan_metastore/dkan_metastore.schemas.yml`
+- [ ] T079 [US4] Add update or install handling for default schema availability in `../dkan/modules/dkan_metastore/dkan_metastore.install`
+- [ ] T080 [US4] Update custom schema guide for module declarations and legacy override behavior in `../dkan/docs/source/user-guide/guide_custom_schemas.rst`
+- [ ] T081 [US4] Add developer guide declaration format documentation in `../dkan/docs/source/developer-guide/schema_declarations.rst`
+- [ ] T082 [US4] Update metastore component documentation for declaration-backed discovery in `../dkan/docs/source/components/dkan_metastore.rst`
+- [ ] T083 [US4] Update upgrade notes for `docroot/schema/collections` override and migration path in `../dkan/docs/source/upgrade.rst`
+- [ ] T084 [US4] Scaffold the optional DCAT-US 1.1 module info file in `../dkan/modules/dkan_dcat_us_1_1/dkan_dcat_us_1_1.info.yml`
+- [ ] T085 [US4] Add full DCAT-US validation and UI schema JSON for `dataset`, `distribution`, and `data-dictionary` in `../dkan/modules/dkan_dcat_us_1_1/schema/collections/*.json`
+- [ ] T086 [US4] Author `dkan_dcat_us_1_1.schemas.yml` declaring full `dataset`, `distribution`, and `data-dictionary` schemas with references and behavior definitions in `../dkan/modules/dkan_dcat_us_1_1/dkan_dcat_us_1_1.schemas.yml`
+- [ ] T087 [US4] Set declaration `weight` (or rely on module order) so `dkan_dcat_us_1_1` declarations supersede `dkan_metastore` bare-minimum defaults when enabled, per FR-038/FR-026–FR-028
+- [ ] T088 [US4] Document enabling the DCAT-US 1.1 module and its supersession behavior in `../dkan/docs/source/user-guide/guide_custom_schemas.rst`
 
 **Checkpoint**: User Story 4 is independently functional on top of US1: default schemas remain available, custom schema migration is documented and testable, invalid declarations are actionable, and legacy deployments remain protected.
 
@@ -164,12 +181,12 @@
 
 **Purpose**: Final consistency, quality, and release-readiness tasks across all stories.
 
-- [ ] T072 [P] Run metastore PHPUnit coverage for schema declaration changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T073 [P] Run datastore PHPUnit coverage for declaration-backed trigger changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T074 [P] Run PHPCS for touched DKAN modules and record results in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T075 Review service names, constructor injection, and backward compatibility notes in `../dkan/modules/dkan_metastore/dkan_metastore.services.yml`
-- [ ] T076 Review quickstart validation steps against final implementation behavior in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T077 Update task completion evidence and residual risks in `specs/005-module-yaml-schemas/tasks.md`
+- [ ] T089 [P] Run metastore PHPUnit coverage for schema declaration changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T090 [P] Run datastore PHPUnit coverage for declaration-backed behavior changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T091 [P] Run PHPCS for touched DKAN modules and record results in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T092 Review service names, constructor injection, and backward compatibility notes in `../dkan/modules/dkan_metastore/dkan_metastore.services.yml`
+- [ ] T093 Review quickstart validation steps against final implementation behavior in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T094 Update task completion evidence and residual risks in `specs/005-module-yaml-schemas/tasks.md`
 
 ---
 
@@ -207,7 +224,8 @@
 - Test tasks within each user story can run in parallel because they target different files.
 - US2 reference integration and datastore trigger integration can split between metastore and datastore developers after shared trigger/reference provider contracts are stable.
 - US3 UI schema work can proceed alongside US2 after US1 registry APIs are stable.
-- Documentation tasks T068-T071 can run in parallel once implementation behavior is settled.
+- Documentation tasks T080-T083 can run in parallel once implementation behavior is settled.
+- DCAT-US 1.1 module tasks T084-T088 can proceed in parallel with documentation once the bare-minimum default (T071-T079) is stable.
 
 ## Parallel Example: User Story 1
 
@@ -222,26 +240,26 @@ Task: "T020 [US1] Add functional API tests in ../dkan/modules/dkan_metastore/tes
 
 ```bash
 Task: "T034 [US2] Add kernel tests for declaration-backed references in ../dkan/modules/dkan_metastore/tests/src/Kernel/Reference/DeclarationReferencerTest.php"
-Task: "T037 [US2] Add unit tests for declaration-backed datastore triggering in ../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DeclarationDatastoreSubscriberTest.php"
-Task: "T041 [US2] Update reference processing in ../dkan/modules/dkan_metastore/src/Reference/Referencer.php"
-Task: "T046 [US2] Update datastore trigger checks in ../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php"
+Task: "T037 [US2] Add unit tests for declaration-backed import_trigger datastore update triggering in ../dkan/modules/dkan_datastore/tests/src/Unit/EventSubscriber/DeclarationDatastoreSubscriberTest.php"
+Task: "T043 [US2] Update reference processing in ../dkan/modules/dkan_metastore/src/Reference/Referencer.php"
+Task: "T050 [US2] Update datastore import_trigger checks in ../dkan/modules/dkan_datastore/src/EventSubscriber/DatastoreSubscriber.php"
 ```
 
 ## Parallel Example: User Story 3
 
 ```bash
-Task: "T049 [US3] Add UI schema source tests in ../dkan/modules/dkan_metastore/tests/src/Unit/Schema/UiSchemaDeclarationTest.php"
-Task: "T052 [US3] Add functional widget tests in ../dkan/modules/dkan_metastore/tests/src/Functional/Plugin/Field/FieldWidget/DeclarationUiSchemaTest.php"
-Task: "T056 [US3] Update JSON form option source in ../dkan/modules/dkan_metastore/src/Plugin/JsonFormOptionSource/MetastoreSchema.php"
+Task: "T054 [US3] Add UI schema source tests in ../dkan/modules/dkan_metastore/tests/src/Unit/Schema/UiSchemaDeclarationTest.php"
+Task: "T057 [US3] Add functional widget tests in ../dkan/modules/dkan_metastore/tests/src/Functional/Plugin/Field/FieldWidget/DeclarationUiSchemaTest.php"
+Task: "T061 [US3] Update JSON form option source in ../dkan/modules/dkan_metastore/src/Plugin/JsonFormOptionSource/MetastoreSchema.php"
 ```
 
 ## Parallel Example: User Story 4
 
 ```bash
-Task: "T058 [US4] Add default schema module tests in ../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/DefaultSchemaModuleTest.php"
-Task: "T068 [US4] Update custom schema guide in ../dkan/docs/source/user-guide/guide_custom_schemas.rst"
-Task: "T069 [US4] Add developer guide in ../dkan/docs/source/developer-guide/schema_declarations.rst"
-Task: "T071 [US4] Update upgrade notes in ../dkan/docs/source/upgrade.rst"
+Task: "T063 [US4] Add default schema module tests in ../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/DefaultSchemaModuleTest.php"
+Task: "T080 [US4] Update custom schema guide in ../dkan/docs/source/user-guide/guide_custom_schemas.rst"
+Task: "T081 [US4] Add developer guide in ../dkan/docs/source/developer-guide/schema_declarations.rst"
+Task: "T083 [US4] Update upgrade notes in ../dkan/docs/source/upgrade.rst"
 ```
 
 ## Implementation Strategy

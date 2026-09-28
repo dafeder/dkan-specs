@@ -17,23 +17,35 @@ schemas:
   dataset:
     weight: 0
     validation_schema:
-      path: schema/collections/dataset.json
+      path: schema/dataset.json
     ui_schema:
-      path: schema/collections/dataset.ui.json
+      path: schema/dataset.ui.json
     references:
-      distribution:
+      keyword:
         type: object_ref
-        target_schema: distribution
-    triggers:
-      distribution:
-        behavior: datastore_import
-  distribution:
-    validation_schema:
-      path: schema/collections/distribution.json
-    references:
-      downloadURL:
+        target_schema: keyword
+      distribution[].downloadURL:
         type: resource_url
-        behavior: resource_mapper_registration
+      distribution[].describedBy:
+        type: item_url
+        target_schema: data-dictionary
+    behaviors:
+      modified:
+        - import_trigger
+      distribution[].downloadURL:
+        - resource_mapper
+      distribution[].describedBy:
+        - data_dictionary
+    title: title
+  keyword:
+    validation_schema:
+      inline:
+        type: string
+        title: Tag
+        description: >-
+          Tags (or keywords) help users discover your dataset; please include terms that would be used by
+          technical and non-technical users.
+        minLength: 1
   data-dictionary:
     validation_schema:
       path: schema/collections/data-dictionary.json
@@ -66,6 +78,7 @@ This JSON Schema validates the parsed YAML structure and enforces:
 - reference `type` values (`object_ref`, `item_url`, `resource_url`)
 - `target_schema` required for `object_ref` and `item_url`
 - `target_schema` forbidden for `resource_url`
+- `behaviors` values are non-empty arrays of supported behavior names (`import_trigger`, `resource_mapper`, `data_dictionary`)
 
 ## Duplicate Selection
 
@@ -87,16 +100,12 @@ Role aliases and multiple active schemas for the same core behavior are out of s
 
 ## Reference Definitions
 
-Reference entries map schema properties to supported reference behaviors.
+Reference entries map schema properties that must be dereferenced on retrieval to a reference type.
 
 Required fields:
 
 - `type`: `object_ref`, `item_url`, or `resource_url` for the initial implementation.
 - `target_schema`: required for `object_ref` and `item_url`.
-
-Optional fields:
-
-- `behavior`: named behavior for special handling, such as resource mapper registration.
 
 Default behavior:
 
@@ -108,15 +117,21 @@ Disallowed combinations:
 
 Invalid reference definitions exclude the affected declaration and produce an operator warning.
 
-## Trigger Definitions
+## Behavior Definitions
 
-Trigger entries map schema properties to named system behaviors.
+Behavior entries map schema properties to one or more named system behaviors, independent of that property's reference definition (a property may declare both).
 
-Required fields:
+Required shape:
 
-- `behavior`: supported behavior name, initially including `datastore_import`.
+- Value is a non-empty array of supported behavior names.
 
-Invalid trigger definitions exclude the affected declaration and produce an operator warning.
+Supported behavior names for the initial implementation:
+
+- `import_trigger`: property change triggers datastore import for affected resources (replaces the previous `triggers` map).
+- `resource_mapper`: property value is a downloadable/importable resource URL that should register or update resource linkage (replaces the previous `resource_mapper_registration` reference behavior).
+- `data_dictionary`: property is the data dictionary source used by data-dictionary resolution.
+
+Invalid behavior definitions exclude the affected declaration and produce an operator warning.
 
 ## Literal Inline Schema Example
 

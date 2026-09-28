@@ -32,7 +32,7 @@ Attributes:
 - UI schema source: optional object with exactly one of `path` or `inline`.
 - Weight: optional numeric weight for duplicate resolution.
 - References: optional list/map of Reference Definitions.
-- Triggers: optional list/map of Trigger Definitions.
+- Behaviors: optional list/map of Behavior Definitions.
 - Status: valid, invalid, active, inactive, or ignored-by-legacy-override.
 - Validation messages: warnings or errors discovered during declaration validation.
 
@@ -65,7 +65,7 @@ Validation rules:
 - Exactly one of `path` or `inline` must be provided.
 - `path` and `inline` must not both be present.
 - If `path` is present, the file must exist and parse as JSON-compatible content.
-- If `inline` is present, the value must parse as JSON-compatible content.
+- If `inline` is present, the value must parse as JSON-compatible content, including literal-type content (for example, a bare `type: string` schema) with no wrapping object required beyond the JSON-compatible schema structure itself.
 
 ## Schema Registry
 
@@ -129,33 +129,37 @@ Validation rules:
 - Property is required as the reference map key; it is not repeated inside the reference definition body.
 - Type must be supported; if omitted, `object_ref` is assumed.
 - `target_schema` is required for `object_ref` and `item_url` references, and not allowed for `resource_url` references.
-- Behavior must be valid for the selected reference type.
 
 Relationships:
 
 - Belongs to one Schema Definition.
 - Consumed by metastore reference and dereference behavior.
 
-## Trigger Definition
+## Behavior Definition
 
-Declarative rule for system behavior driven by metadata changes.
+Declarative rule mapping a property to one or more named system behaviors, independent of that property's Reference Definition, if any.
 
 Attributes:
 
-- Property: source property that triggers behavior, derived from the key under `triggers`.
-- Event: lifecycle point, initially dataset update/pre-reference behavior.
-- Behavior: named behavior such as datastore import trigger.
+- Property: source property carrying the behaviors, derived from the key under `behaviors`.
+- Behaviors: non-empty list of behavior names.
+
+Supported behavior names for the initial implementation:
+
+- `import_trigger`: property change triggers datastore import for affected resources.
+- `resource_mapper`: property value is a downloadable/importable resource URL that should register or update resource linkage.
+- `data_dictionary`: property is the data dictionary source used by data-dictionary resolution.
 
 Validation rules:
 
-- Property is required as the trigger map key; it is not repeated inside the trigger definition body.
-- Behavior must be supported.
-- Initial implementation supports datastore import trigger behavior and fixed core schema names.
+- Property is required as the behavior map key; it is not repeated inside the behavior definition body.
+- Value must be a non-empty array of supported behavior names.
+- A property MAY declare both a Reference Definition and one or more behaviors.
 
 Relationships:
 
 - Belongs to one Schema Definition.
-- Consumed by datastore event subscriber behavior.
+- Consumed by datastore event subscriber behavior (`import_trigger`), resource mapping behavior (`resource_mapper`), and data-dictionary resolution (`data_dictionary`).
 
 ## Administrator Report
 

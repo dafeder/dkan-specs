@@ -30,16 +30,18 @@ schemas:
       distribution:
         type: object_ref
         target_schema: distribution
-    triggers:
+    behaviors:
       distribution:
-        behavior: datastore_import
+        - import_trigger
   distribution:
     validation_schema:
       path: schema/collections/distribution.json
     references:
       downloadURL:
         type: resource_url
-        behavior: resource_mapper_registration
+    behaviors:
+      downloadURL:
+        - resource_mapper
 ```
 
 Enable the module and clear caches.
@@ -77,7 +79,7 @@ Expected results:
 
 ## 5. Verify Datastore Trigger Behavior
 
-Update metadata properties declared with `datastore_import` trigger behavior.
+Update metadata properties declared with `import_trigger` behavior.
 
 Expected results:
 
