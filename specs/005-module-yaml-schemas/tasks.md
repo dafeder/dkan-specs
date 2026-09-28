@@ -177,16 +177,42 @@
 
 ---
 
+## Phase 6a: Stretch Goal - JSON Schema `$ref`/`$id` Cross-Schema Dependencies (FR-038–FR-041)
+
+**Goal**: `validation_schema` supports an optional `dependencies` list (embedded `path`/`inline` content or other schema machine names) that is registered by `$id` with the schema resolver before validation, so standard JSON Schema `$ref` values resolve across schema documents.
+
+**Status**: Stretch goal. Not required for this feature's completion; may be deferred to a follow-up phase, and may require upstream changes in `GetDKAN/RootedJsonData`.
+
+**Independent Test**: Declare a schema whose `validation_schema` uses `$ref` to another registered schema's `$id`, list that schema in `dependencies`, and verify validation succeeds; verify an undeclared `$ref` target produces an invalid-declaration warning per FR-041.
+
+### Tests for Stretch Goal
+
+- [ ] T089 [P] [STRETCH] Add unit tests for `dependencies` list parsing (embedded `path`/`inline` object entries and string schema-machine-name entries) in `../dkan/modules/dkan_metastore/tests/src/Unit/Schema/SchemaDependencyTest.php`
+- [ ] T090 [P] [STRETCH] Add kernel tests verifying declared dependency schemas are registered by `$id` before validation and `$ref` resolves in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/SchemaDependencyRegistrationKernelTest.php`
+- [ ] T091 [P] [STRETCH] Add kernel tests for an unresolved `$ref` (undeclared dependency) producing an invalid-declaration warning per FR-041 in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/UnresolvedSchemaRefTest.php`
+
+### Implementation for Stretch Goal
+
+- [ ] T092 [STRETCH] Confirm `GetDKAN/RootedJsonData` (opis/json-schema 2.x) support for registering schema documents by `$id` before validation; file an upstream issue/PR if changes are needed
+- [ ] T093 [STRETCH] Implement `dependencies` parsing (object and string entry forms) on the schema source value object in `../dkan/modules/dkan_metastore/src/Schema/SchemaSource.php`
+- [ ] T094 [STRETCH] Implement recursive dependency registration by `$id` with the schema resolver before validation in `../dkan/modules/dkan_metastore/src/SchemaRetriever.php`
+- [ ] T095 [STRETCH] Implement unresolved-`$ref` detection and invalid-declaration warning handling per FR-041 in `../dkan/modules/dkan_metastore/src/Schema/SchemaDeclarationValidator.php`
+- [ ] T096 [STRETCH] Document the `dependencies`/`$ref` stretch-goal capability, including its optional status, in `../dkan/docs/source/developer-guide/schema_declarations.rst`
+
+**Checkpoint**: If completed, cross-schema `$ref` resolution works for declared dependencies and unresolved references are reported per FR-041; if deferred, no other phase is blocked.
+
+---
+
 ## Phase 7: Polish & Cross-Cutting Concerns
 
 **Purpose**: Final consistency, quality, and release-readiness tasks across all stories.
 
-- [ ] T089 [P] Run metastore PHPUnit coverage for schema declaration changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T090 [P] Run datastore PHPUnit coverage for declaration-backed behavior changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T091 [P] Run PHPCS for touched DKAN modules and record results in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T092 Review service names, constructor injection, and backward compatibility notes in `../dkan/modules/dkan_metastore/dkan_metastore.services.yml`
-- [ ] T093 Review quickstart validation steps against final implementation behavior in `specs/005-module-yaml-schemas/quickstart.md`
-- [ ] T094 Update task completion evidence and residual risks in `specs/005-module-yaml-schemas/tasks.md`
+- [ ] T097 [P] Run metastore PHPUnit coverage for schema declaration changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T098 [P] Run datastore PHPUnit coverage for declaration-backed behavior changes and record results in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T099 [P] Run PHPCS for touched DKAN modules and record results in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T100 Review service names, constructor injection, and backward compatibility notes in `../dkan/modules/dkan_metastore/dkan_metastore.services.yml`
+- [ ] T101 Review quickstart validation steps against final implementation behavior in `specs/005-module-yaml-schemas/quickstart.md`
+- [ ] T102 Update task completion evidence and residual risks in `specs/005-module-yaml-schemas/tasks.md`
 
 ---
 
@@ -200,7 +226,8 @@
 - **Phase 4 US2**: Depends on Phase 2 and integrates most cleanly after US1 registry result APIs exist.
 - **Phase 5 US3**: Depends on Phase 2 and uses US1 registry result APIs for lookup.
 - **Phase 6 US4**: Depends on US1 for discovery/override behavior and benefits from US2/US3 for complete default declarations.
-- **Phase 7 Polish**: Depends on the desired story set being complete.
+- **Phase 6a Stretch Goal**: Depends on US1 registry/`SchemaRetriever` APIs; optional and does not block Phase 7 if deferred.
+- **Phase 7 Polish**: Depends on the desired story set being complete; does not require Phase 6a.
 
 ### User Story Dependencies
 
@@ -278,6 +305,7 @@ Task: "T083 [US4] Update upgrade notes in ../dkan/docs/source/upgrade.rst"
 2. Deliver US2 so behavior moves from property-name/admin config assumptions into schema metadata.
 3. Deliver US3 so validation and UI schemas are separated cleanly.
 4. Deliver US4 so default schemas, custom migration, and documentation are release-ready.
+5. (Optional) Deliver Phase 6a's `dependencies`/`$ref` stretch goal if time allows; otherwise defer without blocking release.
 
 ### Manual Ticket Strategy
 
@@ -286,7 +314,7 @@ Each numbered task should be small enough to become a manual ticket or subtask. 
 ## Notes
 
 - `[P]` marks tasks that can run in parallel because they touch different files and do not depend on incomplete implementation tasks.
-- `[US1]`, `[US2]`, `[US3]`, and `[US4]` labels map tasks to the feature specification user stories.
+- `[US1]`, `[US2]`, `[US3]`, and `[US4]` labels map tasks to the feature specification user stories; `[STRETCH]` marks Phase 6a's optional `dependencies`/`$ref` tasks (FR-038–FR-041), which are not required for feature completion.
 - All user story tasks include exact target paths for implementation or tests.
 - Tests are included because the specification's success criteria require automated coverage.
 - Keep `docroot/schema/collections` override behavior visible in every story that touches discovery or migration.
