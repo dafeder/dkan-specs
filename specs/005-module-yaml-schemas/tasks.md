@@ -150,7 +150,7 @@
 - [ ] T067 [P] [US4] Add functional report tests for ignored declarations under legacy override in `../dkan/modules/dkan_metastore/tests/src/Functional/Schema/SchemaSelectionReportTest.php`
 - [ ] T068 [P] [US4] Add documentation example validation test for declaration snippets in `../dkan/modules/dkan_metastore/tests/src/Kernel/Schema/SchemaDeclarationDocumentationTest.php`
 - [ ] T069 [P] [US4] Add kernel tests for DCAT-US 1.1 module full `dataset`/`distribution`/`data-dictionary` schema availability in `../dkan/modules/dkan_dcat_us_1_1/tests/src/Kernel/Schema/DcatUs11ModuleSchemaTest.php`
-- [ ] T070 [P] [US4] Add kernel tests proving DCAT-US 1.1 module declarations supersede `dkan_metastore` bare-minimum defaults via weight/module-order selection (FR-038) in `../dkan/modules/dkan_dcat_us_1_1/tests/src/Kernel/Schema/DcatUs11SupersedesDefaultTest.php`
+- [ ] T070 [P] [US4] Add kernel tests proving DCAT-US 1.1 module declarations supersede `dkan_metastore` bare-minimum defaults via weight/module-order selection (FR-019) in `../dkan/modules/dkan_dcat_us_1_1/tests/src/Kernel/Schema/DcatUs11SupersedesDefaultTest.php`
 
 ### Implementation for User Story 4
 
@@ -170,7 +170,7 @@
 - [ ] T084 [US4] Scaffold the optional DCAT-US 1.1 module info file in `../dkan/modules/dkan_dcat_us_1_1/dkan_dcat_us_1_1.info.yml`
 - [ ] T085 [US4] Add full DCAT-US validation and UI schema JSON for `dataset`, `distribution`, and `data-dictionary` in `../dkan/modules/dkan_dcat_us_1_1/schema/collections/*.json`
 - [ ] T086 [US4] Author `dkan_dcat_us_1_1.schemas.yml` declaring full `dataset`, `distribution`, and `data-dictionary` schemas with references and behavior definitions in `../dkan/modules/dkan_dcat_us_1_1/dkan_dcat_us_1_1.schemas.yml`
-- [ ] T087 [US4] Set declaration `weight` (or rely on module order) so `dkan_dcat_us_1_1` declarations supersede `dkan_metastore` bare-minimum defaults when enabled, per FR-038/FR-026–FR-028
+- [ ] T087 [US4] Set declaration `weight` (or rely on module order) so `dkan_dcat_us_1_1` declarations supersede `dkan_metastore` bare-minimum defaults when enabled, per FR-019/FR-026–FR-028
 - [ ] T088 [US4] Document enabling the DCAT-US 1.1 module and its supersession behavior in `../dkan/docs/source/user-guide/guide_custom_schemas.rst`
 
 **Checkpoint**: User Story 4 is independently functional on top of US1: default schemas remain available, custom schema migration is documented and testable, invalid declarations are actionable, and legacy deployments remain protected.

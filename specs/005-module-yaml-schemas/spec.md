@@ -25,6 +25,8 @@
 - Q: Should this also reverse FR-014 (literal-string schemas), since the existing inline example is a plain string schema? -> A: Yes; inline schema content is back in scope for `validation_schema` and `ui_schema`, and literal-type inline schemas (e.g. a bare `type: string` schema) are back in scope as well, reversing the prior path-only and literal-string-exclusion decisions.
 - Q: Should `triggers` be replaced by a more general `behaviors` map, and how should reference types split between dereferencing (`references`) and other functionality (`behaviors`)? -> A: Keep `references` limited to properties that must be dereferenced on retrieval (`object_ref`, `item_url`, `resource_url` all remain reference types). Replace `triggers` with `behaviors`: a property-keyed map whose value is an array of behavior names. The initial behavior names are `import_trigger` (datastore import trigger, replacing the old trigger behavior), `resource_mapper` (marks a `resource_url`-referenced property as a downloadable/importable resource, replacing the old `resource_mapper_registration` reference behavior), and `data_dictionary` (marks a property as the data dictionary source for data-dictionary resolution). A property may declare both a reference type and one or more behaviors.
 - Q: Should FR-012 be reduced further? -> A: Yes; the fixed core schema names are now limited to `dataset` and `data-dictionary`, both supplied by default through the `dkan_metastore` module's bare-minimum declarations unless overridden; `distribution` is no longer a fixed core schema name and is supported only when declared.
+- Q: Should FR-019 and FR-038 be combined? -> A: Yes; the two were redundant. Merged into FR-019 (DCAT-US 1.1 module packaging and supersession behavior); FR-038's slot is removed since it was the last requirement.
+- Q: How should the `catalog` schema (used only to validate the `/data.json` catalog endpoint, not for item entry/retrieval) be addressed? -> A: Note in the spec that no special declaration-level handling exists for it in this phase; a future enhancement may add an optional boolean `items` schema declaration property, defaulting to `true`, settable to `false` to mark a schema as validation-only and excluded from item add/retrieve routes.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -105,6 +107,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - A declaration omits optional UI schema information.
 - A schema declaration changes while existing metadata records already use earlier behavior.
 - Dependent logic requests a data dictionary in a context where no applicable declared dictionary can be resolved.
+- A `catalog`-style schema exists only to validate a catalog endpoint (for example `/data.json`) and is not intended to allow item entry or retrieval through `dkan_metastore.1.metastore.schemas.id.items`; this phase does not add declaration-level handling to distinguish such schemas.
 
 ## Requirements *(mandatory)*
 
@@ -129,7 +132,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-016**: Existing schema lookup consumers MUST be able to retrieve validation schemas by declared machine name.
 - **FR-017**: Existing form-building consumers MUST be able to retrieve UI schemas when declared.
 - **FR-018**: Existing reference handling MUST continue to support dataset-to-distribution references, distribution-to-resource references, and data-dictionary identifier references when declared.
-- **FR-019**: The full DCAT-US-style schema collection (beyond the `dkan_metastore` bare-minimum default) MUST be packaged as an optional, separately enableable DCAT-US 1.1 module-provided schema set.
+- **FR-019**: DKAN core MUST provide an optional DCAT-US 1.1 module that ships the full DCAT-US-style schema collection—validation schemas, UI schemas, references, and behavior definitions for `dataset`, `distribution`, and `data-dictionary`—packaged as a separately enableable schema set that, when enabled, supersedes the `dkan_metastore` bare-minimum defaults via the standard duplicate-declaration selection rules (FR-026–FR-028).
 - **FR-020**: Sites using custom schemas MUST have a documented path to provide those schemas through a custom module declaration.
 - **FR-021**: When `docroot/schema/collections` exists, the system MUST use legacy filesystem schema discovery as the authoritative schema source and ignore module YAML declarations.
 - **FR-022**: The system MUST expose administrator-visible reporting that identifies whether active schemas are sourced from `docroot/schema/collections` or module YAML declarations.
@@ -148,7 +151,6 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **FR-035**: The `data-dictionary` schema in `dkan_metastore.schemas.yml` MUST be identical to the current default data-dictionary schema.
 - **FR-036**: The `dataset` schema in `dkan_metastore.schemas.yml` MUST be reduced to only the properties required by the default `search_api` index configuration: `description`, `keyword`, `modified`, `publisher.name`, `theme`, and `title`.
 - **FR-037**: The `dataset` schema in `dkan_metastore.schemas.yml` MUST include a `distribution` property as an array of objects, where each object is reduced to only `downloadURL`, `title`, `description`, `describedBy`, and `describedByType`.
-- **FR-038**: DKAN core MUST provide an optional DCAT-US 1.1 module that ships full DCAT-US-style validation schemas, UI schemas, references, and behavior definitions for `dataset`, `distribution`, and `data-dictionary`, and that, when enabled, supersedes the `dkan_metastore` bare-minimum defaults via the standard duplicate-declaration selection rules (FR-026–FR-028).
 
 ### Key Entities *(include if feature involves data)*
 
@@ -160,7 +162,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **Behavior Definition**: Declarative rule that maps a property to one or more named system behaviors (`import_trigger`, `resource_mapper`, `data_dictionary`) that are independent of, and may coexist with, that property's reference definition.
 - **Data Dictionary Resolution Method**: A schema module-provided capability used by dependent DKAN logic to resolve the effective data dictionary for a given business context.
 - **Default Schema Module**: The `dkan_metastore` module's own `dkan_metastore.schemas.yml`, providing an absolute bare-minimum `dataset` schema (limited to default `search_api`-indexed properties plus a reduced `distribution` property) and a `data-dictionary` schema identical to the current default.
-- **Included DCAT-US 1.1 module**: An optional module that ships with DKAN core and provides full schemas and declarations for a DCAT-US 1.1 site, superseding the `dkan_metastore` bare-minimum defaults when enabled (FR-038).
+- **Included DCAT-US 1.1 module**: An optional module that ships with DKAN core and provides full schemas and declarations for a DCAT-US 1.1 site, superseding the `dkan_metastore` bare-minimum defaults when enabled (FR-019).
 - **Custom Schema Module**: Site-owned module that declares custom schemas and can replace or extend default schema behavior according to documented rules.
 - **Schema Selection Report**: Administrator-visible output that lists discovered declarations, active selections, weights, fallback ordering, and conflict-resolution reasons.
 - **Legacy Schema Override**: Backward-compatible behavior where the presence of `docroot/schema/collections` makes filesystem schemas authoritative and prevents module YAML declarations from participating in active schema selection.
@@ -178,7 +180,7 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - **SC-007**: A custom schema module can be enabled and used without disabling discovery of unrelated default schemas.
 - **SC-008**: UI schema retrieval works for 100% of declarations that include UI schema information and falls back without fatal errors when UI schema information is omitted.
 - **SC-009**: Reference and trigger administration paths no longer allow conflicting runtime configuration once declaration-based behavior is authoritative.
-- **SC-010**: Migration documentation enables maintainers to convert a legacy custom schema directory into a module declaration in under 30 minutes for a simple dataset/distribution schema pair.
+- **SC-010**: Migration documentation enables maintainers to convert a legacy custom schema directory into a module declaration for a simple dataset/distribution schema pair.
 - **SC-011**: For 100% of duplicate schema machine-name scenarios in scope, schema discovery selects one active schema and exposes the selected declaration and selection reason in administrator-visible reporting.
 - **SC-012**: For 100% of environments where `docroot/schema/collections` exists, schema discovery uses filesystem schemas instead of module YAML declarations and reports that source selection to administrators.
 - **SC-013**: In 100% of invalid-declaration scenarios in scope, valid declarations remain discoverable and the invalid declaration is excluded with an administrator-visible warning.
@@ -202,3 +204,4 @@ As a DKAN maintainer, I want a clear migration path for default and custom schem
 - Existing public API behavior should remain stable where practical while schema discovery internals change.
 - Behavior names (`import_trigger`, `resource_mapper`, `data_dictionary`) are a closed, fixed set validated by the declaration JSON Schema contract in this phase; an open/extensible behavior-naming scheme (allowing modules to register additional behavior names) is a possible future enhancement and is out of scope now.
 - The bare-minimum default `dataset`/`distribution` property sets in `dkan_metastore.schemas.yml` are sized to the default `search_api` index configuration; sites needing the fuller Project Open Data field set are expected to enable the DCAT-US 1.1 module or a custom schema module.
+- Validation-only schemas such as `catalog` (used to validate a catalog endpoint, not for item entry/retrieval) are out of scope for declaration-level special handling in this phase; there is no code distinguishing them from item-backed schemas. A possible future enhancement is an optional boolean `items` schema declaration property (default `true`) that, when set to `false`, marks a schema as available for validation/retrieval-by-consumers but excluded from item add/retrieve routes.
